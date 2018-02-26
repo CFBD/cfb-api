@@ -1,0 +1,30 @@
+{
+  "name": "cfb-api",
+  "version": "1.0.0",
+  "description": "API for accessing data from the college football database (cfbdb)",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "football",
+    "college",
+    "cfb",
+    "ncaaf",
+    "data",
+    "statistics"
+  ],
+  "author": "BlueSCar",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "cookie-session": "^2.0.0-beta.3",
+    "dotenv": "^5.0.0",
+    "express": "^4.16.2",
+    "helmet": "^3.11.0",
+    "knex": "^0.14.4",
+    "objection": "^1.0.0",
+    "pg": "^7.4.1"
+  }
+}
