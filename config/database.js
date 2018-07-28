@@ -621,6 +621,7 @@ module.exports = () => {
     }
 
     return {
+        connectionString,
         Athlete,
         Coach,
         CoachSeason,

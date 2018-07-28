@@ -6,6 +6,10 @@ module.exports = async () => {
     const session = require('cookie-session');
     const cookieParser = require('cookie-parser');
 
+    const {
+        postgraphile
+    } = require('postgraphile');
+
     const app = express();
 
     app.enable('trust proxy');
@@ -25,7 +29,12 @@ module.exports = async () => {
 
     const db = require('./database')();
 
-    require('../app/test/test.routes')(app, db.Coach);
+    app.use(postgraphile(db.connectionString, 'public', {
+        disableDefaultMutations: true,
+        graphiql: true
+    }));
+
+    // require('../app/coach/coach.route')(app, db.Coach);
 
     return app;
 }

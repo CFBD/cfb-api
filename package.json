@@ -2,6 +2,9 @@
   "name": "cfb-api",
   "version": "1.0.0",
   "description": "API for accessing data from the college football database (cfbdb)",
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -25,6 +28,8 @@
     "helmet": "^3.11.0",
     "knex": "^0.14.4",
     "objection": "^1.0.0",
-    "pg": "^7.4.1"
-  }
+    "pg": "^7.4.1",
+    "postgraphile": "^4.0.0-rc.2"
+  },
+  "devDependencies": {}
 }
