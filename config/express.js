@@ -27,14 +27,15 @@ module.exports = async () => {
         extended: true
     }));
 
-    const db = require('./database')();
+    const dbInfo = require('./database')();
 
-    app.use(postgraphile(db.connectionString, 'public', {
+    app.use(postgraphile(dbInfo.connectionString, 'public', {
         disableDefaultMutations: true,
         graphiql: true
     }));
 
     // require('../app/coach/coach.route')(app, db.Coach);
+    require('../app/game/game.route')(dbInfo.db);
 
     return app;
 }

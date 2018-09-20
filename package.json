@@ -20,6 +20,7 @@
   "author": "BlueSCar",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.5.2",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "cookie-session": "^2.0.0-beta.3",
@@ -29,6 +30,7 @@
     "knex": "^0.14.4",
     "objection": "^1.0.0",
     "pg": "^7.4.1",
+    "pg-promise": "^8.4.6",
     "postgraphile": "^4.0.0-rc.2"
   },
   "devDependencies": {}
