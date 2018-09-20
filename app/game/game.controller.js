@@ -3,7 +3,7 @@ module.exports = (db) => {
         getGames: async (req, res) => {
             try {
                 if (!req.query.year) {
-                    req.status(400).send({
+                    res.status(400).send({
                         error: 'A year parameter must be specified.'
                     });
 
@@ -56,7 +56,7 @@ module.exports = (db) => {
         getDrives: async (req, res) => {
                 try {
                     if (!req.query.year) {
-                        req.status(400).send({
+                        res.status(400).send({
                             error: 'A year parameter must be specified.'
                         });
 
@@ -108,7 +108,7 @@ module.exports = (db) => {
             getPlays: async (req, res) => {
                 try {
                     if (!req.query.year) {
-                        req.status(400).send({
+                        res.status(400).send({
                             error: 'A year parameter must be specified.'
                         });
 
@@ -139,7 +139,7 @@ module.exports = (db) => {
                     }
 
                     if (params.length < 2) {
-                        req.status(400).send({
+                        res.status(400).send({
                             error: 'Either a week, an offensive team, or a defensive team must be specified.'
                         });
 
