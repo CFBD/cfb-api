@@ -1,6 +1,6 @@
 module.exports = (db) => {
     return {
-        getDrives = async (req, res) => {
+        getDrives: async (req, res) => {
             try {
                 if (!req.query.year) {
                     req.status(400).send({
@@ -51,7 +51,7 @@ module.exports = (db) => {
                 });
             }
         },
-        getPlays = async (req, res) => {
+        getPlays: async (req, res) => {
 
         }
     }

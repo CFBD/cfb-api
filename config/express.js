@@ -35,7 +35,7 @@ module.exports = async () => {
     }));
 
     // require('../app/coach/coach.route')(app, db.Coach);
-    require('../app/game/game.route')(dbInfo.db);
+    require('../app/game/game.route')(app, dbInfo.db);
 
     return app;
 }
