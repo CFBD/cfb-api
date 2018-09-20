@@ -36,6 +36,7 @@ module.exports = async () => {
 
     // require('../app/coach/coach.route')(app, db.Coach);
     require('../app/game/game.route')(app, dbInfo.db);
+    require('../app/team/team.route')(app, dbInfo.db);
 
     return app;
 }

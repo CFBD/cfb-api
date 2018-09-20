@@ -46,6 +46,7 @@ module.exports = (db) => {
 
                     res.send(drives);
                 } catch (err) {
+                    console.error(err);
                     res.status(500).send({
                         error: 'Something went wrong.'
                     });
@@ -106,6 +107,7 @@ module.exports = (db) => {
 
                     res.send(plays);
                 } catch (err) {
+                    console.error(err);
                     res.status(500).send({
                         error: 'Something went wrong.'
                     });
