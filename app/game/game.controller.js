@@ -22,13 +22,13 @@ module.exports = (db) => {
                 }
 
                 if (req.query.offense) {
-                    filter += ` AND LOWER(offense.school) = LOWER(${index})`;
+                    filter += ` AND LOWER(offense.school) = LOWER($${index})`;
                     params.push(req.query.offense);
                     index++;
                 }
 
                 if (req.query.defense) {
-                    filter += ` AND LOWER(defense.school) = LOWER(${index})`;
+                    filter += ` AND LOWER(defense.school) = LOWER($${index})`;
                     params.push(req.query.defense);
                     index++;
                 }
