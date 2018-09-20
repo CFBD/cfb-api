@@ -5,6 +5,9 @@ module.exports = async () => {
     const bodyParser = require('body-parser');
     const session = require('cookie-session');
     const cookieParser = require('cookie-parser');
+    const path = require('path');
+    const fs = require('fs');
+    const morgan = require('morgan');
 
     const {
         postgraphile
@@ -29,6 +32,9 @@ module.exports = async () => {
 
     const dbInfo = require('./database')();
 
+    const accessLogStream = fs.createWriteStream(path.join(__dirname, '../access.log'), { flags: 'a' });
+    app.use(morgan('combined', { stream: accessLogStream }));
+
     app.use(postgraphile(dbInfo.connectionString, 'public', {
         disableDefaultMutations: true,
         graphiql: true
@@ -37,6 +43,12 @@ module.exports = async () => {
     // require('../app/coach/coach.route')(app, db.Coach);
     require('../app/game/game.route')(app, dbInfo.db);
     require('../app/team/team.route')(app, dbInfo.db);
+
+    app.use(express.static(path.join(__dirname, '../doc')));
+
+    app.get('*', (req, res) => {
+        res.sendfile(path.join(__dirname, '../doc/index.html'));
+    });
 
     return app;
 }
