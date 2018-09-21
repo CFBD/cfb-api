@@ -159,7 +159,7 @@ module.exports = (db) => {
                         }
 
                         let drives = await db.any(`
-                    SELECT offense.school as offense, defense.school as defense, d.id, d.scoring, d.start_period, d.start_yardline, d.start_time, d.end_period, d.end_yardline, d.end_time, d.elapsed, d.plays, d.yards, dr.name as drive_result
+                    SELECT offense.school as offense, defense.school as defense, g.id as game_id, d.id, d.scoring, d.start_period, d.start_yardline, d.start_time, d.end_period, d.end_yardline, d.end_time, d.elapsed, d.plays, d.yards, dr.name as drive_result
                     FROM game g
                         INNER JOIN drive d ON g.id = d.game_id
                         INNER JOIN team offense ON d.offense_id = offense.id
@@ -253,7 +253,7 @@ module.exports = (db) => {
                         }
 
                         let plays = await db.any(`
-                        SELECT id, offense.school as offense, defense.school as defense, d.id as drive_id, p.period, p.clock, p.yard_line, p.down, p.distance, p.yards_gained,  pt.text as play_type, p.play_text
+                        SELECT p.id, offense.school as offense, defense.school as defense, d.id as drive_id, p.period, p.clock, p.yard_line, p.down, p.distance, p.yards_gained,  pt.text as play_type, p.play_text
                         FROM game g
                             INNER JOIN drive d ON g.id = d.game_id
                             INNER JOIN play p ON d.id = p.drive_id
