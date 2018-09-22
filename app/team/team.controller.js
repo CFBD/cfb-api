@@ -32,7 +32,7 @@ module.exports = (db) => {
             }
         },
         /** 
-         * @api {get} /teams Get team roster
+         * @api {get} /roster Get team roster
          * @apiVersion 1.0.0
          * @apiName GetRoster
          * @apiGroup Teams
