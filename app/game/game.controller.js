@@ -8,6 +8,7 @@ module.exports = (db) => {
          * 
          * @apiParam {Number} year Required. Year filter for games.
          * @apiParam {Number} week Week filter for games.
+         * @apiParam {String} team Name of a team to filter on.
          * @apiParam {String} home Name of home team to filter on.
          * @apiParam {String} away Name of away team to filter on.
          * 
@@ -56,6 +57,12 @@ module.exports = (db) => {
                         index++;
                     }
 
+                    if (req.query.team) {
+                        filter += ` AND (LOWER(away.school) = LOWER($${index}) OR LOWER(home.school) = LOWER($${index}))`;
+                        params.push(req.query.team);
+                        index++;
+                    }
+
                     if (req.query.home) {
                         filter += ` AND LOWER(home.school) = LOWER($${index})`;
                         params.push(req.query.home);
@@ -96,6 +103,7 @@ module.exports = (db) => {
              * 
              * @apiParam {Number} year Required. Year filter for drives.
              * @apiParam {Number} week Week filter for drives.
+             * @apiParam {String} team Name of team to filter on.
              * @apiParam {String} offense Name of offense team to filter on.
              * @apiParam {String} defense Name of defense team to filter on.
              * 
@@ -146,6 +154,12 @@ module.exports = (db) => {
                             index++;
                         }
 
+                        if (req.query.team) {
+                            filter += ` AND (LOWER(offense.school) = LOWER($${index}) OR LOWER(defense.school) = LOWER($${index}))`;
+                            params.push(req.query.team);
+                            index++;
+                        }
+
                         if (req.query.offense) {
                             filter += ` AND LOWER(offense.school) = LOWER($${index})`;
                             params.push(req.query.offense);
@@ -185,6 +199,7 @@ module.exports = (db) => {
                  * 
                  * @apiParam {Number} year Required. Year filter for plays.
                  * @apiParam {Number} week Week filter for plays.
+                 * @apiParam {String} team Name of team to filter on.
                  * @apiParam {String} offense Name of offense team to filter on.
                  * @apiParam {String} defense Name of defense team to filter on.
                  * 
@@ -232,6 +247,12 @@ module.exports = (db) => {
                             index++;
                         }
 
+                        if (req.query.team) {
+                            filter += ` AND (LOWER(offense.school) = LOWER($${index}) OR LOWER(defense.school) = LOWER($${index}))`;
+                            params.push(req.query.team);
+                            index++;
+                        }
+
                         if (req.query.offense) {
                             filter += ` AND LOWER(offense.school) = LOWER($${index})`;
                             params.push(req.query.offense);
@@ -246,7 +267,7 @@ module.exports = (db) => {
 
                         if (params.length < 2) {
                             res.status(400).send({
-                                error: 'Either a week, an offensive team, or a defensive team must be specified.'
+                                error: 'Either a week, a team, an offensive team, or a defensive team must be specified.'
                             });
 
                             return;
