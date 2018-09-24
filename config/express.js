@@ -32,8 +32,23 @@ module.exports = async () => {
 
     const dbInfo = require('./database')();
 
-    const accessLogStream = fs.createWriteStream(path.join(__dirname, '../access.log'), { flags: 'a' });
-    app.use(morgan('combined', { stream: accessLogStream }));
+    const accessLogStream = fs.createWriteStream(path.join(__dirname, '../access.log'), {
+        flags: 'a'
+    });
+    app.use(morgan('combined', {
+        stream: accessLogStream,
+        skip: (req, res) => {
+            return !req.path ||
+                req.path == '' ||
+                req.path == '/' ||
+                req.path.indexOf('vendor') != -1 ||
+                req.path.indexOf('css') != -1
+                || req.path.indexOf('utils') != -1
+                || req.path.indexOf('locales') != -1
+                || req.path.indexOf('main.js') != -1
+                || req.path.indexOf('api_') != -1;
+        }
+    }));
 
     app.use(postgraphile(dbInfo.connectionString, 'public', {
         disableDefaultMutations: true,
