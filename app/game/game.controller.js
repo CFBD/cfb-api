@@ -6,6 +6,7 @@ module.exports = (db) => {
          * @apiName GetGames
          * @apiGroup Games
          * 
+         * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
          * @apiParam {Number} year Required. Year filter for games.
          * @apiParam {Number} week Week filter for games.
          * @apiParam {String} team Name of a team to filter on.
@@ -46,10 +47,10 @@ module.exports = (db) => {
                         return;
                     }
 
-                    let filter = 'WHERE g.season = $1';
-                    let params = [req.query.year];
+                    let filter = 'WHERE g.season = $1 AND season_type = $2';
+                    let params = [req.query.year, req.query.seasonType || 'regular'];
 
-                    let index = 2;
+                    let index = 3;
 
                     if (req.query.week) {
                         filter += ` AND g.week = $${index}`;
@@ -101,6 +102,7 @@ module.exports = (db) => {
              * @apiName GetDrives
              * @apiGroup Games
              * 
+             * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
              * @apiParam {Number} year Required. Year filter for drives.
              * @apiParam {Number} week Week filter for drives.
              * @apiParam {String} team Name of team to filter on.
@@ -143,10 +145,10 @@ module.exports = (db) => {
                             return;
                         }
 
-                        let filter = 'WHERE g.season = $1';
-                        let params = [req.query.year];
+                        let filter = 'WHERE g.season = $1 AND season_type = $2';
+                        let params = [req.query.year, req.query.seasonType || 'regular'];
 
-                        let index = 2;
+                        let index = 3;
 
                         if (req.query.week) {
                             filter += ` AND g.week = $${index}`;
@@ -197,6 +199,7 @@ module.exports = (db) => {
                  * @apiName GetPlays
                  * @apiGroup Games
                  * 
+                 * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
                  * @apiParam {Number} year Required. Year filter for plays.
                  * @apiParam {Number} week Week filter for plays.
                  * @apiParam {String} team Name of team to filter on.
@@ -236,10 +239,10 @@ module.exports = (db) => {
                             return;
                         }
 
-                        let filter = 'WHERE g.season = $1';
-                        let params = [req.query.year];
+                        let filter = 'WHERE g.season = $1 AND season_type = $2';
+                        let params = [req.query.year, req.query.seasonType || 'regular'];
 
-                        let index = 2;
+                        let index = 3;
 
                         if (req.query.week) {
                             filter += ` AND g.week = $${index}`;
@@ -265,7 +268,7 @@ module.exports = (db) => {
                             index++;
                         }
 
-                        if (params.length < 2) {
+                        if (params.length < 3) {
                             res.status(400).send({
                                 error: 'Either a week, a team, an offensive team, or a defensive team must be specified.'
                             });
