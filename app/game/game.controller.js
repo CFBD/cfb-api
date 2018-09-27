@@ -113,7 +113,7 @@ module.exports = (db) => {
              * curl -i https://api.collegefootballdata.com/drives?year=2018
              * 
              * @apiExample Single defensive team
-             * curl -i https://api.collegefootballdata.com/games?drives=2018&defense=virginia%20tech
+             * curl -i https://api.collegefootballdata.com/drives?year=2018&defense=virginia%20tech
              * 
              * @apiSuccess {Object[]} drives List of drives.
              * @apiSuccess {String} drives.offense Offense team name
@@ -210,7 +210,7 @@ module.exports = (db) => {
                  * curl -i https://api.collegefootballdata.com/plays?year=2018&week=3
                  * 
                  * @apiExample Single offensive team
-                 * curl -i https://api.collegefootballdata.com/games?drives=2018&offense=clemson
+                 * curl -i https://api.collegefootballdata.com/plays?year=2018&offense=clemson
                  * 
                  * @apiSuccess {Object[]} plays List of plays.
                  * @apiSuccess {String} plays.offense Offense team name
@@ -230,53 +230,53 @@ module.exports = (db) => {
                  * 
                  */
                 getPlays: async (req, res) => {
-                    try {
-                        if (!req.query.year) {
-                            res.status(400).send({
-                                error: 'A year parameter must be specified.'
-                            });
+                        try {
+                            if (!req.query.year) {
+                                res.status(400).send({
+                                    error: 'A year parameter must be specified.'
+                                });
 
-                            return;
-                        }
+                                return;
+                            }
 
-                        let filter = 'WHERE g.season = $1 AND season_type = $2';
-                        let params = [req.query.year, req.query.seasonType || 'regular'];
+                            let filter = 'WHERE g.season = $1 AND season_type = $2';
+                            let params = [req.query.year, req.query.seasonType || 'regular'];
 
-                        let index = 3;
+                            let index = 3;
 
-                        if (req.query.week) {
-                            filter += ` AND g.week = $${index}`;
-                            params.push(req.query.week);
-                            index++;
-                        }
+                            if (req.query.week) {
+                                filter += ` AND g.week = $${index}`;
+                                params.push(req.query.week);
+                                index++;
+                            }
 
-                        if (req.query.team) {
-                            filter += ` AND (LOWER(offense.school) = LOWER($${index}) OR LOWER(defense.school) = LOWER($${index}))`;
-                            params.push(req.query.team);
-                            index++;
-                        }
+                            if (req.query.team) {
+                                filter += ` AND (LOWER(offense.school) = LOWER($${index}) OR LOWER(defense.school) = LOWER($${index}))`;
+                                params.push(req.query.team);
+                                index++;
+                            }
 
-                        if (req.query.offense) {
-                            filter += ` AND LOWER(offense.school) = LOWER($${index})`;
-                            params.push(req.query.offense);
-                            index++;
-                        }
+                            if (req.query.offense) {
+                                filter += ` AND LOWER(offense.school) = LOWER($${index})`;
+                                params.push(req.query.offense);
+                                index++;
+                            }
 
-                        if (req.query.defense) {
-                            filter += ` AND LOWER(defense.school) = LOWER($${index})`;
-                            params.push(req.query.defense);
-                            index++;
-                        }
+                            if (req.query.defense) {
+                                filter += ` AND LOWER(defense.school) = LOWER($${index})`;
+                                params.push(req.query.defense);
+                                index++;
+                            }
 
-                        if (params.length < 3) {
-                            res.status(400).send({
-                                error: 'Either a week, a team, an offensive team, or a defensive team must be specified.'
-                            });
+                            if (params.length < 3) {
+                                res.status(400).send({
+                                    error: 'Either a week, a team, an offensive team, or a defensive team must be specified.'
+                                });
 
-                            return;
-                        }
+                                return;
+                            }
 
-                        let plays = await db.any(`
+                            let plays = await db.any(`
                         SELECT p.id, offense.school as offense, defense.school as defense, d.id as drive_id, p.period, p.clock, p.yard_line, p.down, p.distance, p.yards_gained,  pt.text as play_type, p.play_text
                         FROM game g
                             INNER JOIN drive d ON g.id = d.game_id
@@ -288,13 +288,135 @@ module.exports = (db) => {
                         ORDER BY d.id
                 `, params);
 
-                        res.send(plays);
-                    } catch (err) {
-                        console.error(err);
-                        res.status(500).send({
-                            error: 'Something went wrong.'
-                        });
+                            res.send(plays);
+                        } catch (err) {
+                            console.error(err);
+                            res.status(500).send({
+                                error: 'Something went wrong.'
+                            });
+                        }
+                    },
+                                    /** 
+                 * @api {get} /games/teams Get team statistics broken down by game
+                 * @apiVersion 1.0.0
+                 * @apiName GetTeamStats
+                 * @apiGroup Games
+                 * 
+                 * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
+                 * @apiParam {Number} year Year filter
+                 * @apiParam {Number} week Week filter
+                 * @apiParam {String} team Team filter
+                 * 
+                 * @apiExample Whole week
+                 * curl -i https://api.collegefootballdata.com/games/teams?year=2018&week=3
+                 * 
+                 * @apiExample Single team
+                 * curl -i https://api.collegefootballdata.com/games/teams?year=2018&team=clemson
+                 * 
+                 * @apiExample Single game
+                 * curl -i https://api.collegefootballdata.com/games/teams?gameId=401012891
+                 * 
+                 * @apiSuccess {Object[]} games List of games.
+                 * @apiSuccess {Number} games.id Game id
+                 * @apiSuccess {String} games.teams Teams associated with a game
+                 * @apiSuccess {String} games.teams.school Name of school
+                 * @apiSuccess {String} games.teams.homeAway Home/away flag
+                 * @apiSuccess {String} games.teams.stats Collection of stats
+                 * @apiSuccess {String} games.teams.stats.category Statistical category
+                 * @apiSuccess {String} games.teams.stats.stat Stat
+                 * 
+                 */
+                    getTeamStats: async (req, res) => {
+                        try {
+                            if (!req.query.gameId && !(req.query.year && (req.query.week || req.query.team))) {
+                                res.status(400).send({
+                                    error: 'Must specify a gameId or a year with either a week or a team.'
+                                });
+
+                                return;
+                            }
+
+                            let filter;
+                            let params;
+
+                            let index = 2;
+
+                            if (req.query.gameId) {
+                                filter = 'WHERE g.id = $1';
+                                params = [req.query.gameId];
+                            } else {
+                                filter = 'WHERE g.season_type = $1';
+                                params = [req.query.seasonType || 'regular'];
+
+                                let index = 2;
+
+                                if (req.query.year) {
+                                    filter += ` AND g.season = $${index}`;
+                                    params.push(req.query.year);
+                                    index++;
+                                }
+
+                                if (req.query.week) {
+                                    filter += ` AND g.week = $${index}`;
+                                    params.push(req.query.week);
+                                    index++;
+                                }
+
+                                if (req.query.team) {
+                                    filter += ` AND LOWER(t.school) = LOWER($${index})`;
+                                    params.push(req.query.team);
+                                    index++;
+                                }
+                            }
+
+                            let data = await db.any(`
+                                SELECT g.id, gt.home_away, t.school, tst.name, gts.stat
+                                FROM team t
+                                    INNER JOIN game_team gt ON t.id = gt.team_id
+                                    INNER JOIN game g ON gt.game_id = g.id
+                                    INNER JOIN game_team_stat gts ON gts.game_team_id = gt.id
+                                    INNER JOIN team_stat_type tst ON gts.type_id = tst.id
+                                ${filter}
+                            `, params);
+
+                            let stats = [];
+
+                            let ids = Array.from(new Set(data.map(d => d.id)));
+                            for (let id of ids) {
+                                let game = {
+                                    id,
+                                    teams: []
+                                }
+
+                                let gameStats = data.filter(d => d.id == id);
+                                let gameTeams = Array.from(new Set(gameStats.map(gs => gs.school)));
+
+                                for (let team of gameTeams) {
+                                    let teamStats = gameStats.filter(gs => gs.school == team);
+
+                                    game.teams.push({
+                                        school: team,
+                                        homeAway: teamStats[0].home_away,
+                                        stats: teamStats.map(ts => {
+                                            return {
+                                                category: ts.name,
+                                                stat: ts.stat
+                                            }
+                                        })
+                                    });
+                                }
+
+                                stats.push(game);
+                            }
+
+                            res.send(stats);
+
+                        } catch (err) {
+                            console.error(err);
+                            res.status(500).send({
+                                error: 'Something went wrong.'
+                            });
+                        }
                     }
-                }
     }
 }
