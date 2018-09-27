@@ -215,6 +215,8 @@ module.exports = (db) => {
                  * @apiSuccess {Object[]} plays List of plays.
                  * @apiSuccess {String} plays.offense Offense team name
                  * @apiSuccess {String} plays.defense Defense team name
+                 * @apiSuccess {Number} plays.offense_score Offensive team score
+                 * @apiSuccess {Number} plays.defense_score Defensive team score
                  * @apiSuccess {Number} plays.id Id
                  * @apiSuccess {Number} plays.drive_id Id of the drive
                  * @apiSuccess {Number} plays.period Period
@@ -277,12 +279,27 @@ module.exports = (db) => {
                             }
 
                             let plays = await db.any(`
-                        SELECT p.id, offense.school as offense, defense.school as defense, d.id as drive_id, p.period, p.clock, p.yard_line, p.down, p.distance, p.yards_gained,  pt.text as play_type, p.play_text
+                        SELECT  p.id,
+                                offense.school as offense,
+                                defense.school as defense,
+                                CASE WHEN ogt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS offense_score,
+                                CASE WHEN dgt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS defense_score,
+                                d.id as drive_id,
+                                p.period,
+                                p.clock,
+                                p.yard_line,
+                                p.down,
+                                p.distance,
+                                p.yards_gained,
+                                pt.text as play_type,
+                                p.play_text
                         FROM game g
                             INNER JOIN drive d ON g.id = d.game_id
                             INNER JOIN play p ON d.id = p.drive_id
                             INNER JOIN team offense ON p.offense_id = offense.id
                             INNER JOIN team defense ON p.defense_id = defense.id
+                            INNER JOIN game_team ogt ON ogt.game_id = g.id AND ogt.team_id = offense.id 
+                            INNER JOIN game_team dgt ON dgt.game_id = g.id AND dgt.team_id = defense.id
                             INNER JOIN play_type pt ON p.play_type_id = pt.id
                         ${filter}
                         ORDER BY d.id
