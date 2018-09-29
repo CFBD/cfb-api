@@ -338,7 +338,7 @@ module.exports = (db) => {
                  * @apiSuccess {String} games.teams Teams associated with a game
                  * @apiSuccess {String} games.teams.school Name of school
                  * @apiSuccess {String} games.teams.homeAway Home/away flag
-                 * @apiSuccess {String} games.teams.points Points
+                 * @apiSuccess {Number} games.teams.points Points
                  * @apiSuccess {String} games.teams.stats Collection of stats
                  * @apiSuccess {String} games.teams.stats.category Statistical category
                  * @apiSuccess {String} games.teams.stats.stat Stat
