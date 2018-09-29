@@ -338,6 +338,7 @@ module.exports = (db) => {
                  * @apiSuccess {String} games.teams Teams associated with a game
                  * @apiSuccess {String} games.teams.school Name of school
                  * @apiSuccess {String} games.teams.homeAway Home/away flag
+                 * @apiSuccess {String} games.teams.points Points
                  * @apiSuccess {String} games.teams.stats Collection of stats
                  * @apiSuccess {String} games.teams.stats.category Statistical category
                  * @apiSuccess {String} games.teams.stats.stat Stat
@@ -355,8 +356,6 @@ module.exports = (db) => {
 
                             let filter;
                             let params;
-
-                            let index = 2;
 
                             if (req.query.gameId) {
                                 filter = 'WHERE g.id = $1';
@@ -380,17 +379,19 @@ module.exports = (db) => {
                                 }
 
                                 if (req.query.team) {
-                                    filter += ` AND LOWER(t.school) = LOWER($${index})`;
+                                    filter += ` AND (LOWER(t.school) = LOWER($${index}) OR LOWER(t2.school) = LOWER($${index}))`;
                                     params.push(req.query.team);
                                     index++;
                                 }
                             }
 
                             let data = await db.any(`
-                                SELECT g.id, gt.home_away, t.school, tst.name, gts.stat
+                                SELECT g.id, gt.home_away, t.school, gt.points, tst.name, gts.stat
                                 FROM team t
                                     INNER JOIN game_team gt ON t.id = gt.team_id
                                     INNER JOIN game g ON gt.game_id = g.id
+                                    INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
+                                    INNER JOIN team t2 ON gt2.team_id = t2.id
                                     INNER JOIN game_team_stat gts ON gts.game_team_id = gt.id
                                     INNER JOIN team_stat_type tst ON gts.type_id = tst.id
                                 ${filter}
@@ -414,6 +415,7 @@ module.exports = (db) => {
                                     game.teams.push({
                                         school: team,
                                         homeAway: teamStats[0].home_away,
+                                        points: teamStats[0].points,
                                         stats: teamStats.map(ts => {
                                             return {
                                                 category: ts.name,
