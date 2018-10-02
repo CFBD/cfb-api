@@ -130,6 +130,9 @@ module.exports = (db) => {
              * @apiParam {String} team Name of team to filter on.
              * @apiParam {String} offense Name of offense team to filter on.
              * @apiParam {String} defense Name of defense team to filter on.
+             * @apiParam {String} offenseConference Offense conference abbreviation
+             * @apiParam {String} defenseConference Defense conference abbreviation
+             * @apiParam {String} conference Conference abbreviation
              * 
              * @apiExample Whole season
              * curl -i https://api.collegefootballdata.com/drives?year=2018
@@ -139,7 +142,9 @@ module.exports = (db) => {
              * 
              * @apiSuccess {Object[]} drives List of drives.
              * @apiSuccess {String} drives.offense Offense team name
+             * @apiSuccess {String} drives.offense_conference Offense conference
              * @apiSuccess {String} drives.defense Defense team name
+             * @apiSuccess {String} drives.defense_conference Defense conference
              * @apiSuccess {Number} drives.id Id
              * @apiSuccess {Boolean} drives.scoring Scoring flag
              * @apiSuccess {Number} drives.start_period Quarter the drive started in
@@ -166,7 +171,7 @@ module.exports = (db) => {
 
                             return;
                         }
-                        
+
                         let filter = 'WHERE g.season = $1';
                         let params = [req.query.year];
 
@@ -202,16 +207,38 @@ module.exports = (db) => {
                             index++;
                         }
 
+                        if (req.query.offenseConference) {
+                            filter += ` AND LOWER(oc.abbreviation) = LOWER($${index})`;
+                            params.push(req.query.offenseConference);
+                            index++;
+                        }
+
+                        if (req.query.defenseConference) {
+                            filter += ` AND LOWER(dc.abbreviation) = LOWER($${index})`;
+                            params.push(req.query.defenseConference);
+                            index++;
+                        }
+
+                        if (req.query.conference) {
+                            filter += ` AND (LOWER(oc.abbreviation) = LOWER($${index}) OR LOWER(dc.abbreviation) = LOWER($${index}))`;
+                            params.push(req.query.conference);
+                            index++;
+                        }
+
                         let drives = await db.any(`
-                    SELECT offense.school as offense, defense.school as defense, g.id as game_id, d.id, d.scoring, d.start_period, d.start_yardline, d.start_time, d.end_period, d.end_yardline, d.end_time, d.elapsed, d.plays, d.yards, dr.name as drive_result
-                    FROM game g
-                        INNER JOIN drive d ON g.id = d.game_id
-                        INNER JOIN team offense ON d.offense_id = offense.id
-                        INNER JOIN team defense ON d.defense_id = defense.id
-                        INNER JOIN drive_result dr ON d.result_id = dr.id
-                    ${filter}
-                    ORDER BY d.id
-                `, params);
+                            SELECT offense.school as offense, oc.name as offense_conference, defense.school as defense, dc.name as defense_conference, g.id as game_id, d.id, d.scoring, d.start_period, d.start_yardline, d.start_time, d.end_period, d.end_yardline, d.end_time, d.elapsed, d.plays, d.yards, dr.name as drive_result
+                            FROM game g
+                                INNER JOIN drive d ON g.id = d.game_id
+                                INNER JOIN team offense ON d.offense_id = offense.id
+                                INNER JOIN conference_team oct ON offense.id = oct.team_id
+                                INNER JOIN conference oc ON oct.conference_id = oc.id
+                                INNER JOIN team defense ON d.defense_id = defense.id
+                                INNER JOIN conference_team dct ON defense.id = dct.team_id
+                                INNER JOIN conference dc ON dct.conference_id = dc.id
+                                INNER JOIN drive_result dr ON d.result_id = dr.id
+                            ${filter}
+                            ORDER BY d.id
+                        `, params);
 
                         res.send(drives);
                     } catch (err) {
@@ -233,6 +260,9 @@ module.exports = (db) => {
                  * @apiParam {String} team Name of team to filter on.
                  * @apiParam {String} offense Name of offense team to filter on.
                  * @apiParam {String} defense Name of defense team to filter on.
+                 * @apiParam {String} offenseConference Offense conference abbreviation
+                 * @apiParam {String} defenseConference Defense conference abbreviation
+                 * @apiParam {String} conference Conference abbreviation
                  * 
                  * @apiExample Whole week
                  * curl -i https://api.collegefootballdata.com/plays?year=2018&week=3
@@ -242,7 +272,9 @@ module.exports = (db) => {
                  * 
                  * @apiSuccess {Object[]} plays List of plays.
                  * @apiSuccess {String} plays.offense Offense team name
+                 * @apiSuccess {String} plays.offense_conference Offense conference
                  * @apiSuccess {String} plays.defense Defense team name
+                 * @apiSuccess {String} plays.defense_conference Defense conference
                  * @apiSuccess {Number} plays.offense_score Offensive team score
                  * @apiSuccess {Number} plays.defense_score Defensive team score
                  * @apiSuccess {Number} plays.id Id
@@ -279,7 +311,6 @@ module.exports = (db) => {
                                 params.push(req.query.seasonType || 'regular');
                                 index++;
                             }
-                            1
 
                             if (req.query.week) {
                                 filter += ` AND g.week = $${index}`;
@@ -305,6 +336,24 @@ module.exports = (db) => {
                                 index++;
                             }
 
+                            if (req.query.offenseConference) {
+                                filter += ` AND LOWER(oc.abbreviation) = LOWER($${index})`;
+                                params.push(req.query.offenseConference);
+                                index++;
+                            }
+
+                            if (req.query.defenseConference) {
+                                filter += ` AND LOWER(dc.abbreviation) = LOWER($${index})`;
+                                params.push(req.query.defenseConference);
+                                index++;
+                            }
+
+                            if (req.query.conference) {
+                                filter += ` AND (LOWER(oc.abbreviation) = LOWER($${index}) OR LOWER(dc.abbreviation) = LOWER($${index}))`;
+                                params.push(req.query.conference);
+                                index++;
+                            }
+
                             if (params.length < 3) {
                                 res.status(400).send({
                                     error: 'Either a week, a team, an offensive team, or a defensive team must be specified.'
@@ -314,31 +363,37 @@ module.exports = (db) => {
                             }
 
                             let plays = await db.any(`
-                        SELECT  p.id,
-                                offense.school as offense,
-                                defense.school as defense,
-                                CASE WHEN ogt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS offense_score,
-                                CASE WHEN dgt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS defense_score,
-                                d.id as drive_id,
-                                p.period,
-                                p.clock,
-                                p.yard_line,
-                                p.down,
-                                p.distance,
-                                p.yards_gained,
-                                pt.text as play_type,
-                                p.play_text
-                        FROM game g
-                            INNER JOIN drive d ON g.id = d.game_id
-                            INNER JOIN play p ON d.id = p.drive_id
-                            INNER JOIN team offense ON p.offense_id = offense.id
-                            INNER JOIN team defense ON p.defense_id = defense.id
-                            INNER JOIN game_team ogt ON ogt.game_id = g.id AND ogt.team_id = offense.id 
-                            INNER JOIN game_team dgt ON dgt.game_id = g.id AND dgt.team_id = defense.id
-                            INNER JOIN play_type pt ON p.play_type_id = pt.id
-                        ${filter}
-                        ORDER BY d.id
-                `, params);
+                                SELECT  p.id,
+                                        offense.school as offense,
+                                        oc.name as offense_conference,
+                                        defense.school as defense,
+                                        dc.name as defense_conference,
+                                        CASE WHEN ogt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS offense_score,
+                                        CASE WHEN dgt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS defense_score,
+                                        d.id as drive_id,
+                                        p.period,
+                                        p.clock,
+                                        p.yard_line,
+                                        p.down,
+                                        p.distance,
+                                        p.yards_gained,
+                                        pt.text as play_type,
+                                        p.play_text
+                                FROM game g
+                                    INNER JOIN drive d ON g.id = d.game_id
+                                    INNER JOIN play p ON d.id = p.drive_id
+                                    INNER JOIN team offense ON p.offense_id = offense.id
+                                    INNER JOIN conference_team oct ON offense.id = oct.team_id
+                                    INNER JOIN conference oc ON oct.conference_id = oc.id
+                                    INNER JOIN team defense ON p.defense_id = defense.id
+                                    INNER JOIN conference_team dct ON defense.id = dct.team_id
+                                    INNER JOIN conference dc ON dct.conference_id = dc.id
+                                    INNER JOIN game_team ogt ON ogt.game_id = g.id AND ogt.team_id = offense.id 
+                                    INNER JOIN game_team dgt ON dgt.game_id = g.id AND dgt.team_id = defense.id
+                                    INNER JOIN play_type pt ON p.play_type_id = pt.id
+                                ${filter}
+                                ORDER BY d.id
+                        `, params);
 
                             res.send(plays);
                         } catch (err) {
@@ -358,6 +413,7 @@ module.exports = (db) => {
                      * @apiParam {Number} year Year filter
                      * @apiParam {Number} week Week filter
                      * @apiParam {String} team Team filter
+                     * @apiParam {String} conference Conference filter
                      * 
                      * @apiExample Whole week
                      * curl -i https://api.collegefootballdata.com/games/teams?year=2018&week=3
@@ -371,7 +427,8 @@ module.exports = (db) => {
                      * @apiSuccess {Object[]} games List of games.
                      * @apiSuccess {Number} games.id Game id
                      * @apiSuccess {String} games.teams Teams associated with a game
-                     * @apiSuccess {String} games.teams.school Name of school
+                     * @apiSuccess {String} games.teams.school.name Name of school
+                     * @apiSuccess {String} games.teams.school.conference Conference
                      * @apiSuccess {String} games.teams.homeAway Home/away flag
                      * @apiSuccess {Number} games.teams.points Points
                      * @apiSuccess {String} games.teams.stats Collection of stats
@@ -418,15 +475,25 @@ module.exports = (db) => {
                                     params.push(req.query.team);
                                     index++;
                                 }
+
+                                if (req.query.conference) {
+                                    filter += ` AND (LOWER(c.abbreviation) = LOWER($${index}) OR LOWER(c2.abbreviation) = LOWER($${index}))`;
+                                    params.push(req.query.conference);
+                                    index++;
+                                }
                             }
 
                             let data = await db.any(`
-                                SELECT g.id, gt.home_away, t.school, gt.points, tst.name, gts.stat
+                                SELECT g.id, gt.home_away, t.school, c.name as conference, gt.points, tst.name, gts.stat
                                 FROM team t
                                     INNER JOIN game_team gt ON t.id = gt.team_id
                                     INNER JOIN game g ON gt.game_id = g.id
+                                    INNER JOIN conference_team ct ON t.id = ct.team_id
+                                    INNER JOIN conference c ON ct.conference_id = c.id
                                     INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
                                     INNER JOIN team t2 ON gt2.team_id = t2.id
+                                    INNER JOIN conference_team ct2 ON t2.id = ct2.team_id
+                                    INNER JOIN conference c2 ON ct2.conference_id = c2.id
                                     INNER JOIN game_team_stat gts ON gts.game_team_id = gt.id
                                     INNER JOIN team_stat_type tst ON gts.type_id = tst.id
                                 ${filter}
@@ -449,6 +516,7 @@ module.exports = (db) => {
 
                                     game.teams.push({
                                         school: team,
+                                        conference: teamStats[0].conference,
                                         homeAway: teamStats[0].home_away,
                                         points: teamStats[0].points,
                                         stats: teamStats.map(ts => {
