@@ -13,12 +13,13 @@ module.exports = (db) => {
          * @apiSuccess {String} teams.abbreviation Team abbreviation
          * @apiSuccess {String} teams.color Primary color hex code
          * @apiSuccess {String} teams.alt_color Secondary color hex code
+         * @apiSuccess {String[]} teams.logos Team logos
          * 
          */
         getTeams: async (req, res) => {
             try {
                 let teams = await db.any(`
-                    SELECT school, mascot, abbreviation, ('#' || color) as color, ('#' || alt_color) as alt_color
+                    SELECT school, mascot, abbreviation, ('#' || color) as color, ('#' || alt_color) as alt_color, images as logos
                     FROM team
                     ORDER BY active DESC, school
                 `);
