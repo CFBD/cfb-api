@@ -3,4 +3,5 @@ module.exports = (app, db) => {
 
     app.route('/teams').get(controller.getTeams);
     app.route('/roster').get(controller.getRoster);
+    app.route('/conferences').get(controller.getConferences);
 }

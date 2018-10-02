@@ -7,10 +7,21 @@ module.exports = (db) => {
          * @apiName GetTeams
          * @apiGroup Teams
          * 
+         * @apiParam {String} conference Conference abbreviation (optional)
+         * 
+         * @apiExample All teams
+         * curl -i https://api.collegefootballdata.com/teams
+         * 
+         * @apiExample Big Ten teams
+         * curl -i https://api.collegefootballdata.com/teams?conference=B1G
+         * 
+         * 
          * @apiSuccess {Object[]} teams List of teams.
          * @apiSuccess {String} teams.school Name of school
-         * @apiSuccess {String} teams.mascont Name of mascot
+         * @apiSuccess {String} teams.mascot Name of mascot
          * @apiSuccess {String} teams.abbreviation Team abbreviation
+         * @apiSuccess {String} teams.conference Name of conference
+         * @apiSuccess {String} teams.division Name of conference division
          * @apiSuccess {String} teams.color Primary color hex code
          * @apiSuccess {String} teams.alt_color Secondary color hex code
          * @apiSuccess {String[]} teams.logos Team logos
@@ -18,11 +29,17 @@ module.exports = (db) => {
          */
         getTeams: async (req, res) => {
             try {
+                let filter = req.query.conference ? 'WHERE LOWER(c.abbreviation) = LOWER($1)' : '';
+                let params = [req.query.conference];
+
                 let teams = await db.any(`
-                    SELECT school, mascot, abbreviation, ('#' || color) as color, ('#' || alt_color) as alt_color, images as logos
-                    FROM team
-                    ORDER BY active DESC, school
-                `);
+                    SELECT t.school, t.mascot, t.abbreviation, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos
+                    FROM conference c
+                        INNER JOIN conference_team ct ON c.id = ct.conference_id
+                        INNER JOIN team t ON ct.team_id = t.id
+                    ${filter}
+                    ORDER BY t.active DESC, t.school
+                `, params);
 
                 res.send(teams);
             } catch (err) {
@@ -77,6 +94,38 @@ module.exports = (db) => {
 
                 res.send(roster);
 
+            } catch (err) {
+                console.error(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
+        },
+        /** 
+         * @api {get} /conferences Get conferences
+         * @apiVersion 1.0.0
+         * @apiName GetConferences
+         * @apiGroup Teams
+         * 
+         * @apiExample Example
+         * curl -i https://api.collegefootballdata.com/conferences
+         * 
+         * @apiSuccess {Object[]} conferences List of conferences
+         * @apiSuccess {Number} id Conference id
+         * @apiSuccess {String} name Name
+         * @apiSuccess {String} short_name Short name
+         * @apiSuccess {String} abbreviation Abbreviation
+         * 
+         */
+        getConferences: async (req, res) => {
+            try {
+                let conferences = await db.any(`
+                    SELECT id, name, short_name, abbreviation
+                    FROM conference
+                    ORDER BY id
+                `);
+
+                res.send(conferences);
             } catch (err) {
                 console.error(err);
                 res.status(500).send({
