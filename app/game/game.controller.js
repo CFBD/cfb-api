@@ -12,27 +12,33 @@ module.exports = (db) => {
          * @apiParam {String} team Name of a team to filter on.
          * @apiParam {String} home Name of home team to filter on.
          * @apiParam {String} away Name of away team to filter on.
+         * @apiParam {String} conference Conference abbreviation
          * 
          * @apiExample Whole season
          * curl -i https://api.collegefootballdata.com/games?year=2018
          * 
-         * @apiExample Single home team
-         * curl -i https://api.collegefootballdata.com/games?year=2018&home=michigan
+         * @apiExample Single team
+         * curl -i https://api.collegefootballdata.com/games?year=2018&team=michigan
+         * 
+         * @apiExample Single conference and week
+         * curl -i https://api.collegefootballdata.com/games?year=2018&week=4&conference=SEC
          * 
          * @apiSuccess {Object[]} games List of games.
          * @apiSuccess {Number} games.id Id
          * @apiSuccess {Number} games.season Season
          * @apiSuccess {Number} games.week Week
-         * @apiSuccess {String} games.season_type Season type (e.g. regular or postseason)
+         * @apiSuccess {String} games.season_type Season type (e.g. regular, postseason, or both)
          * @apiSuccess {Date} games.start_date Start date
          * @apiSuccess {Boolean} games.neutral_site Neutral site flag
          * @apiSuccess {Boolean} games.conference_game Conference game flag
          * @apiSuccess {Number} games.attendance Attendance
          * @apiSuccess {String} games.venue Venue for game
          * @apiSuccess {String} games.home_team Home team name
+         * @apiSuccess {String} games.home_conference Home team conference
          * @apiSuccess {Number} games.home_points Home team points
          * @apiSuccess {Number[]} games.home_line_scores Home points breakdown by quarter
          * @apiSuccess {String} games.away_team Home team name
+         * @apiSuccess {String} games.away_conference Away team conference
          * @apiSuccess {Number} games.away_points Away team points
          * @apiSuccess {Number[]} games.away_line_scores Away points breakdown by quarter
          * 
@@ -47,10 +53,16 @@ module.exports = (db) => {
                         return;
                     }
 
-                    let filter = 'WHERE g.season = $1 AND season_type = $2';
-                    let params = [req.query.year, req.query.seasonType || 'regular'];
+                    let filter = 'WHERE g.season = $1';
+                    let params = [req.query.year];
 
-                    let index = 3;
+                    let index = 2;
+
+                    if (req.query.seasonType != 'both') {
+                        filter += ` AND g.season_type = $${index}`;
+                        params.push(req.query.seasonType || 'regular');
+                        index++;
+                    }
 
                     if (req.query.week) {
                         filter += ` AND g.week = $${index}`;
@@ -76,13 +88,23 @@ module.exports = (db) => {
                         index++;
                     }
 
+                    if (req.query.conference) {
+                        filter += ` AND (LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`;
+                        params.push(req.query.conference);
+                        index++;
+                    }
+
                     let games = await db.any(`
-                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.neutral_site, g.conference_game, g.attendance, v.name as venue, home.school as home_team, gt.points as home_points, gt.line_scores as home_line_scores, away.school as away_team, gt2.points as away_points, gt2.line_scores as away_line_scores
+                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.neutral_site, g.conference_game, g.attendance, v.name as venue, home.school as home_team, hc.name as home_conference, gt.points as home_points, gt.line_scores as home_line_scores, away.school as away_team, ac.name as away_conference, gt2.points as away_points, gt2.line_scores as away_line_scores
                     FROM game g
                         INNER JOIN game_team gt ON g.id = gt.game_id AND gt.home_away = 'home'
                         INNER JOIN team home ON gt.team_id = home.id
+                        INNER JOIN conference_team hct ON home.id = hct.team_id
+                        INNER JOIN conference hc ON hct.conference_id = hc.id
                         INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.home_away = 'away'
                         INNER JOIN team away ON gt2.team_id = away.id
+                        INNER JOIN conference_team act ON away.id = act.team_id
+                        INNER JOIN conference ac ON act.conference_id = ac.id
                         LEFT JOIN venue v ON g.venue_id = v.id
                     ${filter}
                     ORDER BY g.season, g.week, g.start_date
@@ -102,7 +124,7 @@ module.exports = (db) => {
              * @apiName GetDrives
              * @apiGroup Games
              * 
-             * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
+             * @apiParam {String} seasonType 'regular', 'postseason' or 'both'. Defaults to 'regular'.
              * @apiParam {Number} year Required. Year filter for drives.
              * @apiParam {Number} week Week filter for drives.
              * @apiParam {String} team Name of team to filter on.
@@ -144,11 +166,17 @@ module.exports = (db) => {
 
                             return;
                         }
+                        
+                        let filter = 'WHERE g.season = $1';
+                        let params = [req.query.year];
 
-                        let filter = 'WHERE g.season = $1 AND season_type = $2';
-                        let params = [req.query.year, req.query.seasonType || 'regular'];
+                        let index = 2;
 
-                        let index = 3;
+                        if (req.query.seasonType != 'both') {
+                            filter += ` AND g.season_type = $${index}`;
+                            params.push(req.query.seasonType || 'regular');
+                            index++;
+                        }
 
                         if (req.query.week) {
                             filter += ` AND g.week = $${index}`;
@@ -199,7 +227,7 @@ module.exports = (db) => {
                  * @apiName GetPlays
                  * @apiGroup Games
                  * 
-                 * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
+                 * @apiParam {String} seasonType 'regular', 'postseason', or 'both'. Defaults to 'regular'.
                  * @apiParam {Number} year Required. Year filter for plays.
                  * @apiParam {Number} week Week filter for plays.
                  * @apiParam {String} team Name of team to filter on.
@@ -241,10 +269,17 @@ module.exports = (db) => {
                                 return;
                             }
 
-                            let filter = 'WHERE g.season = $1 AND season_type = $2';
-                            let params = [req.query.year, req.query.seasonType || 'regular'];
+                            let filter = 'WHERE g.season = $1';
+                            let params = [req.query.year];
 
-                            let index = 3;
+                            let index = 2;
+
+                            if (req.query.seasonType != 'both') {
+                                filter += ` AND g.season_type = $${index}`;
+                                params.push(req.query.seasonType || 'regular');
+                                index++;
+                            }
+                            1
 
                             if (req.query.week) {
                                 filter += ` AND g.week = $${index}`;
@@ -313,37 +348,37 @@ module.exports = (db) => {
                             });
                         }
                     },
-                                    /** 
-                 * @api {get} /games/teams Get team statistics broken down by game
-                 * @apiVersion 1.0.0
-                 * @apiName GetTeamStats
-                 * @apiGroup Games
-                 * 
-                 * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
-                 * @apiParam {Number} year Year filter
-                 * @apiParam {Number} week Week filter
-                 * @apiParam {String} team Team filter
-                 * 
-                 * @apiExample Whole week
-                 * curl -i https://api.collegefootballdata.com/games/teams?year=2018&week=3
-                 * 
-                 * @apiExample Single team
-                 * curl -i https://api.collegefootballdata.com/games/teams?year=2018&team=clemson
-                 * 
-                 * @apiExample Single game
-                 * curl -i https://api.collegefootballdata.com/games/teams?gameId=401012891
-                 * 
-                 * @apiSuccess {Object[]} games List of games.
-                 * @apiSuccess {Number} games.id Game id
-                 * @apiSuccess {String} games.teams Teams associated with a game
-                 * @apiSuccess {String} games.teams.school Name of school
-                 * @apiSuccess {String} games.teams.homeAway Home/away flag
-                 * @apiSuccess {Number} games.teams.points Points
-                 * @apiSuccess {String} games.teams.stats Collection of stats
-                 * @apiSuccess {String} games.teams.stats.category Statistical category
-                 * @apiSuccess {String} games.teams.stats.stat Stat
-                 * 
-                 */
+                    /** 
+                     * @api {get} /games/teams Get team statistics broken down by game
+                     * @apiVersion 1.0.0
+                     * @apiName GetTeamStats
+                     * @apiGroup Games
+                     * 
+                     * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
+                     * @apiParam {Number} year Year filter
+                     * @apiParam {Number} week Week filter
+                     * @apiParam {String} team Team filter
+                     * 
+                     * @apiExample Whole week
+                     * curl -i https://api.collegefootballdata.com/games/teams?year=2018&week=3
+                     * 
+                     * @apiExample Single team
+                     * curl -i https://api.collegefootballdata.com/games/teams?year=2018&team=clemson
+                     * 
+                     * @apiExample Single game
+                     * curl -i https://api.collegefootballdata.com/games/teams?gameId=401012891
+                     * 
+                     * @apiSuccess {Object[]} games List of games.
+                     * @apiSuccess {Number} games.id Game id
+                     * @apiSuccess {String} games.teams Teams associated with a game
+                     * @apiSuccess {String} games.teams.school Name of school
+                     * @apiSuccess {String} games.teams.homeAway Home/away flag
+                     * @apiSuccess {Number} games.teams.points Points
+                     * @apiSuccess {String} games.teams.stats Collection of stats
+                     * @apiSuccess {String} games.teams.stats.category Statistical category
+                     * @apiSuccess {String} games.teams.stats.stat Stat
+                     * 
+                     */
                     getTeamStats: async (req, res) => {
                         try {
                             if (!req.query.gameId && !(req.query.year && (req.query.week || req.query.team))) {
