@@ -438,9 +438,9 @@ module.exports = (db) => {
                      */
                     getTeamStats: async (req, res) => {
                         try {
-                            if (!req.query.gameId && !(req.query.year && (req.query.week || req.query.team))) {
+                            if (!req.query.gameId && !(req.query.year && (req.query.week || req.query.team || req.query.conference))) {
                                 res.status(400).send({
-                                    error: 'Must specify a gameId or a year with either a week or a team.'
+                                    error: 'Must specify a gameId or a year with either a week, team, or conference.'
                                 });
 
                                 return;
