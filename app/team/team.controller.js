@@ -111,10 +111,10 @@ module.exports = (db) => {
          * curl -i https://api.collegefootballdata.com/conferences
          * 
          * @apiSuccess {Object[]} conferences List of conferences
-         * @apiSuccess {Number} id Conference id
-         * @apiSuccess {String} name Name
-         * @apiSuccess {String} short_name Short name
-         * @apiSuccess {String} abbreviation Abbreviation
+         * @apiSuccess {Number} conferences.id Conference id
+         * @apiSuccess {String} conferences.name Name
+         * @apiSuccess {String} conferences.short_name Short name
+         * @apiSuccess {String} conferences.abbreviation Abbreviation
          * 
          */
         getConferences: async (req, res) => {
@@ -126,6 +126,45 @@ module.exports = (db) => {
                 `);
 
                 res.send(conferences);
+            } catch (err) {
+                console.error(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
+        },
+          /** 
+         * @api {get} /talent Get team talent rankings
+         * @apiVersion 1.0.0
+         * @apiName GetTalent
+         * @apiGroup Teams
+         * 
+         * @apiExample All years
+         * curl -i https://api.collegefootballdata.com/talent
+         * 
+         * @apiExample Single year
+         * curl -i https://api.collegefootballdata.com/talent?year=2018
+         * 
+         * @apiSuccess {Object[]} teams List of teams
+         * @apiSuccess {Number} teams.year Year
+         * @apiSuccess {String} teams.school School
+         * @apiSuccess {Number} teams.talent Talent rating
+         * 
+         */
+        getTeamTalent: async (req, res) => {
+            try {
+                let filter = req.query.year ? 'WHERE tt.year = $1' : '';
+                let params = req.query.year ? [req.query.year] : [];
+
+                let talent = await db.any(`
+                    SELECT tt.year, t.school, tt.talent
+                    FROM team_talent tt
+                        INNER JOIN team t ON tt.team_id = t.id
+                    ${filter}
+                    ORDER BY tt.year DESC, tt.talent DESC
+                `, params);
+
+                res.send(talent);
             } catch (err) {
                 console.error(err);
                 res.status(500).send({
