@@ -34,9 +34,9 @@ module.exports = (db) => {
 
                 let teams = await db.any(`
                     SELECT t.school, t.mascot, t.abbreviation, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos
-                    FROM conference c
-                        INNER JOIN conference_team ct ON c.id = ct.conference_id
-                        INNER JOIN team t ON ct.team_id = t.id
+                    FROM team t
+                        LEFT JOIN conference_team ct ON t.id = ct.team_id
+                        LEFT JOIN ON c.id = ct.conference_id
                     ${filter}
                     ORDER BY t.active DESC, t.school
                 `, params);
