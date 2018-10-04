@@ -36,7 +36,7 @@ module.exports = (db) => {
                     SELECT t.school, t.mascot, t.abbreviation, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos
                     FROM team t
                         LEFT JOIN conference_team ct ON t.id = ct.team_id
-                        LEFT JOIN ON c.id = ct.conference_id
+                        LEFT JOIN  conference ON c.id = ct.conference_id
                     ${filter}
                     ORDER BY t.active DESC, t.school
                 `, params);
