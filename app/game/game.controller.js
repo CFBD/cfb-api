@@ -146,6 +146,7 @@ module.exports = (db) => {
              * @apiSuccess {String} drives.defense Defense team name
              * @apiSuccess {String} drives.defense_conference Defense conference
              * @apiSuccess {Number} drives.id Id
+             * @apiSuccess {Number} drives.game_id Game id
              * @apiSuccess {Boolean} drives.scoring Scoring flag
              * @apiSuccess {Number} drives.start_period Quarter the drive started in
              * @apiSuccess {Number} drives.start_yardline Yard line at which the drive began
