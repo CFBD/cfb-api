@@ -32,6 +32,7 @@ module.exports = (db) => {
          * @apiSuccess {Boolean} games.neutral_site Neutral site flag
          * @apiSuccess {Boolean} games.conference_game Conference game flag
          * @apiSuccess {Number} games.attendance Attendance
+         * @apiSuccess {Number} games.venue_id Venue id
          * @apiSuccess {String} games.venue Venue for game
          * @apiSuccess {String} games.home_team Home team name
          * @apiSuccess {String} games.home_conference Home team conference
@@ -95,7 +96,7 @@ module.exports = (db) => {
                     }
 
                     let games = await db.any(`
-                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.neutral_site, g.conference_game, g.attendance, v.name as venue, home.school as home_team, hc.name as home_conference, gt.points as home_points, gt.line_scores as home_line_scores, away.school as away_team, ac.name as away_conference, gt2.points as away_points, gt2.line_scores as away_line_scores
+                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.neutral_site, g.conference_game, g.attendance, v.id as venue_id, v.name as venue, home.school as home_team, hc.name as home_conference, gt.points as home_points, gt.line_scores as home_line_scores, away.school as away_team, ac.name as away_conference, gt2.points as away_points, gt2.line_scores as away_line_scores
                     FROM game g
                         INNER JOIN game_team gt ON g.id = gt.game_id AND gt.home_away = 'home'
                         INNER JOIN team home ON gt.team_id = home.id
