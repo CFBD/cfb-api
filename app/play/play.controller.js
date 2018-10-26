@@ -142,11 +142,11 @@ module.exports = (db) => {
                         INNER JOIN drive d ON g.id = d.game_id
                         INNER JOIN play p ON d.id = p.drive_id
                         INNER JOIN team offense ON p.offense_id = offense.id
-                        INNER JOIN conference_team oct ON offense.id = oct.team_id
-                        INNER JOIN conference oc ON oct.conference_id = oc.id
+                        LEFT JOIN conference_team oct ON offense.id = oct.team_id
+                        LEFT JOIN conference oc ON oct.conference_id = oc.id
                         INNER JOIN team defense ON p.defense_id = defense.id
-                        INNER JOIN conference_team dct ON defense.id = dct.team_id
-                        INNER JOIN conference dc ON dct.conference_id = dc.id
+                        LEFT JOIN conference_team dct ON defense.id = dct.team_id
+                        LEFT JOIN conference dc ON dct.conference_id = dc.id
                         INNER JOIN game_team ogt ON ogt.game_id = g.id AND ogt.team_id = offense.id 
                         INNER JOIN game_team dgt ON dgt.game_id = g.id AND dgt.team_id = defense.id
                         INNER JOIN play_type pt ON p.play_type_id = pt.id

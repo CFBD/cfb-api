@@ -100,12 +100,12 @@ module.exports = (db) => {
                     FROM game g
                         INNER JOIN game_team gt ON g.id = gt.game_id AND gt.home_away = 'home'
                         INNER JOIN team home ON gt.team_id = home.id
-                        INNER JOIN conference_team hct ON home.id = hct.team_id
-                        INNER JOIN conference hc ON hct.conference_id = hc.id
+                        LEFT JOIN conference_team hct ON home.id = hct.team_id
+                        LEFT JOIN conference hc ON hct.conference_id = hc.id
                         INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.home_away = 'away'
                         INNER JOIN team away ON gt2.team_id = away.id
-                        INNER JOIN conference_team act ON away.id = act.team_id
-                        INNER JOIN conference ac ON act.conference_id = ac.id
+                        LEFT JOIN conference_team act ON away.id = act.team_id
+                        LEFT JOIN conference ac ON act.conference_id = ac.id
                         LEFT JOIN venue v ON g.venue_id = v.id
                     ${filter}
                     ORDER BY g.season, g.week, g.start_date
@@ -232,11 +232,11 @@ module.exports = (db) => {
                             FROM game g
                                 INNER JOIN drive d ON g.id = d.game_id
                                 INNER JOIN team offense ON d.offense_id = offense.id
-                                INNER JOIN conference_team oct ON offense.id = oct.team_id
-                                INNER JOIN conference oc ON oct.conference_id = oc.id
+                                LEFT JOIN conference_team oct ON offense.id = oct.team_id
+                                LEFT JOIN conference oc ON oct.conference_id = oc.id
                                 INNER JOIN team defense ON d.defense_id = defense.id
-                                INNER JOIN conference_team dct ON defense.id = dct.team_id
-                                INNER JOIN conference dc ON dct.conference_id = dc.id
+                                LEFT JOIN conference_team dct ON defense.id = dct.team_id
+                                LEFT JOIN conference dc ON dct.conference_id = dc.id
                                 INNER JOIN drive_result dr ON d.result_id = dr.id
                             ${filter}
                             ORDER BY d.id
@@ -336,12 +336,12 @@ module.exports = (db) => {
                                 FROM team t
                                     INNER JOIN game_team gt ON t.id = gt.team_id
                                     INNER JOIN game g ON gt.game_id = g.id
-                                    INNER JOIN conference_team ct ON t.id = ct.team_id
-                                    INNER JOIN conference c ON ct.conference_id = c.id
+                                    LEFT JOIN conference_team ct ON t.id = ct.team_id
+                                    LEFT JOIN conference c ON ct.conference_id = c.id
                                     INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
                                     INNER JOIN team t2 ON gt2.team_id = t2.id
-                                    INNER JOIN conference_team ct2 ON t2.id = ct2.team_id
-                                    INNER JOIN conference c2 ON ct2.conference_id = c2.id
+                                    LEFT JOIN conference_team ct2 ON t2.id = ct2.team_id
+                                    LEFT JOIN conference c2 ON ct2.conference_id = c2.id
                                     INNER JOIN game_team_stat gts ON gts.game_team_id = gt.id
                                     INNER JOIN team_stat_type tst ON gts.type_id = tst.id
                                 ${filter}
