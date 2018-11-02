@@ -387,6 +387,183 @@ module.exports = (db) => {
                                 error: 'Something went wrong.'
                             });
                         }
+                    }, /** 
+                    * @api {get} /games/players Get player statistics broken down by game
+                    * @apiVersion 1.0.0
+                    * @apiName GetPlayerStats
+                    * @apiGroup Games
+                    * 
+                    * @apiParam {String} seasonType 'regular' or 'postseason'. Defaults to 'regular'.
+                    * @apiParam {Number} year Year filter
+                    * @apiParam {Number} week Week filter
+                    * @apiParam {String} team Team filter
+                    * @apiParam {String} conference Conference filter
+                    * @apiParam {String} category Statistical cateogory
+                    * 
+                    * @apiExample Whole week
+                    * curl -i https://api.collegefootballdata.com/games/players?year=2018&week=3
+                    * 
+                    * @apiExample Single team
+                    * curl -i https://api.collegefootballdata.com/games/players?year=2018&team=clemson
+                    * 
+                    * @apiExample Single game
+                    * curl -i https://api.collegefootballdata.com/games/players?gameId=401012891
+                    * 
+                    * @apiExample Specific team and category
+                    * curl -i https://api.collegefootballdata.com/games/players?year=2018&team=michigan&category=defensive
+                    * 
+                    * @apiSuccess {Object[]} games List of games.
+                    * @apiSuccess {Number} games.id Game id
+                    * @apiSuccess {Object[]} games.teams Teams associated with a game
+                    * @apiSuccess {Object} games.teams.school School
+                    * @apiSuccess {String} games.teams.school.name Name of school
+                    * @apiSuccess {String} games.teams.school.conference Conference
+                    * @apiSuccess {String} games.teams.homeAway Home/away flag
+                    * @apiSuccess {Number} games.teams.points Points
+                    * @apiSuccess {Object[]} games.teams.categories Statistical categories
+                    * @apiSuccess {String} games.teams.categories.name Name of category
+                    * @apiSucess {Object[]} games.teams.categories.types Category stat types
+                    * @apiSuccess {String} games.teams.categories.types.name Name of statistical sub-category
+                    * @apiSuccess {Object[]} games.teams.categories.types.athletes Athletes with statistics in the given sub-category
+                    * @apiSuccess {Number} games.teams.categories.types.athletes.id Athlete id number
+                    * @apiSuccess {String} games.teams.categories.types.athletes.name Athlete name
+                    * @apiSuccess {String} games.teams.categories.types.athletes.stat Statistic
+                    * 
+                    */
+                    getPlayerStats: async (req, res) => {
+                        try {
+                            if (!req.query.gameId && !(req.query.year && (req.query.week || req.query.team || req.query.conference))) {
+                                res.status(400).send({
+                                    error: 'Must specify a gameId or a year with either a week, team, or conference.'
+                                });
+
+                                return;
+                            }
+
+                            let filter;
+                            let params;
+
+                            if (req.query.gameId) {
+                                filter = 'WHERE g.id = $1';
+                                params = [req.query.gameId];
+                            } else {
+                                filter = 'WHERE g.season_type = $1';
+                                params = [req.query.seasonType || 'regular'];
+
+                                let index = 2;
+
+                                if (req.query.year) {
+                                    filter += ` AND g.season = $${index}`;
+                                    params.push(req.query.year);
+                                    index++;
+                                }
+
+                                if (req.query.week) {
+                                    filter += ` AND g.week = $${index}`;
+                                    params.push(req.query.week);
+                                    index++;
+                                }
+
+                                if (req.query.team) {
+                                    filter += ` AND (LOWER(t.school) = LOWER($${index}) OR LOWER(t2.school) = LOWER($${index}))`;
+                                    params.push(req.query.team);
+                                    index++;
+                                }
+
+                                if (req.query.conference) {
+                                    filter += ` AND (LOWER(c.abbreviation) = LOWER($${index}) OR LOWER(c2.abbreviation) = LOWER($${index}))`;
+                                    params.push(req.query.conference);
+                                    index++;
+                                }
+
+                                if (req.query.category) {
+                                    filter += ` AND LOWER(cat.name) = LOWER($${index})`;
+                                    params.push(req.query.category);
+                                    index++;
+                                }
+                            }
+
+                            let data = await db.any(`
+                                SELECT g.id, gt.home_away, t.school, c.name as conference, gt.points, cat.name as cat, typ.name as typ, a.id as athlete_id, a.name as athlete, gps.stat
+                                FROM team t
+                                    INNER JOIN game_team gt ON t.id = gt.team_id
+                                    INNER JOIN game g ON gt.game_id = g.id
+                                    LEFT JOIN conference_team ct ON t.id = ct.team_id
+                                    LEFT JOIN conference c ON ct.conference_id = c.id
+                                    INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
+                                    INNER JOIN team t2 ON gt2.team_id = t2.id
+                                    LEFT JOIN conference_team ct2 ON t2.id = ct2.team_id
+                                    LEFT JOIN conference c2 ON ct2.conference_id = c2.id
+                                    INNER JOIN game_player_stat gps ON gps.game_team_id = gt.id
+                                    INNER JOIN player_stat_category cat ON gps.category_id = cat.id
+                                    INNER JOIN player_stat_type typ ON gps.type_id = typ.id
+                                    INNER JOIN athlete a ON gps.athlete_id = a.id
+                                    ${filter}
+                            `, params);
+
+                            let stats = [];
+
+                            let ids = Array.from(new Set(data.map(d => d.id)));
+                            for (let id of ids) {
+                                let game = {
+                                    id,
+                                    teams: []
+                                }
+
+                                let gameStats = data.filter(d => d.id == id);
+                                let gameTeams = Array.from(new Set(gameStats.map(gs => gs.school)));
+
+                                for (let team of gameTeams) {
+                                    let teamStats = gameStats.filter(gs => gs.school == team);
+                                    let teamRecord = {
+                                        school: team,
+                                        conference: teamStats[0].conference,
+                                        homeAway: teamStats[0].home_away,
+                                        points: teamStats[0].points,
+                                        categories: []
+                                    }
+
+                                    let categories = Array.from(new Set(teamStats.map(gs => gs.cat)));
+
+                                    for (let category of categories) {
+                                        let categoryStats = teamStats.filter(ts => ts.cat == category);
+                                        let categoryRecord = {
+                                            name: categoryStats[0].cat,
+                                            types: []
+                                        }
+
+                                        let types = Array.from(new Set(categoryStats.map(gs => gs.typ)));
+                                        for (let statType of types) {
+                                            let typeStats = categoryStats.filter(cs => cs.typ == statType);
+                                            categoryRecord.types.push({
+                                                name: typeStats[0].typ,
+                                                athletes: typeStats.map(ts => {
+                                                    return {
+                                                        id: ts.athlete_id,
+                                                        name: ts.athlete,
+                                                        stat: ts.stat
+                                                    }
+                                                })
+                                            });
+                                        }
+
+                                        teamRecord.categories.push(categoryRecord);
+                                    }
+                                    
+                                    game.teams.push(teamRecord);
+                                }
+
+                                stats.push(game);
+                            }
+
+                            res.send(stats);
+
+                        } catch (err) {
+                            console.error(err);
+                            res.status(500).send({
+                                error: 'Something went wrong.'
+                            });
+                        }
                     }
     }
 }
