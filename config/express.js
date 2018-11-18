@@ -61,10 +61,13 @@ module.exports = async () => {
     require('../app/team/team.route')(app, dbInfo.db);
     require('../app/venue/venue.route')(app, dbInfo.db);
 
-    app.use(express.static(path.join(__dirname, '../doc')));
+    // app.use(express.static(path.join(__dirname, '../doc')));
+
+    require('./swagger')(app);
+    app.use('/api/docs', express.static('./node_modules/swagger-ui-dist'));
 
     app.get('*', (req, res) => {
-        res.sendfile(path.join(__dirname, '../doc/index.html'));
+        res.redirect('/api/docs/?url=/api-docs.json');
     });
 
     return app;

@@ -1,0 +1,1119 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
+    "version": "1.1.1",
+    "title": "College Football Data API",
+    "contact": {
+      "email": "bluescarcfb@gmail.com"
+    }
+  },
+  "host": "api.collegefootballdata.com",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "games",
+      "description": "Games scores and statistics"
+    },
+    {
+      "name": "drives",
+      "description": "Drive data"
+    },
+    {
+      "name": "plays",
+      "description": "Play by play data"
+    },
+    {
+      "name": "teams",
+      "description": "Team information"
+    },
+    {
+      "name": "conferences",
+      "description": "Conference information"
+    },
+    {
+      "name": "venues",
+      "description": "Information about venues"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/games": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Get game information",
+        "description": "",
+        "operationId": "getGames",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "home",
+            "description": "Home team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "away",
+            "description": "Away team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Game"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/games/players": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Get player statistics by game",
+        "description": "",
+        "operationId": "getPlayerGameStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "category",
+            "description": "Category filter (e.g defensive)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "gameId",
+            "description": "Game id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerGame"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/games/teams": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Get team statistics by game",
+        "description": "",
+        "operationId": "getTeamGameStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "gameId",
+            "description": "Game id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamGame"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/drives": {
+      "get": {
+        "tags": [
+          "drives"
+        ],
+        "summary": "Get drive information",
+        "description": "",
+        "operationId": "getDrvies",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "seasonType",
+            "description": "Season type filter",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offense",
+            "description": "Offensive team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "defense",
+            "description": "Defensive team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offenseConference",
+            "description": "Offensive conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "defenseConference",
+            "description": "Defensive conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Drive"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plays": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Get play information",
+        "description": "",
+        "operationId": "getPlays",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "seasonType",
+            "description": "Season type filter",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offense",
+            "description": "Offensive team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "defense",
+            "description": "Defensive team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offenseConference",
+            "description": "Offensive conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "defenseConference",
+            "description": "Defensive conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "playType",
+            "description": "Play type filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Play"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/play/types": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Get play type list",
+        "description": "",
+        "operationId": "getPlayTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayType"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conferences": {
+      "get": {
+        "tags": [
+          "conferences"
+        ],
+        "summary": "Get conference list",
+        "description": "",
+        "operationId": "getConferences",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Conference"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Get team information",
+        "description": "",
+        "operationId": "getTeams",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/roster": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Get team roster",
+        "description": "",
+        "operationId": "getRoster",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "team",
+            "description": "Team name",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Player"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/talent": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Get team talent rankings",
+        "description": "",
+        "operationId": "getTalent",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamTalent"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/venues": {
+      "get": {
+        "tags": [
+          "venues"
+        ],
+        "summary": "Get venue information",
+        "description": "",
+        "operationId": "getVenues",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Venue"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Game": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "season_type": {
+          "type": "string"
+        },
+        "start_date": {
+          "type": "string"
+        },
+        "neutral_site": {
+          "type": "boolean"
+        },
+        "conference_game": {
+          "type": "boolean"
+        },
+        "attendance": {
+          "type": "integer"
+        },
+        "venue_id": {
+          "type": "integer"
+        },
+        "venue": {
+          "type": "string"
+        },
+        "home_team": {
+          "type": "string"
+        },
+        "home_conference": {
+          "type": "string"
+        },
+        "home_points": {
+          "type": "integer"
+        },
+        "home_line_scores": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "away_team": {
+          "type": "string"
+        },
+        "away_conference": {
+          "type": "string"
+        },
+        "away_points": {
+          "type": "integer"
+        },
+        "away_line_scores": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "PlayerGame": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "school": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "conference": {
+                    "type": "string"
+                  }
+                }
+              },
+              "homeAway": {
+                "type": "boolean"
+              },
+              "points": {
+                "type": "integer"
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "types": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "athletes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "stat": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "TeamGame": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "school": {
+                "type": "string"
+              },
+              "conference": {
+                "type": "string"
+              },
+              "homeAway": {
+                "type": "boolean"
+              },
+              "points": {
+                "type": "integer"
+              },
+              "stats": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "category": {
+                      "type": "string"
+                    },
+                    "stat": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Drive": {
+      "type": "object",
+      "properties": {
+        "offense": {
+          "type": "string"
+        },
+        "offense_conference": {
+          "type": "string"
+        },
+        "defense": {
+          "type": "string"
+        },
+        "defense_conference": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "game_id": {
+          "type": "integer"
+        },
+        "scoring": {
+          "type": "boolean"
+        },
+        "start_period": {
+          "type": "integer"
+        },
+        "start_yardline": {
+          "type": "integer"
+        },
+        "start_time": {
+          "type": "object",
+          "properties": {
+            "minutes": {
+              "type": "integer"
+            },
+            "seconds": {
+              "type": "integer"
+            }
+          }
+        },
+        "end_period": {
+          "type": "integer"
+        },
+        "end_yardline": {
+          "type": "integer"
+        },
+        "end_time": {
+          "type": "object",
+          "properties": {
+            "minutes": {
+              "type": "integer"
+            },
+            "seconds": {
+              "type": "integer"
+            }
+          }
+        },
+        "plays": {
+          "type": "integer"
+        },
+        "yards": {
+          "type": "integer"
+        },
+        "drive_result": {
+          "type": "string"
+        }
+      }
+    },
+    "Play": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "drive_id": {
+          "type": "integer"
+        },
+        "offense": {
+          "type": "string"
+        },
+        "offense_conference": {
+          "type": "string"
+        },
+        "offense_score": {
+          "type": "integer"
+        },
+        "defense": {
+          "type": "string"
+        },
+        "defense_conference": {
+          "type": "string"
+        },
+        "defense_points": {
+          "type": "integer"
+        },
+        "period": {
+          "type": "integer"
+        },
+        "clock": {
+          "type": "object",
+          "properties": {
+            "minutes": {
+              "type": "integer"
+            },
+            "seconds": {
+              "type": "integer"
+            }
+          }
+        },
+        "yard_line": {
+          "type": "integer"
+        },
+        "down": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "yards_gained": {
+          "type": "integer"
+        },
+        "play_type": {
+          "type": "string"
+        },
+        "play_text": {
+          "type": "string"
+        }
+      }
+    },
+    "PlayType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        }
+      }
+    },
+    "Conference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "short_name": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        }
+      }
+    },
+    "Team": {
+      "type": "object",
+      "properties": {
+        "school": {
+          "type": "string"
+        },
+        "mascot": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "division": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "alt_color": {
+          "type": "string"
+        },
+        "logos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Player": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "weight": {
+          "type": "integer"
+        },
+        "jersey": {
+          "type": "integer"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "position": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "TeamTalent": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "school": {
+          "type": "string"
+        },
+        "talent": {
+          "type": "number"
+        }
+      }
+    },
+    "Venue": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "integer"
+        },
+        "grass": {
+          "type": "boolean"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "country_code": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          }
+        },
+        "elevation": {
+          "type": "integer"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "dome": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

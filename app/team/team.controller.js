@@ -1,32 +1,5 @@
 module.exports = (db) => {
     return {
-        
-        /** 
-         * @api {get} /teams Get team information
-         * @apiVersion 1.0.0
-         * @apiName GetTeams
-         * @apiGroup Teams
-         * 
-         * @apiParam {String} conference Conference abbreviation (optional)
-         * 
-         * @apiExample All teams
-         * curl -i https://api.collegefootballdata.com/teams
-         * 
-         * @apiExample Big Ten teams
-         * curl -i https://api.collegefootballdata.com/teams?conference=B1G
-         * 
-         * 
-         * @apiSuccess {Object[]} teams List of teams.
-         * @apiSuccess {String} teams.school Name of school
-         * @apiSuccess {String} teams.mascot Name of mascot
-         * @apiSuccess {String} teams.abbreviation Team abbreviation
-         * @apiSuccess {String} teams.conference Name of conference
-         * @apiSuccess {String} teams.division Name of conference division
-         * @apiSuccess {String} teams.color Primary color hex code
-         * @apiSuccess {String} teams.alt_color Secondary color hex code
-         * @apiSuccess {String[]} teams.logos Team logos
-         * 
-         */
         getTeams: async (req, res) => {
             try {
                 let filter = req.query.conference ? 'WHERE LOWER(c.abbreviation) = LOWER($1)' : '';
@@ -49,31 +22,6 @@ module.exports = (db) => {
                 });
             }
         },
-        /** 
-         * @api {get} /roster Get team roster
-         * @apiVersion 1.0.0
-         * @apiName GetRoster
-         * @apiGroup Teams
-         * 
-         * @apiParam {String} team Name of team to filter on.
-         * 
-         * @apiExample Example
-         * curl -i https://api.collegefootballdata.com/roster?team=Clemson
-         * 
-         * @apiSuccess {Object[]} roster List of players
-         * @apiSuccess {Number} roster.id Id of player
-         * @apiSuccess {String} roster.first_name Player first name
-         * @apiSuccess {String} roster.last_name Player last name
-         * @apiSuccess {Number} roster.height Player height, in inches
-         * @apiSuccess {Number} roster.weight Player weight, in pounds
-         * @apiSuccess {Number} roster.jersey Player jersey number
-         * @apiSuccess {Number} roster.year Player eligibility year
-         * @apiSuccess {String} roster.position Player position
-         * @apiSuccess {String} roster.city Player home city
-         * @apiSuccess {String} roster.state Player home state or province
-         * @apiSuccess {String} roster.country Player home country
-         * 
-         */
         getRoster: async (req, res) => {
             try {
                 if (!req.query.team) {
@@ -101,22 +49,6 @@ module.exports = (db) => {
                 });
             }
         },
-        /** 
-         * @api {get} /conferences Get conferences
-         * @apiVersion 1.0.0
-         * @apiName GetConferences
-         * @apiGroup Teams
-         * 
-         * @apiExample Example
-         * curl -i https://api.collegefootballdata.com/conferences
-         * 
-         * @apiSuccess {Object[]} conferences List of conferences
-         * @apiSuccess {Number} conferences.id Conference id
-         * @apiSuccess {String} conferences.name Name
-         * @apiSuccess {String} conferences.short_name Short name
-         * @apiSuccess {String} conferences.abbreviation Abbreviation
-         * 
-         */
         getConferences: async (req, res) => {
             try {
                 let conferences = await db.any(`
@@ -133,24 +65,6 @@ module.exports = (db) => {
                 });
             }
         },
-          /** 
-         * @api {get} /talent Get team talent rankings
-         * @apiVersion 1.0.0
-         * @apiName GetTalent
-         * @apiGroup Teams
-         * 
-         * @apiExample All years
-         * curl -i https://api.collegefootballdata.com/talent
-         * 
-         * @apiExample Single year
-         * curl -i https://api.collegefootballdata.com/talent?year=2018
-         * 
-         * @apiSuccess {Object[]} teams List of teams
-         * @apiSuccess {Number} teams.year Year
-         * @apiSuccess {String} teams.school School
-         * @apiSuccess {Number} teams.talent Talent rating
-         * 
-         */
         getTeamTalent: async (req, res) => {
             try {
                 let filter = req.query.year ? 'WHERE tt.year = $1' : '';

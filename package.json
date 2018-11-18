@@ -32,7 +32,8 @@
     "objection": "^1.0.0",
     "pg": "^7.4.1",
     "pg-promise": "^8.4.6",
-    "postgraphile": "^4.0.0-rc.2"
+    "postgraphile": "^4.0.0-rc.2",
+    "swagger-ui-dist": "^3.19.5"
   },
   "devDependencies": {}
 }
