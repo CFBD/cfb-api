@@ -1,6 +1,5 @@
-module.exports = (app, coaches) => {
-    const controller = require('./coach.controller')(coaches);
+module.exports = (app, db) => {
+    const controller = require('./coach.controller')(db);
 
-    app.route('/coach/list').get(controller.getList);
-    app.route('/coach').get(controller.getCoach);
+    app.route('/coaches').get(controller.getCoaches);
 }

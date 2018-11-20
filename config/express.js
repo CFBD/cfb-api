@@ -55,7 +55,7 @@ module.exports = async () => {
         graphiql: true
     }));
 
-    // require('../app/coach/coach.route')(app, db.Coach);
+    require('../app/coach/coach.route')(app, dbInfo.db);
     require('../app/game/game.route')(app, dbInfo.db);
     require('../app/play/play.route')(app, dbInfo.db);
     require('../app/team/team.route')(app, dbInfo.db);
