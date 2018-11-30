@@ -8,6 +8,7 @@ module.exports = async () => {
     const path = require('path');
     const fs = require('fs');
     const morgan = require('morgan');
+    const cors = require('cors');
 
     const {
         postgraphile
@@ -64,7 +65,7 @@ module.exports = async () => {
     // app.use(express.static(path.join(__dirname, '../doc')));
 
     require('./swagger')(app);
-    app.use('/api/docs', express.static('./node_modules/swagger-ui-dist'));
+    app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
 
     app.get('*', (req, res) => {
         res.redirect('/api/docs/?url=/api-docs.json');
