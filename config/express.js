@@ -64,8 +64,8 @@ module.exports = async () => {
 
     // app.use(express.static(path.join(__dirname, '../doc')));
 
-    require('./swagger')(app);
-    app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
+    require('./swagger')(app, cors);
+    app.use('/api/docs', express.static('./node_modules/swagger-ui-dist'));
 
     app.get('*', (req, res) => {
         res.redirect('/api/docs/?url=/api-docs.json');
