@@ -2,4 +2,6 @@ node_modules
 .vscode
 .env
 /doc
-access.log
+*.log
+*.bak
+*.save
