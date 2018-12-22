@@ -5,7 +5,7 @@
     "version": "1.1.1",
     "title": "College Football Data API",
     "contact": {
-      "email": "bluescarcfb@gmail.com"
+      "email": "admin@collegefootballdata.com"
     }
   },
   "host": "api.collegefootballdata.com",
@@ -50,7 +50,7 @@
           "games"
         ],
         "summary": "Get game information",
-        "description": "",
+        "description": "Game results",
         "operationId": "getGames",
         "produces": [
           "application/json"
@@ -129,7 +129,7 @@
           "games"
         ],
         "summary": "Get player statistics by game",
-        "description": "",
+        "description": "Player game stats",
         "operationId": "getPlayerGameStats",
         "produces": [
           "application/json"
@@ -208,7 +208,7 @@
           "games"
         ],
         "summary": "Get team statistics by game",
-        "description": "",
+        "description": "Team game stats",
         "operationId": "getTeamGameStats",
         "produces": [
           "application/json"
@@ -280,7 +280,7 @@
           "drives"
         ],
         "summary": "Get drive information",
-        "description": "",
+        "description": "Drive results",
         "operationId": "getDrvies",
         "produces": [
           "application/json"
@@ -370,7 +370,7 @@
           "plays"
         ],
         "summary": "Get play information",
-        "description": "",
+        "description": "Play results",
         "operationId": "getPlays",
         "produces": [
           "application/json"
@@ -467,7 +467,7 @@
           "plays"
         ],
         "summary": "Get play type list",
-        "description": "",
+        "description": "Types of plays",
         "operationId": "getPlayTypes",
         "produces": [
           "application/json"
@@ -491,7 +491,7 @@
           "conferences"
         ],
         "summary": "Get conference list",
-        "description": "",
+        "description": "Conferences",
         "operationId": "getConferences",
         "produces": [
           "application/json"
@@ -515,7 +515,7 @@
           "teams"
         ],
         "summary": "Get team information",
-        "description": "",
+        "description": "Team information",
         "operationId": "getTeams",
         "produces": [
           "application/json"
@@ -551,7 +551,7 @@
           "teams"
         ],
         "summary": "Get team roster",
-        "description": "",
+        "description": "Roster data",
         "operationId": "getRoster",
         "produces": [
           "application/json"
@@ -587,7 +587,7 @@
           "teams"
         ],
         "summary": "Get team talent rankings",
-        "description": "",
+        "description": "Team talent composite",
         "operationId": "getTalent",
         "produces": [
           "application/json"
@@ -623,7 +623,7 @@
           "venues"
         ],
         "summary": "Get venue information",
-        "description": "",
+        "description": "Venues",
         "operationId": "getVenues",
         "produces": [
           "application/json"
@@ -650,7 +650,7 @@
           "coaches"
         ],
         "summary": "Get coach records and school history",
-        "description": "",
+        "description": "Coaching history",
         "operationId": "getCoaches",
         "produces": [
           "application/json"
