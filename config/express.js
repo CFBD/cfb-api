@@ -10,16 +10,17 @@ module.exports = async () => {
     const morgan = require('morgan');
     const cors = require('cors');
 
-    var whitelist = process.env.CORS_WHITELIST.split(',');
-    var corsOptions = {
-        origin: function (origin, callback) {
-            if (whitelist.indexOf(origin) !== -1) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        }
+    let corsOptions;
+
+    if (process.env.NODE_ENV != 'development') {
+        corsOptions = {
+            origin: /collegefootballdata\.com/g
+        };
+    } else {
+        corsOptions = {};
     }
+
+
 
     const {
         postgraphile
