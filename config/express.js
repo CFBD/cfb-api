@@ -10,6 +10,17 @@ module.exports = async () => {
     const morgan = require('morgan');
     const cors = require('cors');
 
+    var whitelist = process.env.CORS_WHITELIST.split(',');
+    var corsOptions = {
+        origin: function (origin, callback) {
+            if (whitelist.indexOf(origin) !== -1) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        }
+    }
+
     const {
         postgraphile
     } = require('postgraphile');
@@ -43,13 +54,15 @@ module.exports = async () => {
                 req.path == '' ||
                 req.path == '/' ||
                 req.path.indexOf('vendor') != -1 ||
-                req.path.indexOf('css') != -1
-                || req.path.indexOf('utils') != -1
-                || req.path.indexOf('locales') != -1
-                || req.path.indexOf('main.js') != -1
-                || req.path.indexOf('api_') != -1;
+                req.path.indexOf('css') != -1 ||
+                req.path.indexOf('utils') != -1 ||
+                req.path.indexOf('locales') != -1 ||
+                req.path.indexOf('main.js') != -1 ||
+                req.path.indexOf('api_') != -1;
         }
     }));
+
+    app.use(cors(corsOptions));
 
     app.use(postgraphile(dbInfo.connectionString, 'public', {
         disableDefaultMutations: true,
