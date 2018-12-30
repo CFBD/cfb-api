@@ -75,6 +75,7 @@ module.exports = async () => {
     require('../app/play/play.route')(app, dbInfo.db);
     require('../app/team/team.route')(app, dbInfo.db);
     require('../app/venue/venue.route')(app, dbInfo.db);
+    require('../app/rankings/rankings.route')(app, dbInfo.db);
 
     // app.use(express.static(path.join(__dirname, '../doc')));
 

@@ -722,6 +722,57 @@
           }
         }
       }
+    },
+    "/rankings": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Get historical rankings and polls",
+        "description": "Poll rankings",
+        "operationId": "getRankings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RankingWeek"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1226,6 +1277,51 @@
         },
         "dome": {
           "type": "boolean"
+        }
+      }
+    },
+    "RankingWeek": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "polls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "poll": {
+                "type": "string"
+              },
+              "ranks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "school": {
+                      "type": "string"
+                    },
+                    "conference": {
+                      "type": "string"
+                    },
+                    "firstPlaceVotes": {
+                      "type": "integer"
+                    },
+                    "points": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
