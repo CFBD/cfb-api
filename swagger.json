@@ -38,6 +38,10 @@
     {
       "name": "coaches",
       "description": "Information about coaches"
+    },
+    {
+      "name": "rankings",
+      "description": "Historical poll rankings"
     }
   ],
   "schemes": [
