@@ -1,7 +1,0 @@
-{
-    "name": "College Football Data",
-    "version": "1.0.0",
-    "description": "API for interacting with the cfb-db",
-    "title": "College Football API",
-    "url": "https://api.collegefootballdata.com"
-}
