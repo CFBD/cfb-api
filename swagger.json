@@ -1305,6 +1305,9 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "rank": {
+                      "type": "integer"
+                    },
                     "school": {
                       "type": "string"
                     },

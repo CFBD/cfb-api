@@ -60,6 +60,7 @@ module.exports = (db) => {
                                     poll,
                                     ranks: records.filter(r => r.poll == poll).map(r => {
                                         return {
+                                            rank: r.rank,
                                             school: r.school,
                                             conference: r.conference,
                                             firstPlaceVotes: r.first_place_votes,
