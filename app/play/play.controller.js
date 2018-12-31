@@ -69,7 +69,7 @@ module.exports = (db) => {
                     index++;
                 }
 
-                if (params.length < 3) {
+                if (params.length < 3 && req.query.seasonType != 'both') {
                     res.status(400).send({
                         error: 'Either a week, a team, an offensive team, or a defensive team must be specified.'
                     });
