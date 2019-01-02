@@ -14,7 +14,13 @@ module.exports = async () => {
 
     if (process.env.NODE_ENV != 'development') {
         corsOptions = {
-            origin: /collegefootballdata\.com/g
+            origin: (origin, cb) => {
+                if (origin == 'https://collegefootballdata.com' || origin == 'https://www.collegefootballdata.com') {
+                    cb(null, true);
+                } else {
+                    cb(new Error('Not allowed by CORS'));
+                }
+            }
         };
     } else {
         corsOptions = {};
