@@ -73,19 +73,18 @@ module.exports = async () => {
     require('./swagger')(app, cors);
     app.use('/api/docs', express.static('./node_modules/swagger-ui-dist'));
 
-    app.use(cors(corsOptions));
-
     app.use(postgraphile(dbInfo.connectionString, 'public', {
         disableDefaultMutations: true,
         graphiql: true
     }));
 
-    require('../app/coach/coach.route')(app, dbInfo.db);
-    require('../app/game/game.route')(app, dbInfo.db);
-    require('../app/play/play.route')(app, dbInfo.db);
-    require('../app/team/team.route')(app, dbInfo.db);
-    require('../app/venue/venue.route')(app, dbInfo.db);
-    require('../app/rankings/rankings.route')(app, dbInfo.db);
+    let corsConfig = cors(corsOptions);
+    require('../app/coach/coach.route')(app, dbInfo.db, corsConfig);
+    require('../app/game/game.route')(app, dbInfo.db, corsConfig);
+    require('../app/play/play.route')(app, dbInfo.db, corsConfig);
+    require('../app/team/team.route')(app, dbInfo.db, corsConfig);
+    require('../app/venue/venue.route')(app, dbInfo.db, corsConfig);
+    require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig);
 
     app.get('*', (req, res) => {
         res.redirect('/api/docs/?url=/api-docs.json');
