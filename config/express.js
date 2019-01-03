@@ -69,6 +69,10 @@ module.exports = async () => {
         }
     }));
 
+    
+    require('./swagger')(app, cors);
+    app.use('/api/docs', express.static('./node_modules/swagger-ui-dist'));
+
     app.use(cors(corsOptions));
 
     app.use(postgraphile(dbInfo.connectionString, 'public', {
@@ -82,11 +86,6 @@ module.exports = async () => {
     require('../app/team/team.route')(app, dbInfo.db);
     require('../app/venue/venue.route')(app, dbInfo.db);
     require('../app/rankings/rankings.route')(app, dbInfo.db);
-
-    // app.use(express.static(path.join(__dirname, '../doc')));
-
-    require('./swagger')(app, cors);
-    app.use('/api/docs', express.static('./node_modules/swagger-ui-dist'));
 
     app.get('*', (req, res) => {
         res.redirect('/api/docs/?url=/api-docs.json');
