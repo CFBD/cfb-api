@@ -71,7 +71,7 @@ module.exports = async () => {
 
     
     require('./swagger')(app, cors);
-    app.use('/api/docs', express.static('./node_modules/swagger-ui-dist'));
+    app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
 
     app.use(postgraphile(dbInfo.connectionString, 'public', {
         disableDefaultMutations: true,
