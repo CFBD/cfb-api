@@ -18,7 +18,7 @@ module.exports = async () => {
                 if (origin == 'https://collegefootballdata.com' || origin == 'https://www.collegefootballdata.com' || origin == 'https://api.collegefootballdata.com') {
                     cb(null, true);
                 } else {
-                    cb(new Error('Not allowed by CORS'));
+                    cb(new Error(`Not allowed by CORS: ${origin}`));
                 }
             }
         };
