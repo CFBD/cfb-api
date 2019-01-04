@@ -627,6 +627,7 @@
           "teams"
         ],
         "summary": "Get matchup history",
+        "description": "Matchup history",
         "operationId": "getTeamMatchup",
         "produces": [
           "application/json"
