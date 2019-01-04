@@ -44,7 +44,7 @@ module.exports = (db) => {
 
             } catch (err) {
                 console.error(err);
-                res.status(500).send({
+                res.status(400).send({
                     error: 'Something went wrong.'
                 });
             }
@@ -60,7 +60,7 @@ module.exports = (db) => {
                 res.send(conferences);
             } catch (err) {
                 console.error(err);
-                res.status(500).send({
+                res.status(400).send({
                     error: 'Something went wrong.'
                 });
             }
@@ -81,7 +81,87 @@ module.exports = (db) => {
                 res.send(talent);
             } catch (err) {
                 console.error(err);
-                res.status(500).send({
+                res.status(400).send({
+                    error: 'Something went wrong.'
+                });
+            }
+        },
+        getMatchup: async (req, res) => {
+            try {
+                if (!req.query.team1 || !req.query.team2) {
+                    res.status(400).send({
+                        error: 'Two teams must be specified.'
+                    });
+                    return;
+                }
+
+                let filter = `WHERE ((LOWER(home_team.school) = LOWER($1) AND LOWER(away_team.school) = LOWER($2)) OR (LOWER(away_team.school) = LOWER($1) AND LOWER(home_team.school) = LOWER($2)))`;
+                let params = [req.query.team1, req.query.team2];
+
+                let index = 3;
+
+                if (req.query.minYear) {
+                    filter += ` AND g.season >= $${index}`;
+                    params.push(req.query.minYear);
+                    index++;
+                }
+
+                if (req.query.maxYear) {
+                    filter += ` AND g.season <= $${index}`;
+                    params.push(req.query.maxYear);
+                    index++;
+                }
+
+                let results = await db.any(`
+                    SELECT g.season, g.week, g.season_type, g.start_date, g.neutral_site, v.name as venue, home_team.school as home, home.points as home_points, away_team.school as away, away.points as away_points
+                    FROM game g
+                        INNER JOIN game_team home ON g.id = home.game_id AND home.home_away = 'home'
+                        INNER JOIN team home_team ON home.team_id = home_team.id
+                        INNER JOIN game_team away ON g.id = away.game_id AND away.home_away = 'away'
+                        INNER JOIN team away_team ON away.team_id = away_team.id
+                        LEFT JOIN venue v ON g.venue_id = v.id
+                    ${filter}
+                    ORDER BY g.season
+                `, params);
+
+                let games = results.map(r => {
+                    let homePoints = r.home_points * 1.0;
+                    let awayPoints = r.away_points * 1.0;
+
+                    return {
+                        season: r.season,
+                        week: r.week,
+                        seasonType: r.season_type,
+                        date: r.start_date,
+                        neutralSite: r.neutral_site,
+                        venue: r.venue,
+                        homeTeam: r.home,
+                        homeScore: homePoints,
+                        awayTeam: r.away,
+                        awayScore: awayPoints,
+                        winner: homePoints == awayPoints ? null : homePoints > awayPoints ? r.home : r.away
+                    }
+                });
+
+                let teams = Array.from(new Set([...games.map(g => g.homeTeam), ...games.map(g => g.awayTeam)]));
+                let team1 = teams.find(t => t.toLowerCase() == req.query.team1.toLowerCase());
+                let team2 = teams.find(t => t.toLowerCase() == req.query.team2.toLowerCase());
+
+                let data = {
+                    team1,
+                    team2,
+                    startYear: req.query.minYear,
+                    endYear: req.query.maxYear,
+                    team1Wins: games.filter(g => g.winner == team1).length,
+                    team2Wins: games.filter(g => g.winner == team2).length,
+                    ties: games.filter(g => !g.winner).length,
+                    games: games
+                };
+
+                res.send(data);
+            } catch (err) {
+                console.error(err);
+                res.status(400).send({
                     error: 'Something went wrong.'
                 });
             }

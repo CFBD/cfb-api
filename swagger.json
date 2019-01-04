@@ -621,6 +621,62 @@
         }
       }
     },
+    "/teams/matchup": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Get matchup history",
+        "operationId": "getTeamMatchup",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "team1",
+            "description": "First team",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "team2",
+            "description": "Second team",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "minYear",
+            "description": "Minimum year",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "maxYear",
+            "description": "Maximum year",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamMatchup"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/venues": {
       "get": {
         "tags": [
@@ -1326,6 +1382,73 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "TeamMatchup": {
+      "type": "object",
+      "properties": {
+        "team1": {
+          "type": "string"
+        },
+        "team2": {
+          "type": "string"
+        },
+        "startYear": {
+          "type": "integer"
+        },
+        "endYear": {
+          "type": "integer"
+        },
+        "team1Wins": {
+          "type": "integer"
+        },
+        "team2Wins": {
+          "type": "integer"
+        },
+        "ties": {
+          "type": "integer"
+        },
+        "games": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "season": {
+                "type": "integer"
+              },
+              "week": {
+                "type": "integer"
+              },
+              "season_type": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              },
+              "neutralSite": {
+                "type": "boolean"
+              },
+              "venue": {
+                "type": "string"
+              },
+              "homeTeam": {
+                "type": "string"
+              },
+              "homeScore": {
+                "type": "integer"
+              },
+              "awayTeam": {
+                "type": "string"
+              },
+              "awayScore": {
+                "type": "integer"
+              },
+              "winner": {
+                "type": "string"
               }
             }
           }
