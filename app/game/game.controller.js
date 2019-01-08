@@ -56,11 +56,11 @@ module.exports = (db) => {
                     FROM game g
                         INNER JOIN game_team gt ON g.id = gt.game_id AND gt.home_away = 'home'
                         INNER JOIN team home ON gt.team_id = home.id
-                        LEFT JOIN conference_team hct ON home.id = hct.team_id
+                        LEFT JOIN conference_team hct ON home.id = hct.team_id AND hct.start_year >= g.season AND (hct.end_year <= g.season OR hct.end_year IS NULL)
                         LEFT JOIN conference hc ON hct.conference_id = hc.id
                         INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.home_away = 'away'
                         INNER JOIN team away ON gt2.team_id = away.id
-                        LEFT JOIN conference_team act ON away.id = act.team_id
+                        LEFT JOIN conference_team act ON away.id = act.team_id AND act.start_year >= g.season AND (act.end_year <= g.season OR act.end_year IS NULL)
                         LEFT JOIN conference ac ON act.conference_id = ac.id
                         LEFT JOIN venue v ON g.venue_id = v.id
                     ${filter}
@@ -143,10 +143,10 @@ module.exports = (db) => {
                             FROM game g
                                 INNER JOIN drive d ON g.id = d.game_id
                                 INNER JOIN team offense ON d.offense_id = offense.id
-                                LEFT JOIN conference_team oct ON offense.id = oct.team_id
+                                LEFT JOIN conference_team oct ON offense.id = oct.team_id AND oct.start_year >= g.season AND (oct.end_year <= g.season OR oct.end_year IS NULL)
                                 LEFT JOIN conference oc ON oct.conference_id = oc.id
                                 INNER JOIN team defense ON d.defense_id = defense.id
-                                LEFT JOIN conference_team dct ON defense.id = dct.team_id
+                                LEFT JOIN conference_team dct ON defense.id = dct.team_id AND dct.start_year >= g.season AND (dct.end_year <= g.season OR dct.end_year IS NULL)
                                 LEFT JOIN conference dc ON dct.conference_id = dc.id
                                 INNER JOIN drive_result dr ON d.result_id = dr.id
                             ${filter}
@@ -213,11 +213,11 @@ module.exports = (db) => {
                                 FROM team t
                                     INNER JOIN game_team gt ON t.id = gt.team_id
                                     INNER JOIN game g ON gt.game_id = g.id
-                                    LEFT JOIN conference_team ct ON t.id = ct.team_id
+                                    LEFT JOIN conference_team ct ON t.id = ct.team_id AND ct.start_year >= g.season AND (ct.end_year <= g.season OR ct.end_year IS NULL)
                                     LEFT JOIN conference c ON ct.conference_id = c.id
                                     INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
                                     INNER JOIN team t2 ON gt2.team_id = t2.id
-                                    LEFT JOIN conference_team ct2 ON t2.id = ct2.team_id
+                                    LEFT JOIN conference_team ct2 ON t2.id = ct2.team_id AND ct2.start_year >= g.season AND (ct2.end_year <= g.season OR ct2.end_year IS NULL)
                                     LEFT JOIN conference c2 ON ct2.conference_id = c2.id
                                     INNER JOIN game_team_stat gts ON gts.game_team_id = gt.id
                                     INNER JOIN team_stat_type tst ON gts.type_id = tst.id
@@ -323,11 +323,11 @@ module.exports = (db) => {
                                 FROM team t
                                     INNER JOIN game_team gt ON t.id = gt.team_id
                                     INNER JOIN game g ON gt.game_id = g.id
-                                    LEFT JOIN conference_team ct ON t.id = ct.team_id
+                                    LEFT JOIN conference_team ct ON t.id = ct.team_id AND ct.start_year >= g.season AND (ct.end_year <= g.season OR ct.end_year IS NULL)
                                     LEFT JOIN conference c ON ct.conference_id = c.id
                                     INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
                                     INNER JOIN team t2 ON gt2.team_id = t2.id
-                                    LEFT JOIN conference_team ct2 ON t2.id = ct2.team_id
+                                    LEFT JOIN conference_team ct2 ON t2.id = ct2.team_id AND ct2.start_year >= g.season AND (ct2.end_year <= g.season OR ct2.end_year IS NULL)
                                     LEFT JOIN conference c2 ON ct2.conference_id = c2.id
                                     INNER JOIN game_player_stat gps ON gps.game_team_id = gt.id
                                     INNER JOIN player_stat_category cat ON gps.category_id = cat.id
