@@ -9,6 +9,7 @@ module.exports = async () => {
     const fs = require('fs');
     const morgan = require('morgan');
     const cors = require('cors');
+    const swStats = require('swagger-stats');
 
     let corsOptions;
 
@@ -72,6 +73,8 @@ module.exports = async () => {
     
     require('./swagger')(app, cors);
     app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
+
+    app.use(swStats.getMiddleware({swaggerSpec: require('../swagger'), authentication: true, onAuthenticate: (req, username, password) => { return username.toLowerCase() == process.env.USERNAME.toLowerCase() && password == process.env.PASSWORD }}));
 
     app.use(postgraphile(dbInfo.connectionString, 'public', {
         disableDefaultMutations: true,
