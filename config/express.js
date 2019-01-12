@@ -5,9 +5,6 @@ module.exports = async () => {
     const bodyParser = require('body-parser');
     const session = require('cookie-session');
     const cookieParser = require('cookie-parser');
-    const path = require('path');
-    const fs = require('fs');
-    const morgan = require('morgan');
     const cors = require('cors');
     const swStats = require('swagger-stats');
 
@@ -26,8 +23,6 @@ module.exports = async () => {
     } else {
         corsOptions = {};
     }
-
-
 
     const {
         postgraphile
@@ -52,29 +47,16 @@ module.exports = async () => {
 
     const dbInfo = require('./database')();
 
-    const accessLogStream = fs.createWriteStream(path.join(__dirname, '../access.log'), {
-        flags: 'a'
-    });
-    app.use(morgan('combined', {
-        stream: accessLogStream,
-        skip: (req, res) => {
-            return !req.path ||
-                req.path == '' ||
-                req.path == '/' ||
-                req.path.indexOf('vendor') != -1 ||
-                req.path.indexOf('css') != -1 ||
-                req.path.indexOf('utils') != -1 ||
-                req.path.indexOf('locales') != -1 ||
-                req.path.indexOf('main.js') != -1 ||
-                req.path.indexOf('api_') != -1;
-        }
-    }));
-
-    
     require('./swagger')(app, cors);
     app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
 
-    app.use(swStats.getMiddleware({swaggerSpec: require('../swagger'), authentication: true, onAuthenticate: (req, username, password) => { return username.toLowerCase() == process.env.USERNAME.toLowerCase() && password == process.env.PASSWORD }}));
+    app.use(swStats.getMiddleware({
+        swaggerSpec: require('../swagger'),
+        authentication: true,
+        onAuthenticate: (req, username, password) => {
+            return username.toLowerCase() == process.env.USERNAME.toLowerCase() && password == process.env.PASSWORD
+        }
+    }));
 
     app.use(postgraphile(dbInfo.connectionString, 'public', {
         disableDefaultMutations: true,
