@@ -32,7 +32,7 @@ module.exports = (db) => {
                                                 inner join poll p on pt.id = p.poll_type_id
                                                 inner join poll_rank pr on p.id = pr.poll_id
                                                 inner join team t on pr.team_id = t.id
-                                                left join conference_team ct on t.id = ct.team_id AND ct.start_year >= p.season AND (ct.end_year <= p.season OR ct.end_year IS NULL)
+                                                left join conference_team ct on t.id = ct.team_id AND ct.start_year <= p.season AND (ct.end_year >= p.season OR ct.end_year IS NULL)
                                                 left join conference c on ct.conference_id = c.id
                                             ${filter}`, params);
 
