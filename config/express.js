@@ -1,5 +1,6 @@
 module.exports = async () => {
     const express = require('express');
+    const expressWs = require('express-ws');
 
     const helmet = require('helmet');
     const bodyParser = require('body-parser');
@@ -29,6 +30,7 @@ module.exports = async () => {
     } = require('postgraphile');
 
     const app = express();
+    const expressWsObj = expressWs(app);
 
     app.enable('trust proxy');
 
@@ -70,6 +72,18 @@ module.exports = async () => {
     require('../app/team/team.route')(app, dbInfo.db, corsConfig);
     require('../app/venue/venue.route')(app, dbInfo.db, corsConfig);
     require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig);
+
+    app.ws('/ws', (ws, req) => {
+        ws.query = req.query;
+    });
+
+    let wsObj = expressWsObj.getWss('/ws');
+
+    setInterval(function () {
+        wsObj.clients.forEach(function (client) {
+            client.send(JSON.stringify(client.query));
+        });
+    }, 5000);
 
     app.get('*', (req, res) => {
         res.redirect('/api/docs/?url=/api-docs.json');
