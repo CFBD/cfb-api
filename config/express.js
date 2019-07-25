@@ -73,17 +73,8 @@ module.exports = async () => {
     require('../app/venue/venue.route')(app, dbInfo.db, corsConfig);
     require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig);
 
-    app.ws('/ws', (ws, req) => {
-        ws.query = req.query;
-    });
-
-    let wsObj = expressWsObj.getWss('/ws');
-
-    setInterval(function () {
-        wsObj.clients.forEach(function (client) {
-            client.send(JSON.stringify(client.query));
-        });
-    }, 5000);
+    const consumers = await require('./consumers')();
+    await require('../app/events/events.route')(app, consumers, expressWsObj);
 
     app.get('*', (req, res) => {
         res.redirect('/api/docs/?url=/api-docs.json');

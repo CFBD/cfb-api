@@ -20,6 +20,7 @@
   "author": "BlueSCar",
   "license": "MIT",
   "dependencies": {
+    "amqplib": "^0.5.3",
     "bluebird": "^3.5.5",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
