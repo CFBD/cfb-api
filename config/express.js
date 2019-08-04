@@ -72,6 +72,7 @@ module.exports = async () => {
     require('../app/team/team.route')(app, dbInfo.db, corsConfig);
     require('../app/venue/venue.route')(app, dbInfo.db, corsConfig);
     require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig);
+    require('../app/lines/lines.route')(app, dbInfo.db, corsConfig);
 
     const consumers = await require('./consumers')();
     await require('../app/events/events.route')(app, consumers, expressWsObj);
