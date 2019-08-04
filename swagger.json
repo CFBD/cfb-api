@@ -42,6 +42,10 @@
     {
       "name": "rankings",
       "description": "Historical poll rankings"
+    },
+    {
+      "name": "betting",
+      "description": "Betting lines and data"
     }
   ],
   "schemes": [
@@ -834,6 +838,85 @@
           }
         }
       }
+    },
+    "/lines": {
+      "get": {
+        "tags": [
+          "betting"
+        ],
+        "summary": "Get betting line information",
+        "description": "Closing betting lines",
+        "operationId": "getLines",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "home",
+            "description": "Home team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "away",
+            "description": "Away team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GameLines"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1450,6 +1533,46 @@
               },
               "winner": {
                 "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GameLines": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "homeTeam": {
+          "type": "string"
+        },
+        "homeScore": {
+          "type": "integer"
+        },
+        "awayTeam": {
+          "type": "string"
+        },
+        "awayScore": {
+          "type": "integer"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string"
+              },
+              "spread": {
+                "type": "integer"
+              },
+              "formattedSpread": {
+                "type": "string"
+              },
+              "overUnder": {
+                "type": "integer"
               }
             }
           }
