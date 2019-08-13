@@ -46,6 +46,10 @@
     {
       "name": "betting",
       "description": "Betting lines and data"
+    },
+    {
+      "name": "recruiting",
+      "description": "Recruiting rankings and data"
     }
   ],
   "schemes": [
@@ -917,6 +921,71 @@
           }
         }
       }
+    },
+    "/recruiting/players": {
+      "get": {
+        "tags": [
+          "recruiting"
+        ],
+        "summary": "Get player recruiting rankings and data",
+        "description": "Player recruiting rankings",
+        "operationId": "getRecruitingPlayers",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Recruiting class year",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "classification",
+            "description": "Type of recruit (HighSchool, JUCO, PrepSchool)",
+            "default": "HighSchool",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "description": "State or province abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Committed team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Recruit"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1566,7 +1635,7 @@
                 "type": "string"
               },
               "spread": {
-                "type": "integer"
+                "type": "number"
               },
               "formattedSpread": {
                 "type": "string"
@@ -1576,6 +1645,53 @@
               }
             }
           }
+        }
+      }
+    },
+    "Recruit": {
+      "type": "object",
+      "properties": {
+        "recruitType": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "ranking": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "school": {
+          "type": "string"
+        },
+        "committedTo": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "weight": {
+          "type": "integer"
+        },
+        "stars": {
+          "type": "integer"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "city": {
+          "type": "string"
+        },
+        "stateProvince": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
         }
       }
     }
