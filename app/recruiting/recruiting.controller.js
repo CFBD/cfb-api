@@ -1,9 +1,9 @@
 module.exports = (db) => {
     const getPlayers = async (req, res) => {
         try {
-            if (!req.query.year) {
+            if (!req.query.year || isNaN(req.query.year)) {
                 res.status(400).send({
-                    error: 'A year parameter must be specified.'
+                    error: 'A numeric year parameter must be specified.'
                 });
     
                 return;

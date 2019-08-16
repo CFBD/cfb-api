@@ -2,9 +2,9 @@ module.exports = (db) => {
 
     const getLines = async (req, res) => {
         try {
-            if (!req.query.year) {
+            if (!req.query.year || isNaN(req.query.year)) {
                 res.status(400).send({
-                    error: 'A year parameter must be specified.'
+                    error: 'A numeric year parameter must be specified.'
                 });
 
                 return;
@@ -22,6 +22,14 @@ module.exports = (db) => {
             }
 
             if (req.query.week) {
+                if (isNaN(req.query.week)) {
+                    res.status(400).send({
+                        error: 'Week parameter must be numeric'
+                    });
+
+                    return;
+                }
+                
                 filter += ` AND g.week = $${index}`;
                 params.push(req.query.week);
                 index++;
