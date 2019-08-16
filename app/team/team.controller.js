@@ -95,7 +95,7 @@ module.exports = (db) => {
                     return;
                 }
 
-                let filter = `WHERE ((LOWER(home_team.school) = LOWER($1) AND LOWER(away_team.school) = LOWER($2)) OR (LOWER(away_team.school) = LOWER($1) AND LOWER(home_team.school) = LOWER($2)))`;
+                let filter = `WHERE g.start_date < now() AND ((LOWER(home_team.school) = LOWER($1) AND LOWER(away_team.school) = LOWER($2)) OR (LOWER(away_team.school) = LOWER($1) AND LOWER(home_team.school) = LOWER($2)))`;
                 let params = [req.query.team1, req.query.team2];
 
                 let index = 3;
