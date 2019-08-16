@@ -25,12 +25,28 @@ module.exports = (db) => {
                 }
 
                 if (req.query.year) {
+                    if (isNaN(req.query.year)) {
+                        res.status(400).send({
+                            error: 'Year param must be numeric'
+                        });
+    
+                        return;
+                    }
+
                     filter += `${index == 1 ? 'WHERE' : ' AND'} cs.year = $${index}`;
                     params.push(req.query.year);
                     index++;
                 }
 
                 if (req.query.minYear) {
+                    if (isNaN(req.query.minYear)) {
+                        res.status(400).send({
+                            error: 'minYear param must be numeric.'
+                        });
+    
+                        return;
+                    }
+
                     filter += `${index == 1 ? 'WHERE' : ' AND'} cs.year >= $${index}`;
                     params.push(req.query.minYear);
                     index++;
@@ -38,6 +54,14 @@ module.exports = (db) => {
 
 
                 if (req.query.maxYear) {
+                    if (isNaN(req.query.maxYear)) {
+                        res.status(400).send({
+                            error: 'maxYear param must be numeric.'
+                        });
+    
+                        return;
+                    }
+                    
                     filter += `${index == 1 ? 'WHERE' : ' AND'} cs.year <= $${index}`;
                     params.push(req.query.maxYear);
                     index++;

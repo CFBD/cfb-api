@@ -67,6 +67,14 @@ module.exports = (db) => {
         },
         getTeamTalent: async (req, res) => {
             try {
+                if (req.query.year && isNaN(req.query.year)) {
+                    res.status(400).send({
+                        error: 'Week parameter must be numeric'
+                    });
+
+                    return;
+                }
+
                 let filter = req.query.year ? 'WHERE tt.year = $1' : '';
                 let params = req.query.year ? [req.query.year] : [];
 
