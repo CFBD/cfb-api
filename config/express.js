@@ -54,6 +54,7 @@ module.exports = async () => {
 
     app.use(swStats.getMiddleware({
         swaggerSpec: require('../swagger'),
+        apdexThreshold: 250,
         authentication: true,
         onAuthenticate: (req, username, password) => {
             return username.toLowerCase() == process.env.USERNAME.toLowerCase() && password == process.env.PASSWORD
