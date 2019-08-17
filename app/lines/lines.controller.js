@@ -75,6 +75,11 @@ module.exports = (db) => {
 
             let gameIds = games.map(g => g.id);
 
+            if (!gameIds.length) {
+                res.send([]);
+                return;
+            }
+
             let lines = await db.any(`
                 SELECT g.id, p.name, gl.spread, gl.over_under
                 FROM game AS g
