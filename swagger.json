@@ -996,7 +996,7 @@
         "tags": [
           "ratings"
         ],
-        "summary": "Get S&P+ historical rating data",
+        "summary": "Get S&P+ historical rating data (requires either a year or team specified)",
         "description": "S&P+ rating data",
         "operationId": "getSPRatings",
         "produces": [
