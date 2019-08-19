@@ -50,6 +50,10 @@
     {
       "name": "recruiting",
       "description": "Recruiting rankings and data"
+    },
+    {
+      "name": "ratings",
+      "description": "Team rating data"
     }
   ],
   "schemes": [
@@ -986,6 +990,49 @@
           }
         }
       }
+    },
+    "/ratings/sp": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Get S&P+ historical rating data",
+        "description": "S&P+ rating data",
+        "operationId": "getSPRatings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Season filter (required if team not specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if year not specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamSPRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1692,6 +1739,106 @@
         },
         "country": {
           "type": "string"
+        }
+      }
+    },
+    "TeamSPRating": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "secondOrderWins": {
+          "type": "number"
+        },
+        "sos": {
+          "type": "number"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            },
+            "success": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "passing": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            },
+            "runRate": {
+              "type": "number"
+            },
+            "pace": {
+              "type": "number"
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            },
+            "success": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "pasing": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            },
+            "havoc": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "frontSeven": {
+                  "type": "number"
+                },
+                "db": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "specialTeams": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            }
+          }
         }
       }
     }
