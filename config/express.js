@@ -9,6 +9,14 @@ module.exports = async () => {
     const cors = require('cors');
     const swStats = require('swagger-stats');
 
+    const slowDown = require('express-slow-down');
+    const speedLimiter = slowDown({
+        windowMs: 60 * 1000,
+        delayAfter: 10,
+        delayMs: 100,
+        skipFailedRequests: true 
+    });
+
     let corsOptions;
 
     if (process.env.NODE_ENV != 'development') {
@@ -68,7 +76,7 @@ module.exports = async () => {
 
     let corsConfig = cors(corsOptions);
     require('../app/coach/coach.route')(app, dbInfo.db, corsConfig);
-    require('../app/game/game.route')(app, dbInfo.db, corsConfig);
+    require('../app/game/game.route')(app, dbInfo.db, corsConfig, speedLimiter);
     require('../app/play/play.route')(app, dbInfo.db, corsConfig);
     require('../app/team/team.route')(app, dbInfo.db, corsConfig);
     require('../app/venue/venue.route')(app, dbInfo.db, corsConfig);
