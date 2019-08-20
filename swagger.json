@@ -385,7 +385,7 @@
         "tags": [
           "plays"
         ],
-        "summary": "Get play information",
+        "summary": "Get play information. Requires either a week or team to be specified.",
         "description": "Play results",
         "operationId": "getPlays",
         "produces": [
@@ -409,9 +409,9 @@
           },
           {
             "name": "week",
-            "description": "Week filter",
+            "description": "Week filter (required if team, offense, or defense, not specified)",
             "in": "query",
-            "required": true,
+            "required": false,
             "type": "integer"
           },
           {
@@ -931,7 +931,7 @@
         "tags": [
           "recruiting"
         ],
-        "summary": "Get player recruiting rankings and data",
+        "summary": "Get player recruiting rankings and data. Requires either a year or team to be specified.",
         "description": "Player recruiting rankings",
         "operationId": "getRecruitingPlayers",
         "produces": [
@@ -940,9 +940,9 @@
         "parameters": [
           {
             "name": "year",
-            "description": "Recruiting class year",
+            "description": "Recruiting class year (required if team no specified)",
             "in": "query",
-            "required": true,
+            "required": false,
             "type": "integer"
           },
           {
@@ -969,7 +969,7 @@
           },
           {
             "name": "team",
-            "description": "Committed team filter",
+            "description": "Committed team filter (required if year not specified)",
             "in": "query",
             "required": false,
             "type": "string"

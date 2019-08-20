@@ -15,20 +15,6 @@ module.exports = (db) => {
 
                 let index = 2;
 
-                if (req.query.seasonType != 'both') {
-                    if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
-                        res.status(400).send({
-                            error: 'Invalid season type'
-                        });
-    
-                        return;
-                    }
-                    
-                    filter += ` AND g.season_type = $${index}`;
-                    params.push(req.query.seasonType || 'regular');
-                    index++;
-                }
-
                 if (req.query.week) {
                     if (isNaN(req.query.week)) {
                         res.status(400).send({
@@ -85,12 +71,26 @@ module.exports = (db) => {
                     index++;
                 }
 
-                if (params.length < 3 && req.query.seasonType != 'both') {
+                if (params.length < 2 && req.query.seasonType != 'both') {
                     res.status(400).send({
                         error: 'Either a week, a team, an offensive team, or a defensive team must be specified.'
                     });
 
                     return;
+                }
+
+                if (req.query.seasonType != 'both') {
+                    if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
+                        res.status(400).send({
+                            error: 'Invalid season type'
+                        });
+    
+                        return;
+                    }
+                    
+                    filter += ` AND g.season_type = $${index}`;
+                    params.push(req.query.seasonType || 'regular');
+                    index++;
                 }
 
                 let plays = await db.any(`

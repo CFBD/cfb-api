@@ -1,21 +1,32 @@
 module.exports = (db) => {
     const getPlayers = async (req, res) => {
         try {
-            if (!req.query.year || isNaN(req.query.year)) {
+            if (!req.query.year && !req.query.team) {
                 res.status(400).send({
-                    error: 'A numeric year parameter must be specified.'
+                    error: 'A year or team filter must be specified.'
+                });
+            }
+
+            if (req.query.year && isNaN(req.query.year)) {
+                res.status(400).send({
+                    error: 'Year parameter must be numeric.'
                 });
     
                 return;
             }
     
-            let filter = 'WHERE r.recruit_type = $1 AND r.year = $2';
+            let filter = 'WHERE r.recruit_type = $1';
             let params = [
-                req.query.classification ? req.query.classification : 'HighSchool',
-                req.query.year
+                req.query.classification ? req.query.classification : 'HighSchool'
             ];
     
-            let index = 3;
+            let index = 2;
+
+            if (req.query.year) {
+                filter += ` AND r.year = $${index}`;
+                params.push(req.query.year);
+                index++;
+            }
             
             if (req.query.position) {
                 filter += ` AND LOWER(pos.position) = LOWER($${index})`;
