@@ -29,7 +29,7 @@ module.exports = (db) => {
                     return;
                 }
 
-                let filter = req.query.year ? 'ct.start_year <= $1 AND (ct.end_year >= $1 OR ct.end_year IS NULL)' : 'WHERE ct.end_year IS NULL';
+                let filter = req.query.year ? 'WHERE ct.start_year <= $1 AND (ct.end_year >= $1 OR ct.end_year IS NULL)' : 'WHERE ct.end_year IS NULL';
                 let params = req.query.year ? [req.query.year] : [];
 
                 let teams = await db.any(`
