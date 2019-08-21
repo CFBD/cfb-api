@@ -561,6 +561,42 @@
         }
       }
     },
+    "/teams/fbs": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Get list of major division teams for a given year",
+        "description": "Information on major division teams",
+        "operationId": "getFbsTeams",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/roster": {
       "get": {
         "tags": [
@@ -1386,6 +1422,15 @@
           "type": "string"
         },
         "abbreviation": {
+          "type": "string"
+        },
+        "alt_name_1": {
+          "type": "string"
+        },
+        "alt_name_2": {
+          "type": "string"
+        },
+        "alt_name_3": {
           "type": "string"
         },
         "conference": {
