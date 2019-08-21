@@ -29,14 +29,14 @@ module.exports = (db) => {
                     return;
                 }
 
-                let filter = req.query.year ? 'WHERE ct.id IS NOT NULL AND ct.start_year <= $1 AND (ct.end_year >= $1 OR ct.end_year IS NULL)' : 'WHERE ct.end_year IS NULL';
+                let filter = req.query.year ? 'ct.start_year <= $1 AND (ct.end_year >= $1 OR ct.end_year IS NULL)' : 'WHERE ct.end_year IS NULL';
                 let params = req.query.year ? [req.query.year] : [];
 
                 let teams = await db.any(`
                     SELECT t.id, t.school, t.mascot, t.abbreviation, t.alt_name as alt_name1, t.abbreviation as alt_name2, t.nickname as alt_name3, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos
                     FROM team t
-                        LEFT JOIN conference_team ct ON t.id = ct.team_id AND ct.end_year IS NULL
-                        LEFT JOIN  conference c ON c.id = ct.conference_id
+                        INNER JOIN conference_team ct ON t.id = ct.team_id
+                        INNER JOIN  conference c ON c.id = ct.conference_id
                     ${filter}
                     ORDER BY t.active DESC, t.school
                 `, params);
