@@ -93,7 +93,9 @@ module.exports = (db) => {
                 filter += 'WHERE';
                 if (req.query.year)
                     if (!parseInt(req.query.year)) {
-                        res.status(400).send('Year must be numeric');
+                        res.status(400).send({
+                            error: 'Year must be numeric'
+                        });
                         return;
                     } else {
                         filter += ` rt.year = $${index}`;
