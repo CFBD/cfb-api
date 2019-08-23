@@ -1027,6 +1027,49 @@
         }
       }
     },
+    "/recruiting/teams": {
+      "get": {
+        "tags": [
+          "recruiting"
+        ],
+        "summary": "Get team recruiting rankings",
+        "description": "Team recruiting rankings",
+        "operationId": "getRecruitingTeams",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Recruiting class year",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamRecruitingRank"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/ratings/sp": {
       "get": {
         "tags": [
@@ -1784,6 +1827,23 @@
         },
         "country": {
           "type": "string"
+        }
+      }
+    },
+    "TeamRecruitingRank": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "rank": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "points": {
+          "type": "number"
         }
       }
     },
