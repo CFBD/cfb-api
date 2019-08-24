@@ -38,7 +38,7 @@ module.exports = (db) => {
                     AVG(o_passing_downs) AS o_passing_downs,
                     AVG(o_run_rate) AS o_run_rate,
                     AVG(o_pace) AS o_pace,
-                    AVG(d_success) AS o_success,
+                    AVG(d_success) AS d_success,
                     AVG(d_explosiveness) AS d_explosiveness,
                     AVG(d_rushing) AS d_rushing,
                     AVG(d_passing) AS d_passing,
