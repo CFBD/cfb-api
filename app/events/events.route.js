@@ -41,10 +41,10 @@ module.exports = async (app, consumers, expressWs) => {
                     return;
                 }
 
-                client.send({
+                client.send(JSON.stringify({
                     eventType,
                     info
-                });
+                }, null, '\t'));
             });
         }
     };
