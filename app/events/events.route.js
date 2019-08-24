@@ -49,8 +49,9 @@ module.exports = async (app, consumers, expressWs) => {
         }
     };
 
-    await consumers.createQueue('game_started', broadcastGameEvent('game_started'))
+    await consumers.createQueue('game_started', broadcastGameEvent('game_started'));
     await consumers.createQueue('game_completed', broadcastGameEvent('game_completed'));
     await consumers.createQueue('quarter_started', broadcastGameEvent('quarter_started'));
     await consumers.createQueue('halftime_started', broadcastGameEvent('halftime_started'));
+    await consumers.createQueue('score_changed', broadcastGameEvent('score_changed'));
 }
