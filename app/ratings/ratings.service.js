@@ -22,6 +22,42 @@ module.exports = (db) => {
             ORDER BY r.year, r.rating DESC
         `, params);
 
+        const averages = await db.any(`
+            SELECT 	year,
+                    AVG(rating) AS rating,
+                    AVG(o_rating) AS o_rating,
+                    AVG(d_rating) AS d_rating,
+                    AVG(st_rating) AS st_rating,
+                    AVG(sos) AS sos,
+                    AVG(second_order_wins) AS second_order_wins,
+                    AVG(o_success) AS o_success,
+                    AVG(o_explosiveness) AS o_explosiveness,
+                    AVG(o_rushing) AS o_rushing,
+                    AVG(o_passing) AS o_passing,
+                    AVG(o_standard_downs) AS o_standard_downs,
+                    AVG(o_passing_downs) AS o_passing_downs,
+                    AVG(o_run_rate) AS o_run_rate,
+                    AVG(o_pace) AS o_pace,
+                    AVG(d_success) AS o_success,
+                    AVG(d_explosiveness) AS d_explosiveness,
+                    AVG(d_rushing) AS d_rushing,
+                    AVG(d_passing) AS d_passing,
+                    AVG(d_standard_downs) AS d_standard_downs,
+                    AVG(d_passing_downs) AS d_passing_downs,
+                    AVG(d_havoc) AS d_havoc,
+                    AVG(d_front_seven_havoc) AS d_front_seven_havoc,
+                    AVG(d_db_havoc) AS d_db_havoc
+            FROM ratings
+            ${year ? 'WHERE year = $1' : ''}
+            GROUP BY year
+            ORDER BY year
+        `, year ? [year] : []);
+
+        ratings.push(...averages.map(a => ({
+            school: 'nationalAverages',
+            ...a
+        })));
+
         return ratings.map(r => ({
             year: r.year,
             team: r.school,
