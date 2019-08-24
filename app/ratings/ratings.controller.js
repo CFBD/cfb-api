@@ -13,8 +13,18 @@ module.exports = (db) => {
             res.send(ratings);
         }
     };
+
+    const getConferenceSP = async (req, res) => {
+        if (req.query.year && !parseInt(req.query.year)) {
+            res.status(400).send('Year must be an integer');
+        } else {
+            let ratings = await service.getConferenceSP(req.query.year, req.query.conference);
+            res.send(ratings);
+        }
+    }
     
     return {
-        getSP
+        getSP,
+        getConferenceSP
     };
 };
