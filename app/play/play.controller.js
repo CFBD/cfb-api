@@ -99,6 +99,8 @@ module.exports = (db) => {
                             oc.name as offense_conference,
                             defense.school as defense,
                             dc.name as defense_conference,
+                            CASE WHEN ogt.home_away = 'home' THEN offense.school ELSE defense.school END AS home,
+                            CASE WHEN ogt.home_away = 'away' THEN offense.school ELSE defense.school END AS away,
                             CASE WHEN ogt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS offense_score,
                             CASE WHEN dgt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS defense_score,
                             d.id as drive_id,

@@ -1384,6 +1384,12 @@
         "defense": {
           "type": "string"
         },
+        "home": {
+          "type": "string"
+        },
+        "away": {
+          "type": "string"
+        },
         "defense_conference": {
           "type": "string"
         },
