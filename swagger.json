@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -54,6 +54,10 @@
     {
       "name": "ratings",
       "description": "Team rating data"
+    },
+    {
+      "name": "metrics",
+      "description": "Data relating to Predicted Points and other metrics"
     }
   ],
   "schemes": [
@@ -1112,6 +1116,92 @@
           }
         }
       }
+    },
+    "/ratings/sp/conferences": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Get average S&P+ historical rating data by conference",
+        "description": "Conference average S&P+ ratings by year",
+        "operationId": "getConferenceSPRatings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Season filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ConferenceSPRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ppa/predicted": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Calculate Predicted Points",
+        "description": "Predicted Points",
+        "operationId": "getPredictedPoints",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "down",
+            "description": "Down filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "distance",
+            "description": "Distance filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PredictedPoints"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1464,6 +1554,9 @@
     "Team": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "integer"
+        },
         "school": {
           "type": "string"
         },
@@ -1950,6 +2043,117 @@
               "type": "number"
             }
           }
+        }
+      }
+    },
+    "ConferenceSPRating": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "secondOrderWins": {
+          "type": "number"
+        },
+        "sos": {
+          "type": "number"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            },
+            "success": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "passing": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            },
+            "runRate": {
+              "type": "number"
+            },
+            "pace": {
+              "type": "number"
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            },
+            "success": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "pasing": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            },
+            "havoc": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "frontSeven": {
+                  "type": "number"
+                },
+                "db": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "specialTeams": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "PredictedPoints": {
+      "type": "object",
+      "properties": {
+        "yardLine": {
+          "type": "integer"
+        },
+        "predictedPoints": {
+          "type": "number"
         }
       }
     }
