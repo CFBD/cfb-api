@@ -15,9 +15,11 @@ module.exports = (db) => {
         }
 
         const ratings = await db.any(`
-            SELECT t.school, r.*
+            SELECT t.school, c.name AS conference, r.*
             FROM ratings AS r
                 INNER JOIN team AS t ON r.team_id = t.id
+                INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                INNER JOIN conference AS c ON ct.conference_id = c.id
             ${filter}
             ORDER BY r.year, r.rating DESC
         `, params);
@@ -61,6 +63,7 @@ module.exports = (db) => {
         return ratings.map(r => ({
             year: r.year,
             team: r.school,
+            conference: r.conference,
             rating: parseFloat(r.rating),
             secondOrderWins: parseFloat(r.second_order_wins),
             sos: parseFloat(r.sos),

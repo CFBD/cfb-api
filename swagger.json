@@ -2038,6 +2038,9 @@
         "team": {
           "type": "string"
         },
+        "conference": {
+          "type": "string"
+        },
         "rating": {
           "type": "number"
         },

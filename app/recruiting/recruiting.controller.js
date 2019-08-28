@@ -172,6 +172,23 @@ module.exports = (db) => {
                     ORDER BY t.school, p.position_group
                 `, params);
 
+                let totalResults = await db.any(`
+                    SELECT t.school, 'All Positions' AS position_group, c.name as conference, AVG(r.rating) AS avg_rating, SUM(r.rating) AS total_rating, COUNT(r.id) AS total_commits, AVG(stars) AS avg_stars
+                    FROM recruit_position AS p
+                        INNER JOIN recruit AS r ON p.id = r.recruit_position_id
+                        INNER JOIN team AS t ON r.college_id = t.id
+                        INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= $1 AND (ct.end_year IS NULL OR ct.end_year >= $1)
+                        INNER JOIN conference AS c ON ct.conference_id = c.id
+                    ${filter}
+                    GROUP BY t.school, c.name
+                    ORDER BY t.school
+                `, params);
+
+                results = [
+                    ...results,
+                    ...totalResults
+                ];
+
                 res.send(results.map(r => ({
                     team: r.school,
                     conference: r.conference,
