@@ -1074,6 +1074,63 @@
         }
       }
     },
+    "/recruiting/groups": {
+      "get": {
+        "tags": [
+          "recruiting"
+        ],
+        "summary": "Get position group aggregated ratings",
+        "description": "Gets a list of aggregated statistics by team and position grouping",
+        "operationId": "getRecruitingGroups",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "startYear",
+            "description": "Starting year",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "endYear",
+            "description": "Ending year",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PositionGroupRecruitingRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/ratings/sp": {
       "get": {
         "tags": [
@@ -1942,6 +1999,32 @@
           "type": "string"
         },
         "points": {
+          "type": "number"
+        }
+      }
+    },
+    "PositionGroupRecruitingRating": {
+      "type": "object",
+      "properties": {
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "positiionGroup": {
+          "type": "string"
+        },
+        "averageRating": {
+          "type": "number"
+        },
+        "totalRating": {
+          "type": "number"
+        },
+        "commits": {
+          "type": "number"
+        },
+        "averageStars": {
           "type": "number"
         }
       }

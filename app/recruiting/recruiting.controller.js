@@ -130,8 +130,69 @@ module.exports = (db) => {
         }
     };
 
+    const getAggregatedPlayers = async (req, res) => {
+        try {
+            if (req.query.startYear && !parseInt(req.query.startYear)) {
+                res.status(400).send({
+                    error: 'startYear must be a nubmer'
+                });
+            } else if (req.query.endYear && !parseInt(req.query.endYear)) {
+                res.status(400).send({
+                    error: 'endYear must be a number'
+                });
+            } else {
+                let filter = `WHERE r.recruit_type = 'HighSchool' AND r.year <= $1 AND r.year >= $2`;
+                let params = [
+                                req.query.endYear ? req.query.endYear : new Date().getFullYear(),
+                                req.query.startYear ? req.query.startYear : 2000
+                            ];
+                let index = 3;
+
+                if (req.query.conference) {
+                    filter += ` AND LOWER(c.abbreviation) = LOWER($${index})`;
+                    params.push(req.query.conference);
+                    index++;
+                }
+
+                if (req.query.team) {
+                    filter += ` AND LOWER(t.school) = LOWER($${index})`;
+                    params.push(req.query.team);
+                    index++;
+                }
+
+                let results = await db.any(`
+                    SELECT t.school, p.position_group, c.name as conference, AVG(r.rating) AS avg_rating, SUM(r.rating) AS total_rating, COUNT(r.id) AS total_commits, AVG(stars) AS avg_stars
+                    FROM recruit_position AS p
+                        INNER JOIN recruit AS r ON p.id = r.recruit_position_id
+                        INNER JOIN team AS t ON r.college_id = t.id
+                        INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= $1 AND (ct.end_year IS NULL OR ct.end_year >= $1)
+                        INNER JOIN conference AS c ON ct.conference_id = c.id
+                    ${filter}
+                    GROUP BY t.school, p.position_group, c.name
+                    ORDER BY t.school, p.position_group
+                `, params);
+
+                res.send(results.map(r => ({
+                    team: r.school,
+                    conference: r.conference,
+                    positionGroup: r.position_group,
+                    averageRating: parseFloat(r.avg_rating),
+                    totalRating: parseFloat(r.total_rating),
+                    commits: parseInt(r.total_commits),
+                    averageStars: parseFloat(r.avg_stars)
+                })));
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'Something went wrong'
+            });
+        }
+    }
+
     return {
         getPlayers,
-        getTeams
+        getTeams,
+        getAggregatedPlayers
     };
 };
