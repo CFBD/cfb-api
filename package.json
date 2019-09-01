@@ -38,7 +38,8 @@
     "pg-promise": "^8.7.5",
     "postgraphile": "^4.4.1",
     "swagger-stats": "^0.95.7",
-    "swagger-ui-dist": "^3.23.1"
+    "swagger-ui-dist": "^3.23.1",
+    "synaptic": "^1.1.4"
   },
   "devDependencies": {}
 }

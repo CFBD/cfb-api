@@ -29,7 +29,26 @@ module.exports = (db) => {
         }
     };
 
+    const getWP = async (req, res) => {
+        try {
+            if (!req.query.gameId) {
+                res.status(400).send({
+                    error: 'gameId is required.'
+                });
+            } else {
+                let results = await service.getWP(req.query.gameId);
+                res.send(results);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    }
+
     return {
-        getPP
+        getPP,
+        getWP
     }
 }
