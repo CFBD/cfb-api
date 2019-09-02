@@ -58,6 +58,10 @@
     {
       "name": "metrics",
       "description": "Data relating to Predicted Points and other metrics"
+    },
+    {
+      "name": "stats",
+      "description": "Statistical data"
     }
   ],
   "schemes": [
@@ -1259,6 +1263,56 @@
           }
         }
       }
+    },
+    "/stats/season": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get season team stats",
+        "description": "Team season stats",
+        "operationId": "getTeamSeasonStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter (required if no team specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if no year specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamSeasonStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -2240,6 +2294,26 @@
         },
         "predictedPoints": {
           "type": "number"
+        }
+      }
+    },
+    "TeamSeasonStat": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "statName": {
+          "type": "string"
+        },
+        "statValue": {
+          "type": "integer"
         }
       }
     }
