@@ -51,7 +51,8 @@ module.exports = (db) => {
                     ELSE p.yard_line 
                 END AS yard_line,
                 p.down,
-                p.distance
+                p.distance,
+                home.winner
             FROM game AS g
             INNER JOIN game_team AS home ON g.id = home.game_id AND home.home_away = 'home'
             INNER JOIN team AS home_team ON home.team_id = home_team.id
@@ -73,29 +74,74 @@ module.exports = (db) => {
         ORDER BY p.period, p.clock DESC
     `, [gameId]);
 
-        for (let i = 0; i < plays.length; i++) {
-            let play = plays[i];
-            let playInputs = [
-                parseInt(play.spread), // spread
-                play.has_ball ? 1 : 0, // possession
-                parseInt(play.home_score), // home points
-                parseInt(play.away_score), // opp_points
-                parseInt(play.time_remaining), // seconds left
-                parseInt(play.yard_line), // yards to goal
-                parseInt(play.down), // down
-                parseInt(play.distance) // distance
-            ];
-            play.output = wpNetwork.activate(renormalizeData(playInputs))[0] * 100;
+        if (plays && plays.length) {
+            let first = plays[0];
+            if (first.time_remaining != 3600) {
+                plays = [{
+                        gameId: first.gameId,
+                        play_id: 0,
+                        play_text: 'Game start',
+                        home_id: first.home_id,
+                        home: first.home,
+                        away_id: first.away_id,
+                        away: first.away,
+                        spread: first.spread,
+                        has_ball: false,
+                        home_score: 0,
+                        away_score: 0,
+                        time_remaining: 3600,
+                        yard_line: 65,
+                        down: 1,
+                        distance: 10
+                    },
+                    ...plays
+                ];
+            }
+
+            for (let i = 0; i < plays.length; i++) {
+                let play = plays[i];
+                let playInputs = [
+                    parseInt(play.spread), // spread
+                    play.has_ball ? 1 : 0, // possession
+                    parseInt(play.home_score), // home points
+                    parseInt(play.away_score), // opp_points
+                    parseInt(play.time_remaining), // seconds left
+                    parseInt(play.yard_line), // yards to goal
+                    parseInt(play.down), // down
+                    parseInt(play.distance) // distance
+                ];
+                play.output = wpNetwork.activate(renormalizeData(playInputs))[0] * 100;
+            }
+
+            let last = plays[plays.length - 1];
+            if (last.time_remaining == 0) {
+                last.output = last.winner ? 100 : 0;
+            } else {
+                plays = [
+                    ...plays,
+                    {
+                        gameId: last.gameId,
+                        play_id: 0,
+                        play_text: 'Game ended',
+                        home_id: last.home_id,
+                        home: last.home,
+                        away_id: last.away_id,
+                        away: last.away,
+                        spread: last.spread,
+                        has_ball: last.has_ball,
+                        home_score: last.home_score,
+                        away_score: last.away_score,
+                        time_remaining: 0,
+                        yard_line: 65,
+                        down: 0,
+                        distance: 0,
+                        output: last.winner ? 100 : 0
+                    }
+                ]
+            }
         }
 
-        let last = plays[plays.length - 1];
-        last.time_remaining = 0;
-        last.output = Math.round(last.output);
-
-        return [
-            ...plays,
-            last
-        ];
+        return plays;
     }
 
     return {
