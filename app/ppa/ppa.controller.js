@@ -46,9 +46,32 @@ module.exports = (db) => {
             });
         }
     }
+    
+    const getPPAByTeam = async (req, res) => {
+        try {
+            if (!req.query.year && !req.query.team) {
+                res.status(400).send({
+                    error: 'year or team are required'
+                });
+            } else if (req.query.year && !parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be numeric'
+                });
+            } else {
+                const results = await service.getPPAByTeam(req.query.year, req.query.team, req.query.conference);
+                res.send(results);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    }
 
     return {
         getPP,
+        getPPAByTeam,
         getWP
     }
 }
