@@ -1314,6 +1314,42 @@
         }
       }
     },
+    "/metrics/wp": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Get win probability chart data",
+        "description": "Win probability data",
+        "operationId": "getWinProbabilityData",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "Game id filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayWP"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/stats/season": {
       "get": {
         "tags": [
@@ -2424,6 +2460,59 @@
               "type": "number"
             }
           }
+        }
+      }
+    },
+    "PlayWP": {
+      "type": "object",
+      "properties": {
+        "playId": {
+          "type": "integer"
+        },
+        "playText": {
+          "type": "string"
+        },
+        "homeId": {
+          "type": "integer"
+        },
+        "home": {
+          "type": "string"
+        },
+        "awayId": {
+          "type": "integer"
+        },
+        "away": {
+          "type": "string"
+        },
+        "spread": {
+          "type": "number"
+        },
+        "homeBall": {
+          "type": "boolean"
+        },
+        "homeScore": {
+          "type": "integer"
+        },
+        "awayScore": {
+          "type": "integer"
+        },
+        "timeRemaining": {
+          "type": "integer"
+        },
+        "yardLine": {
+          "type": "integer"
+        },
+        "down": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "homeWinner": {
+          "type": "boolean"
+        },
+        "homeWinProb": {
+          "type": "number"
         }
       }
     }

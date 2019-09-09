@@ -141,7 +141,24 @@ module.exports = (db) => {
             }
         }
 
-        return plays;
+        return plays.map(p => ({
+            gameId: p.gameId,
+            playId: p.play_id,
+            playText: p.play_text,
+            homeId: p.home_id,
+            home: p.home,
+            awayId: p.away_id,
+            away: p.away,
+            spread: p.spread,
+            homeBall: p.has_ball,
+            homeScore: p.home_score,
+            awayScore: p.away_score,
+            timeRemaining: p.time_remaining,
+            yardLine: p.yard_line,
+            down: p.down,
+            distance: p.distance,
+            homeWinProb: p.homeWinProb
+        }));
     }
 
     const getPPAByTeam = async (year, team, conference) => {
