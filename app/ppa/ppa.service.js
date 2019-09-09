@@ -110,12 +110,12 @@ module.exports = (db) => {
                     parseInt(play.down), // down
                     parseInt(play.distance) // distance
                 ];
-                play.output = wpNetwork.activate(renormalizeData(playInputs))[0] * 100;
+                play.homeWinProb = wpNetwork.activate(renormalizeData(playInputs))[0];
             }
 
             let last = plays[plays.length - 1];
             if (last.time_remaining == 0) {
-                last.output = last.winner ? 100 : 0;
+                last.homeWinProb = last.winner ? 1 : 0;
             } else {
                 plays = [
                     ...plays,
@@ -135,7 +135,7 @@ module.exports = (db) => {
                         yard_line: 65,
                         down: 0,
                         distance: 0,
-                        output: last.winner ? 100 : 0
+                        homeWinProb: last.winner ? 1 : 0
                     }
                 ]
             }
