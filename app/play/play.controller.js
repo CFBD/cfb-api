@@ -20,10 +20,10 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'Week parameter must be numeric'
                         });
-    
+
                         return;
                     }
-                    
+
                     filter += ` AND g.week = $${index}`;
                     params.push(req.query.week);
                     index++;
@@ -84,10 +84,10 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'Invalid season type'
                         });
-    
+
                         return;
                     }
-                    
+
                     filter += ` AND g.season_type = $${index}`;
                     params.push(req.query.seasonType || 'regular');
                     index++;
@@ -127,6 +127,16 @@ module.exports = (db) => {
                     ${filter}
                     ORDER BY d.id
             `, params);
+
+                for (let play of plays) {
+                    if (!play.clock.minutes) {
+                        play.clock.minutes = 0;
+                    }
+                    
+                    if (!play.clock.seconds) {
+                        play.clock.seconds = 0;
+                    }
+                }
 
                 res.send(plays);
             } catch (err) {

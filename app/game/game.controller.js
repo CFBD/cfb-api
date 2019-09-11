@@ -20,10 +20,10 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'Invalid season type'
                         });
-    
+
                         return;
                     }
-                    
+
                     filter += ` AND g.season_type = $${index}`;
                     params.push(req.query.seasonType || 'regular');
                     index++;
@@ -34,7 +34,7 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'Week parameter must be numeric'
                         });
-    
+
                         return;
                     }
 
@@ -111,7 +111,7 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'Invalid season type'
                         });
-    
+
                         return;
                     }
 
@@ -125,7 +125,7 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'Week parameter must be numeric.'
                         });
-    
+
                         return;
                     }
 
@@ -185,6 +185,23 @@ module.exports = (db) => {
                             ORDER BY d.id
                         `, params);
 
+                for (let drive of drives) {
+                    if (!drive.start_time.minutes) {
+                        drive.start_time.minutes = 0;
+                    }
+
+                    if (!drive.start_time.seconds) {
+                        drive.start_time.seconds = 0;
+                    }
+                    if (!drive.end_time.minutes) {
+                        drive.end_time.minutes = 0;
+                    }
+
+                    if (!drive.end_time.seconds) {
+                        drive.end_time.seconds = 0;
+                    }
+                }
+
                 res.send(drives);
             } catch (err) {
                 console.error(err);
@@ -211,7 +228,7 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'GameId must be numeric.'
                         });
-    
+
                         return;
                     }
 
@@ -222,7 +239,7 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'Invalid season type'
                         });
-    
+
                         return;
                     }
 
@@ -236,7 +253,7 @@ module.exports = (db) => {
                             res.status(400).send({
                                 error: 'Year must be numeric.'
                             });
-        
+
                             return;
                         }
 
@@ -250,7 +267,7 @@ module.exports = (db) => {
                             res.status(400).send({
                                 error: 'Week must be numeric.'
                             });
-        
+
                             return;
                         }
 
@@ -347,7 +364,7 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'gameId must be numeric.'
                         });
-    
+
                         return;
                     }
 
@@ -358,7 +375,7 @@ module.exports = (db) => {
                         res.status(400).send({
                             error: 'Invalid season type'
                         });
-    
+
                         return;
                     }
 
@@ -372,7 +389,7 @@ module.exports = (db) => {
                             res.status(400).send({
                                 error: 'Year param must be numeric.'
                             });
-        
+
                             return;
                         }
 
@@ -386,10 +403,10 @@ module.exports = (db) => {
                             res.status(400).send({
                                 error: 'Week param must be numeric.'
                             });
-        
+
                             return;
                         }
-                        
+
                         filter += ` AND g.week = $${index}`;
                         params.push(req.query.week);
                         index++;
