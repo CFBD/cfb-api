@@ -31,7 +31,7 @@ module.exports = async (app, consumers, expressWs) => {
     const broadcastGameEvent = (eventType) => {
         return (info) => {
             gamesWs.clients.forEach((client) => {
-                if (client.query && client.query.team) {
+                if (client.options && client.options.team) {
                     if (info.homeTeam.name.toLowerCase() !== client.options.team && info.awayTeam.name.toLowerCase() !== client.options.team) {
                         return;
                     }
