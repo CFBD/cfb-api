@@ -35,7 +35,7 @@ module.exports = (db) => {
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
-            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= 2013 AND (ct.end_year IS NULL OR ct.end_year >= 2013)
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
             INNER JOIN conference AS c ON ct.conference_id = c.id
         WHERE typ.id IN (2,3,4,7,10,11,12,13,24,25,26,31,32,33,34,35,36,37,38) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
@@ -54,7 +54,7 @@ module.exports = (db) => {
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
-            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= 2013 AND (ct.end_year IS NULL OR ct.end_year >= 2013)
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
             INNER JOIN conference AS c ON ct.conference_id = c.id
         WHERE typ.id IN (5,6,14,15) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
@@ -73,7 +73,7 @@ module.exports = (db) => {
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
-            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= 2013 AND (ct.end_year IS NULL OR ct.end_year >= 2013)
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
             INNER JOIN conference AS c ON ct.conference_id = c.id
         WHERE typ.id IN (5,6,14,15) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
@@ -88,7 +88,7 @@ module.exports = (db) => {
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
-            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= 2013 AND (ct.end_year IS NULL OR ct.end_year >= 2013)
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
             INNER JOIN conference AS c ON ct.conference_id = c.id
         WHERE typ.id = 8 AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
@@ -101,7 +101,7 @@ module.exports = (db) => {
         FROM game AS g
             INNER JOIN game_team AS gt ON g.id = gt.game_id
             INNER JOIN team AS t ON gt.team_id = t.id
-            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= 2013 AND (ct.end_year IS NULL OR ct.end_year >= 2013)
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
             INNER JOIN conference AS c ON ct.conference_id = c.id
         WHERE ${filter}
         GROUP BY g.season, t.school, c.name
