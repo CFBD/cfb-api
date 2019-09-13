@@ -27,7 +27,7 @@ module.exports = (db) => {
 
     const getCategories = async (req, res) => {
         const categories = await service.getCategories();
-        return categories;
+        res.send(categories);
     }
 
     return {
