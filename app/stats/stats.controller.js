@@ -25,7 +25,13 @@ module.exports = (db) => {
         }
     }
 
+    const getCategories = async (req, res) => {
+        const categories = await service.getCategories();
+        return categories;
+    }
+
     return {
-        getTeamStats
+        getTeamStats,
+        getCategories
     }
 }

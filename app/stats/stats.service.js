@@ -114,9 +114,20 @@ module.exports = (db) => {
             statName: r.stat_type,
             statValue: r.stat
         }));
+    };
+
+    const getCategories = async () => {
+        let results = await db.any(`
+            SELECT name
+            FROM team_stat_type
+            ORDER BY name
+        `);
+
+        return results.map(r => r.name);
     }
 
     return {
-        getTeamStats
+        getTeamStats,
+        getCategories
     };
 };
