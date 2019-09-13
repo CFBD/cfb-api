@@ -240,9 +240,90 @@ module.exports = (db) => {
         }));
     }
 
+    const getPPAByGame = async (year, team, conference, week) => {
+        let filter = 'WHERE g.season = $1';
+        let params = [year];
+        let index = 2;
+
+        if (team) {
+            filter += ` AND LOWER(t.school) = LOWER($${index})`;
+            params.push(team);
+            index++
+        }
+
+        if (conference) {
+            filter += ` AND LOWER(c.abbreviation) = LOWER($${index})`;
+            params.push(conference);
+            index++;
+        }
+
+        if (week) {
+            filter += ` AND g.week = $${index}`;
+            params.push(week);
+            index++;
+        }
+
+        let results = await db.any(`
+        SELECT 	g.id,
+                g.season,
+                g.week,
+                t.school,
+                c.name AS conference,
+                t2.school AS opponent,
+                AVG(p.ppa) FILTER(WHERE p.offense_id = t.id) AS offense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_offense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_offense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.down = 1) AS first_offense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.down = 2) AS second_offense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.down = 3) AS third_offense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id) AS defense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_defense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_defense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 1) AS first_defense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 2) AS second_defense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 3) AS third_defense_ppa
+        FROM game AS g
+            INNER JOIN drive AS d ON g.id = d.game_id
+            INNER JOIN play AS p ON d.id = p.drive_id
+            INNER JOIN team AS t ON (p.offense_id = t.id OR p.defense_id = t.id) AND p.ppa IS NOT NULL
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
+            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN team AS t2 ON (p.offense_id = t2.id OR p.defense_id = t2.id) AND t.id <> t2.id
+        ${filter}
+        GROUP BY g.id, g.season, g.week, t.school, c.name, t2.school
+        ORDER BY g.season DESC, g.week, t.school
+        `, params);
+
+        return results.map(r => ({
+            gameId: r.id,
+            season: r.season,
+            week: r.week,
+            conference: r.conference,
+            team: r.school,
+            opponent: r.opponent,
+            offense: {
+                overall: r.offense_ppa,
+                passing: r.passing_offense_ppa,
+                rushing: r.rushing_offense_ppa,
+                firstDown: r.first_offense_ppa,
+                secondDown: r.second_offense_ppa,
+                thirdDown: r.third_offense_ppa
+            },
+            defense: {
+                overall: r.defense_ppa,
+                passing: r.passing_defense_ppa,
+                rushing: r.rushing_defense_ppa,
+                firstDown: r.first_defense_ppa,
+                secondDown: r.second_defense_ppa,
+                thirdDown: r.third_defense_ppa
+            }
+        }));
+    }
+
     return {
         getPP,
         getWP,
-        getPPAByTeam
+        getPPAByTeam,
+        getPPAByGame
     }
 }

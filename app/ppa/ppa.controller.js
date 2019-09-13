@@ -69,9 +69,29 @@ module.exports = (db) => {
         }
     }
 
+    const getPPAByGame = async (req, res) => {
+        if (!req.query.year) {
+            res.status(400).send({
+                error: 'year must be specified'
+            });
+        } else if (req.query.year && !parseInt(req.query.year)) {
+            res.status(400).send({
+                error: 'year must be numeric'
+            });
+        } else if (req.query.week && !parseInt(req.query.week)) {
+            res.status(400).send({
+                error: 'week must be numeric'
+            });
+        } else {
+            const results = await service.getPPAByGame(req.query.year, req.query.team, req.query.conference, req.query.week);
+            res.send(results);
+        }
+    }
+
     return {
         getPP,
         getPPAByTeam,
-        getWP
+        getWP,
+        getPPAByGame
     }
 }
