@@ -19,19 +19,19 @@ module.exports = async () => {
 
     let corsOptions;
 
-    if (process.env.NODE_ENV != 'development') {
-        corsOptions = {
-            origin: (origin, cb) => {
-                if (origin == 'https://collegefootballdata.com' || origin == 'https://www.collegefootballdata.com' || !origin) {
-                    cb(null, true);
-                } else {
-                    cb(new Error(`Not allowed by CORS: ${origin}`));
-                }
-            }
-        };
-    } else {
+    // if (process.env.NODE_ENV != 'development') {
+    //     corsOptions = {
+    //         origin: (origin, cb) => {
+    //             if (origin == 'https://collegefootballdata.com' || origin == 'https://www.collegefootballdata.com' || !origin) {
+    //                 cb(null, true);
+    //             } else {
+    //                 cb(new Error(`Not allowed by CORS: ${origin}`));
+    //             }
+    //         }
+    //     };
+    // } else {
         corsOptions = {};
-    }
+    // }
 
     const {
         postgraphile
