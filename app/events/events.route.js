@@ -2,7 +2,7 @@ module.exports = async (app, consumers, expressWs) => {
 
     app.ws('/events/games', (ws, req) => {
         ws.options = {
-            team: req.query.team.toLowerCase(),
+            team: req.query.team ? req.query.team.toLowerCase() : null,
             events: []
         };
 
