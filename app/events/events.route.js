@@ -32,7 +32,7 @@ module.exports = async (app, consumers, expressWs) => {
         return (info) => {
             gamesWs.clients.forEach((client) => {
                 if (client.options && client.options.team) {
-                    if (info.homeTeam.name.toLowerCase() !== client.options.team && info.awayTeam.name.toLowerCase() !== client.options.team) {
+                    if (info.homeTeam.location.toLowerCase() !== client.options.team && info.awayTeam.location.toLowerCase() !== client.options.team) {
                         return;
                     }
                 }
