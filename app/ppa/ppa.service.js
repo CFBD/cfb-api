@@ -52,7 +52,8 @@ module.exports = (db) => {
                 END AS yard_line,
                 p.down,
                 p.distance,
-                home.winner
+                home.winner,
+                ROW_NUMBER() OVER(ORDER BY p.period, p.clock DESC, p.id) AS play_number
             FROM game AS g
             INNER JOIN game_team AS home ON g.id = home.game_id AND home.home_away = 'home'
             INNER JOIN team AS home_team ON home.team_id = home_team.id
@@ -76,27 +77,26 @@ module.exports = (db) => {
 
         if (plays && plays.length) {
             let first = plays[0];
-            if (first.time_remaining != 3600) {
-                plays = [{
-                        gameId: first.gameId,
-                        play_id: 0,
-                        play_text: 'Game start',
-                        home_id: first.home_id,
-                        home: first.home,
-                        away_id: first.away_id,
-                        away: first.away,
-                        spread: first.spread,
-                        has_ball: false,
-                        home_score: 0,
-                        away_score: 0,
-                        time_remaining: 3600,
-                        yard_line: 65,
-                        down: 1,
-                        distance: 10
-                    },
-                    ...plays
-                ];
-            }
+            plays = [{
+                    gameId: first.gameId,
+                    play_id: 0,
+                    play_text: 'Game start',
+                    home_id: first.home_id,
+                    home: first.home,
+                    away_id: first.away_id,
+                    away: first.away,
+                    spread: first.spread,
+                    has_ball: false,
+                    home_score: 0,
+                    away_score: 0,
+                    time_remaining: 3600,
+                    yard_line: 65,
+                    down: 1,
+                    distance: 10,
+                    play_number: 0
+                },
+                ...plays
+            ];
 
             for (let i = 0; i < plays.length; i++) {
                 let play = plays[i];
@@ -135,7 +135,8 @@ module.exports = (db) => {
                         yard_line: 65,
                         down: 0,
                         distance: 0,
-                        homeWinProb: last.winner ? 1 : 0
+                        homeWinProb: last.winner ? 1 : 0,
+                        play_number: (last.play_number + 1)
                     }
                 ]
             }
@@ -157,7 +158,8 @@ module.exports = (db) => {
             yardLine: p.yard_line,
             down: p.down,
             distance: p.distance,
-            homeWinProb: p.homeWinProb
+            homeWinProb: p.homeWinProb,
+            playNumber: p.play_number
         }));
     }
 
@@ -171,7 +173,7 @@ module.exports = (db) => {
             params.push(year);
             index++;
         }
-        
+
         if (team) {
             if (params.length) {
                 filter += ' AND';
@@ -180,7 +182,7 @@ module.exports = (db) => {
             params.push(team);
             index++;
         }
-        
+
         if (conference) {
             if (params.length) {
                 filter += ' AND';
