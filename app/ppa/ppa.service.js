@@ -136,7 +136,7 @@ module.exports = (db) => {
                         down: 0,
                         distance: 0,
                         homeWinProb: last.winner ? 1 : 0,
-                        play_number: (last.play_number + 1)
+                        play_number: (parseInt(last.play_number) + 1)
                     }
                 ]
             }
