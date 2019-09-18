@@ -555,6 +555,13 @@
             "in": "query",
             "required": false,
             "type": "integer"
+          },
+          {
+            "name": "statTypeId",
+            "description": "statTypeId filter (from /play/stat/types endpoint)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
