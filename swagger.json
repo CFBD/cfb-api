@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.4.1",
+    "version": "1.5.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -509,6 +509,97 @@
         }
       }
     },
+    "/play/stats": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Get play statistics",
+        "description": "Gets player stats associated by play (limit 1000)",
+        "operationId": "getPlayStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "gameId",
+            "description": "gameId filter (from /games endpoint)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "athleteId",
+            "description": "athleteId filter (from /roster endpoint)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/play/stat/types": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Get play stat type lists",
+        "description": "Type of play stats",
+        "operationId": "getPlayStatTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayStatType"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/conferences": {
       "get": {
         "tags": [
@@ -529,6 +620,9 @@
                 "$ref": "#/definitions/Conference"
               }
             }
+          },
+          "400": {
+            "description": "error"
           }
         }
       }
@@ -2665,6 +2759,73 @@
           "type": "number"
         },
         "playNumber": {
+          "type": "integer"
+        }
+      }
+    },
+    "PlayStatType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "PlayStat": {
+      "type": "object",
+      "properties": {
+        "gameId": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "opponent": {
+          "type": "string"
+        },
+        "teamScore": {
+          "type": "integer"
+        },
+        "opponentScore": {
+          "type": "integer"
+        },
+        "driveId": {
+          "type": "integer"
+        },
+        "playId": {
+          "type": "integer"
+        },
+        "period": {
+          "type": "integer"
+        },
+        "secondsRemaining": {
+          "type": "integer"
+        },
+        "yardsToGoal": {
+          "type": "integer"
+        },
+        "down": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "athleteId": {
+          "type": "integer"
+        },
+        "athleteName": {
+          "type": "string"
+        },
+        "statType": {
+          "type": "string"
+        },
+        "stat": {
           "type": "integer"
         }
       }
