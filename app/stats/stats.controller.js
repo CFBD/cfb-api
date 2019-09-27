@@ -30,8 +30,31 @@ module.exports = (db) => {
         res.send(categories);
     }
 
+    const getAdvancedStats = async (req, res) => {
+        try {
+            if (!req.query.year && !req.query.team) {
+                res.status(400).send({
+                    error: 'team or year must be specified'
+                });
+            } else if (req.query.year && !parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be numeric'
+                });
+            } else {
+                const results = await service.getAdvancedStats(req.query.year, req.query.team);
+                res.send(results);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'something went wrong'
+            });
+        }
+    }
+
     return {
         getTeamStats,
-        getCategories
+        getCategories,
+        getAdvancedStats
     }
 }

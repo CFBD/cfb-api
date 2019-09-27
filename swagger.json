@@ -1558,6 +1558,49 @@
         }
       }
     },
+    "/stats/season/advanced": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get advanced season team stats",
+        "description": "Advanced team season stats",
+        "operationId": "getAdvancedTeamSeasonStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter (required if no team specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if no year specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AdvancedSeasonStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/stats/categories": {
       "get": {
         "tags": [
@@ -2834,6 +2877,83 @@
         },
         "stat": {
           "type": "integer"
+        }
+      }
+    },
+    "AdvancedSeasonStat": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "successRate": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "object",
+              "properties": {
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingDowns": {
+              "type": "object",
+              "properties": {
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "successRate": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "object",
+              "properties": {
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingDowns": {
+              "type": "object",
+              "properties": {
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            }
+          }
         }
       }
     }
