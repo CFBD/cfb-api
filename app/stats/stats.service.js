@@ -144,45 +144,59 @@ module.exports = (db) => {
         }
 
         const results = await db.any(`
-            WITH plays AS (
-                SELECT  g.id,
-                        g.season,
-                        t.school,
-                        CASE
-                            WHEN p.offense_id = t.id THEN 'offense'
-                            ELSE 'defense'
-                        END AS o_d,
-                        CASE
-                            WHEN p.down = 2 AND p.distance >= 8 THEN 'passing'
-                            WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
-                            ELSE 'standard'
-                        END AS down_type,
-                        CASE
-                            WHEN p.down = 1 AND (p.yards_gained / p.distance) >= 0.5 THEN true
-                            WHEN p.down = 2 AND (p.yards_gained / p.distance) >= 0.7 THEN true
-                            WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
-                            ELSE false
-                        END AS success,
-                        p.ppa AS ppa
-                FROM game AS g
-                    INNER JOIN game_team AS gt ON g.id = gt.game_id
-                    INNER JOIN team AS t ON gt.team_id = t.id
-                    INNER JOIN drive AS d ON g.id = d.game_id
-                    INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
-                ${filter}
-            )
-            SELECT 	season,
-                    school AS team,
-                    o_d AS unit,
-                    CAST((COUNT(*) FILTER(WHERE success = true)) AS NUMERIC) / COUNT(*) AS success_rate,
-                    AVG(ppa) FILTER(WHERE success = true) AS explosiveness,
-                    CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'standard')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS standard_success_rate,
-                    AVG(ppa) FILTER(WHERE success = true AND down_type = 'standard') AS standard_explosiveness,
-                    CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'passing')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_success_rate,
-                    AVG(ppa) FILTER(WHERE success = true AND down_type = 'passing') AS passing_explosiveness
-            FROM plays
-            GROUP BY season, school, o_d
-            ORDER BY season, school, o_d
+        WITH plays AS (
+            SELECT  g.id,
+                    g.season,
+                    t.school,
+                    CASE
+                        WHEN p.offense_id = t.id THEN 'offense'
+                        ELSE 'defense'
+                    END AS o_d,
+                    CASE
+                        WHEN p.down = 2 AND p.distance >= 8 THEN 'passing'
+                        WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
+                        ELSE 'standard'
+                    END AS down_type,
+                    CASE
+                        WHEN p.down = 1 AND (p.yards_gained / p.distance) >= 0.5 THEN true
+                        WHEN p.down = 2 AND (p.yards_gained / p.distance) >= 0.7 THEN true
+                        WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
+                        ELSE false
+                    END AS success,
+                    CASE 
+                        WHEN p.play_type_id IN (3,4,6,7,24,26,36,51,67) THEN 'Pass'
+                        WHEN p.play_type_id IN (5,9,29,39,68) THEN 'Rush'
+                        ELSE 'Other'
+                    END AS play_type,
+                    p.ppa AS ppa
+            FROM game AS g
+                INNER JOIN game_team AS gt ON g.id = gt.game_id
+                INNER JOIN team AS t ON gt.team_id = t.id
+                INNER JOIN drive AS d ON g.id = d.game_id
+                INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
+            ${filter}
+        )
+        SELECT 	season,
+                school AS team,
+                o_d AS unit,
+                AVG(ppa) AS ppa,
+                AVG(ppa) FILTER(WHERE down_type = 'standard') AS standard_down_ppa,
+                AVG(ppa) FILTER(WHERE down_type = 'passing') AS passing_down_ppa,
+                AVG(ppa) FILTER(WHERE play_type = 'Pass') AS passing_ppa,
+                AVG(ppa) FILTER(WHERE play_type = 'Rush') AS rushing_ppa,
+                CAST((COUNT(*) FILTER(WHERE success = true)) AS NUMERIC) / COUNT(*) AS success_rate,
+                AVG(ppa) FILTER(WHERE success = true) AS explosiveness,
+                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'standard')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS standard_down_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND down_type = 'standard') AS standard_down_explosiveness,
+                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'passing')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_down_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND down_type = 'passing') AS passing_down_explosiveness,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS rush_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND play_type = 'Rush') AS rush_explosiveness,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS pass_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
+        FROM plays
+        GROUP BY season, school, o_d
+        ORDER BY season, school, o_d
         `, params);
 
         let stats = [];
@@ -202,24 +216,44 @@ module.exports = (db) => {
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
                         standardDowns: {
-                            successRate: parseFloat(offense.standard_success_rate),
-                            explosiveness: parseFloat(offense.standard_explosiveness)
+                            successRate: parseFloat(offense.standard_down_success_rate),
+                            explosiveness: parseFloat(offense.standard_down_explosiveness)
                         },
                         passingDowns: {
-                            successRate: parseFloat(offense.passing_success_rate),
-                            explosiveness: parseFloat(offense.passing_explosiveness)
+                            successRate: parseFloat(offense.passing_down_success_rate),
+                            explosiveness: parseFloat(offense.passing_down_explosiveness)
+                        },
+                        rushingPlays: {
+                            ppa: parseFloat(offense.rushing_ppa),
+                            successRate: parseFloat(offense.rush_success_rate),
+                            explosiveness: parseFloat(offense.rush_explosiveness)
+                        },
+                        passingPlays: {
+                            ppa: parseFloat(offense.passing_ppa),
+                            successRate: parseFloat(offense.pass_success_rate),
+                            explosiveness: parseFloat(offense.pass_explosiveness)
                         }
                     },
                     defense: {
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
                         standardDowns: {
-                            successRate: parseFloat(defense.standard_success_rate),
-                            explosiveness: parseFloat(defense.standard_explosiveness)
+                            successRate: parseFloat(defense.standard_down_success_rate),
+                            explosiveness: parseFloat(defense.standard_down_explosiveness)
                         },
                         passingDowns: {
-                            successRate: parseFloat(defense.passing_success_rate),
-                            explosiveness: parseFloat(defense.passing_explosiveness)
+                            successRate: parseFloat(defense.passing_down_success_rate),
+                            explosiveness: parseFloat(defense.passing_down_explosiveness)
+                        },
+                        rushingPlays: {
+                            ppa: parseFloat(defense.rushing_ppa),
+                            successRate: parseFloat(defense.rush_success_rate),
+                            explosiveness: parseFloat(defense.rush_explosiveness)
+                        },
+                        passingPlays: {
+                            ppa: parseFloat(defense.passing_ppa),
+                            successRate: parseFloat(defense.pass_success_rate),
+                            explosiveness: parseFloat(defense.pass_explosiveness)
                         }
                     }
                 }
