@@ -213,13 +213,16 @@ module.exports = (db) => {
                     season: year,
                     team: t,
                     offense: {
+                        ppa: parseFloat(offense.ppa),
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
                         standardDowns: {
+                            ppa: parseFloat(offense.standard_down_ppa),
                             successRate: parseFloat(offense.standard_down_success_rate),
                             explosiveness: parseFloat(offense.standard_down_explosiveness)
                         },
                         passingDowns: {
+                            ppa: parseFloat(offense.passing_down_ppa),
                             successRate: parseFloat(offense.passing_down_success_rate),
                             explosiveness: parseFloat(offense.passing_down_explosiveness)
                         },
@@ -235,13 +238,16 @@ module.exports = (db) => {
                         }
                     },
                     defense: {
+                        ppa: parseFloat(defense.ppa),
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
                         standardDowns: {
+                            ppa: parseFloat(defense.standard_down_ppa),
                             successRate: parseFloat(defense.standard_down_success_rate),
                             explosiveness: parseFloat(defense.standard_down_explosiveness)
                         },
                         passingDowns: {
+                            ppa: parseFloat(defense.passing_down_ppa),
                             successRate: parseFloat(defense.passing_down_success_rate),
                             explosiveness: parseFloat(defense.passing_down_explosiveness)
                         },

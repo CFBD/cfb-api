@@ -2892,6 +2892,9 @@
         "offense": {
           "type": "object",
           "properties": {
+            "ppa": {
+              "type": "number"
+            },
             "successRate": {
               "type": "number"
             },
@@ -2901,6 +2904,9 @@
             "standardDowns": {
               "type": "object",
               "properties": {
+                "ppa": {
+                  "type": "number"
+                },
                 "successRate": {
                   "type": "number"
                 },
@@ -2912,6 +2918,9 @@
             "passingDowns": {
               "type": "object",
               "properties": {
+                "ppa": {
+                  "type": "number"
+                },
                 "successRate": {
                   "type": "number"
                 },
@@ -2953,6 +2962,9 @@
         "defense": {
           "type": "object",
           "properties": {
+            "ppa": {
+              "type": "number"
+            },
             "successRate": {
               "type": "number"
             },
@@ -2962,6 +2974,9 @@
             "standardDowns": {
               "type": "object",
               "properties": {
+                "ppa": {
+                  "type": "number"
+                },
                 "successRate": {
                   "type": "number"
                 },
@@ -2973,6 +2988,9 @@
             "passingDowns": {
               "type": "object",
               "properties": {
+                "ppa": {
+                  "type": "number"
+                },
                 "successRate": {
                   "type": "number"
                 },
