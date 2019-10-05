@@ -272,11 +272,182 @@ module.exports = (db) => {
         }
 
         return stats;
-    }
+    };
+
+    const getAdvancedGameStats = async (year, team, week, opponent) => {
+        let filter = 'WHERE ';
+        let params = [];
+        let index = 1;
+
+        if (year) {
+            filter += `g.season = $${index}`;
+            params.push(year);
+            index++;
+        }
+
+        if (team) {
+            filter += ` ${year ? 'AND ' : ''}LOWER(t.school) = LOWER($${index})`;
+            params.push(team);
+            index++;
+        }
+
+        if (opponent) {
+            filter += ` ${params.length ? 'AND ' : ''}LOWER(t2.school) = LOWER($${index})`;
+            params.push(opponent);
+            index++;
+        }
+
+        if (week) {
+            filter += ` ${params.length ? 'AND ' : ''}g.week = $${index}`;
+            params.push(week);
+            index++;
+        }
+
+        const results = await db.any(`
+        WITH plays AS (
+            SELECT  g.id,
+                    g.season,
+                    g.week,
+                    t.school,
+                    t2.school AS opponent,
+                    CASE
+                        WHEN p.offense_id = t.id THEN 'offense'
+                        ELSE 'defense'
+                    END AS o_d,
+                    CASE
+                        WHEN p.down = 2 AND p.distance >= 8 THEN 'passing'
+                        WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
+                        ELSE 'standard'
+                    END AS down_type,
+                    CASE
+                        WHEN p.down = 1 AND (p.yards_gained / p.distance) >= 0.5 THEN true
+                        WHEN p.down = 2 AND (p.yards_gained / p.distance) >= 0.7 THEN true
+                        WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
+                        ELSE false
+                    END AS success,
+                    CASE 
+                        WHEN p.play_type_id IN (3,4,6,7,24,26,36,51,67) THEN 'Pass'
+                        WHEN p.play_type_id IN (5,9,29,39,68) THEN 'Rush'
+                        ELSE 'Other'
+                    END AS play_type,
+                    p.ppa AS ppa
+            FROM game AS g
+                INNER JOIN game_team AS gt ON g.id = gt.game_id
+                INNER JOIN team AS t ON gt.team_id = t.id
+                INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+                INNER JOIN team AS t2 ON gt2.team_id = t2.id
+                INNER JOIN drive AS d ON g.id = d.game_id
+                INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
+            ${filter}
+        )
+        SELECT 	id,
+                season,
+                week,
+                school AS team,
+                opponent,
+                o_d AS unit,
+                AVG(ppa) AS ppa,
+                AVG(ppa) FILTER(WHERE down_type = 'standard') AS standard_down_ppa,
+                AVG(ppa) FILTER(WHERE down_type = 'passing') AS passing_down_ppa,
+                AVG(ppa) FILTER(WHERE play_type = 'Pass') AS passing_ppa,
+                AVG(ppa) FILTER(WHERE play_type = 'Rush') AS rushing_ppa,
+                CAST((COUNT(*) FILTER(WHERE success = true)) AS NUMERIC) / COUNT(*) AS success_rate,
+                AVG(ppa) FILTER(WHERE success = true) AS explosiveness,
+                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'standard')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS standard_down_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND down_type = 'standard') AS standard_down_explosiveness,
+                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'passing')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_down_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND down_type = 'passing') AS passing_down_explosiveness,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS rush_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND play_type = 'Rush') AS rush_explosiveness,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS pass_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
+        FROM plays
+        GROUP BY id, season, week, school, opponent, o_d
+        ORDER BY id, season, week, school, opponent, o_d
+        `, params);
+
+        let stats = [];
+        let ids = Array.from(new Set(results.map(r => r.id)));
+
+        for (let id of ids) {
+            let teams = Array.from(new Set(results.filter(r => r.id == id).map(r => r.team)));
+
+            let gameStats = teams.map(t => {
+                let offense = results.find(r => r.id == id && r.team == t && r.unit == 'offense');
+                let defense = results.find(r => r.id == id && r.team == t && r.unit == 'defense');
+
+                return {
+                    gameId: id,
+                    season: offense.year,
+                    week: offense.week,
+                    team: t,
+                    opponent: offense.opponent,
+                    offense: {
+                        ppa: parseFloat(offense.ppa),
+                        successRate: parseFloat(offense.success_rate),
+                        explosiveness: parseFloat(offense.explosiveness),
+                        standardDowns: {
+                            ppa: parseFloat(offense.standard_down_ppa),
+                            successRate: parseFloat(offense.standard_down_success_rate),
+                            explosiveness: parseFloat(offense.standard_down_explosiveness)
+                        },
+                        passingDowns: {
+                            ppa: parseFloat(offense.passing_down_ppa),
+                            successRate: parseFloat(offense.passing_down_success_rate),
+                            explosiveness: parseFloat(offense.passing_down_explosiveness)
+                        },
+                        rushingPlays: {
+                            ppa: parseFloat(offense.rushing_ppa),
+                            successRate: parseFloat(offense.rush_success_rate),
+                            explosiveness: parseFloat(offense.rush_explosiveness)
+                        },
+                        passingPlays: {
+                            ppa: parseFloat(offense.passing_ppa),
+                            successRate: parseFloat(offense.pass_success_rate),
+                            explosiveness: parseFloat(offense.pass_explosiveness)
+                        }
+                    },
+                    defense: {
+                        ppa: parseFloat(defense.ppa),
+                        successRate: parseFloat(defense.success_rate),
+                        explosiveness: parseFloat(defense.explosiveness),
+                        standardDowns: {
+                            ppa: parseFloat(defense.standard_down_ppa),
+                            successRate: parseFloat(defense.standard_down_success_rate),
+                            explosiveness: parseFloat(defense.standard_down_explosiveness)
+                        },
+                        passingDowns: {
+                            ppa: parseFloat(defense.passing_down_ppa),
+                            successRate: parseFloat(defense.passing_down_success_rate),
+                            explosiveness: parseFloat(defense.passing_down_explosiveness)
+                        },
+                        rushingPlays: {
+                            ppa: parseFloat(defense.rushing_ppa),
+                            successRate: parseFloat(defense.rush_success_rate),
+                            explosiveness: parseFloat(defense.rush_explosiveness)
+                        },
+                        passingPlays: {
+                            ppa: parseFloat(defense.passing_ppa),
+                            successRate: parseFloat(defense.pass_success_rate),
+                            explosiveness: parseFloat(defense.pass_explosiveness)
+                        }
+                    }
+                }
+            });
+
+            stats = [
+                ...stats,
+                ...gameStats
+            ];
+        }
+
+        return stats;
+    };
 
     return {
         getTeamStats,
         getCategories,
-        getAdvancedStats
+        getAdvancedStats,
+        getAdvancedGameStats
     };
 };

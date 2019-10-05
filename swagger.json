@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -1601,6 +1601,63 @@
         }
       }
     },
+    "/stats/game/advanced": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get advanced game team stats",
+        "description": "Advanced team game stats",
+        "operationId": "getAdvancedTeamGameStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter (required if no team specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if no year specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "opponent",
+            "description": "Opponent filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AdvancedGameStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/stats/categories": {
       "get": {
         "tags": [
@@ -2887,6 +2944,166 @@
           "type": "integer"
         },
         "team": {
+          "type": "string"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "ppa": {
+              "type": "number"
+            },
+            "successRate": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingDowns": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "rushingPlays": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingPlays": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "ppa": {
+              "type": "number"
+            },
+            "successRate": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingDowns": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "rushingPlays": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingPlays": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "AdvancedGameStat": {
+      "type": "object",
+      "properties": {
+        "gameId": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "opponent": {
           "type": "string"
         },
         "offense": {
