@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.7.0",
+    "version": "1.7.1",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -38,6 +38,10 @@
     {
       "name": "coaches",
       "description": "Information about coaches"
+    },
+    {
+      "name": "players",
+      "description": "Player information and data"
     },
     {
       "name": "rankings",
@@ -1681,6 +1685,33 @@
           }
         }
       }
+    },
+    "/player/search": {
+      "get": {
+        "tags": [
+          "players"
+        ],
+        "summary": "Search for players",
+        "description": "Search for players",
+        "operationId": "playerSearch",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerSearchResult"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -3245,6 +3276,44 @@
               }
             }
           }
+        }
+      }
+    },
+    "PlayerSearchResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "jersey": {
+          "type": "integer"
+        },
+        "position": {
+          "type": "string"
+        },
+        "hometown": {
+          "type": "string"
+        },
+        "teamColor": {
+          "type": "string"
         }
       }
     }
