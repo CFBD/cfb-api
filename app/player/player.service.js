@@ -28,6 +28,7 @@ module.exports = (db) => {
             INNER JOIN "position" AS p ON a.position_id = p.id
             INNER JOIN hometown AS h ON a.hometown_id = h.id
         ${filter}
+        ORDER BY a.name
         LIMIT 100
         `, params);
 
