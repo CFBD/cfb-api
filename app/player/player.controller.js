@@ -21,7 +21,26 @@ module.exports = (db) => {
         }
     };
 
+    const getMeanPassingPPA = async (req, res) => {
+        try {
+            if (!req.query.id || !parseInt(req.query.id)) {
+                res.status(400).send({
+                    error: 'a numeric id param is required'
+                });
+            } else {
+                let results = await service.getMeanPassingChartData(req.query.id);
+                res.send(results);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    };
+
     return {
-        playerSearch
+        playerSearch,
+        getMeanPassingPPA
     };
 };
