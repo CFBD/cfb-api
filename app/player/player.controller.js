@@ -39,8 +39,35 @@ module.exports = (db) => {
         }
     };
 
+    const getPlayerUsage = async (req, res) => {
+        try {
+            if (!req.query.year) {
+                res.status(400).send({
+                    error: 'year must be specified'
+                });
+            } else if (!parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be numeric'
+                });
+            } else if (req.query.playerId && !parseInt(req.query.playerId)) {
+                res.status(400).send({
+                    error: 'playerId must be numeric'
+                });
+            } else {
+                const results = await service.getPlayerUsage(req.query.year, req.query.conference, req.query.position, req.query.team, req.query.playerId);
+                res.send(results);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    };
+
     return {
         playerSearch,
-        getMeanPassingPPA
+        getMeanPassingPPA,
+        getPlayerUsage
     };
 };
