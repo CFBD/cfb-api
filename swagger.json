@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.7.1",
+    "version": "1.8.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -1476,6 +1476,148 @@
         }
       }
     },
+    "/ppa/players/games": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Get player game averages for Predicted Points Added (PPA)",
+        "description": "Predicted Points Added (PPA) by player game",
+        "operationId": "getPlayerGamePPA",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "playerId",
+            "description": "Player id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "threshold",
+            "description": "Minimum play threshold filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerGamePPA"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ppa/players/season": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Get player season averages for Predicted Points Added (PPA)",
+        "description": "Predicted Points Added (PPA) by player season",
+        "operationId": "getPlayerSeasonPPA",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "playerId",
+            "description": "Player id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "threshold",
+            "description": "Minimum play threshold filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerSeasonPPA"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/metrics/wp": {
       "get": {
         "tags": [
@@ -1696,6 +1838,29 @@
         "operationId": "playerSearch",
         "produces": [
           "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "searchTerm",
+            "description": "Term to search on",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "school",
+            "description": "school filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
         ],
         "responses": {
           "200": {
@@ -3314,6 +3479,92 @@
         },
         "teamColor": {
           "type": "string"
+        }
+      }
+    },
+    "PlayerGamePPA": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        },
+        "opponent": {
+          "type": "string"
+        },
+        "averagePPA": {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "number"
+            },
+            "pass": {
+              "type": "number"
+            },
+            "rush": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "PlayerSeasonPPA": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "averagePPA": {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "number"
+            },
+            "pass": {
+              "type": "number"
+            },
+            "rush": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            }
+          }
         }
       }
     }

@@ -1,0 +1,2377 @@
+swagger: '2.0'
+info:
+  description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
+  version: 1.8.0
+  title: College Football Data API
+  contact:
+    email: admin@collegefootballdata.com
+host: api.collegefootballdata.com
+basePath: /
+tags:
+  - name: games
+    description: Games scores and statistics
+  - name: drives
+    description: Drive data
+  - name: plays
+    description: Play by play data
+  - name: teams
+    description: Team information
+  - name: conferences
+    description: Conference information
+  - name: venues
+    description: Information about venues
+  - name: coaches
+    description: Information about coaches
+  - name: players
+    description: Player information and data
+  - name: rankings
+    description: Historical poll rankings
+  - name: betting
+    description: Betting lines and data
+  - name: recruiting
+    description: Recruiting rankings and data
+  - name: ratings
+    description: Team rating data
+  - name: metrics
+    description: Data relating to Predicted Points and other metrics
+  - name: stats
+    description: Statistical data
+schemes:
+  - https
+paths:
+  /games:
+    get:
+      tags:
+        - games
+      summary: Get game information
+      description: Game results
+      operationId: getGames
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year/season filter for games
+          in: query
+          required: true
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: seasonType
+          description: Season type filter (regular or postseason)
+          default: regular
+          in: query
+          required: false
+          type: string
+        - name: team
+          description: Team
+          in: query
+          required: false
+          type: string
+        - name: home
+          description: Home team filter
+          in: query
+          required: false
+          type: string
+        - name: away
+          description: Away team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Game'
+        '400':
+          description: error
+  /games/players:
+    get:
+      tags:
+        - games
+      summary: Get player statistics by game
+      description: Player game stats
+      operationId: getPlayerGameStats
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year/season filter for games
+          in: query
+          required: true
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: seasonType
+          description: Season type filter (regular or postseason)
+          default: regular
+          in: query
+          required: false
+          type: string
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: category
+          description: Category filter (e.g defensive)
+          in: query
+          required: false
+          type: string
+        - name: gameId
+          description: Game id filter
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayerGame'
+        '400':
+          description: error
+  /games/teams:
+    get:
+      tags:
+        - games
+      summary: Get team statistics by game
+      description: Team game stats
+      operationId: getTeamGameStats
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year/season filter for games
+          in: query
+          required: true
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: seasonType
+          description: Season type filter (regular or postseason)
+          default: regular
+          in: query
+          required: false
+          type: string
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: gameId
+          description: Game id filter
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamGame'
+        '400':
+          description: error
+  /drives:
+    get:
+      tags:
+        - drives
+      summary: Get drive information
+      description: Drive results
+      operationId: getDrvies
+      produces:
+        - application/json
+      parameters:
+        - name: seasonType
+          description: Season type filter
+          default: regular
+          in: query
+          required: false
+          type: string
+        - name: year
+          description: Year filter
+          in: query
+          required: true
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: offense
+          description: Offensive team filter
+          in: query
+          required: false
+          type: string
+        - name: defense
+          description: Defensive team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference filter
+          in: query
+          required: false
+          type: string
+        - name: offenseConference
+          description: Offensive conference filter
+          in: query
+          required: false
+          type: string
+        - name: defenseConference
+          description: Defensive conference filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Drive'
+  /plays:
+    get:
+      tags:
+        - plays
+      summary: Get play information. Requires either a week or team to be specified.
+      description: Play results
+      operationId: getPlays
+      produces:
+        - application/json
+      parameters:
+        - name: seasonType
+          description: Season type filter
+          default: regular
+          in: query
+          required: false
+          type: string
+        - name: year
+          description: Year filter
+          in: query
+          required: true
+          type: integer
+        - name: week
+          description: 'Week filter (required if team, offense, or defense, not specified)'
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: offense
+          description: Offensive team filter
+          in: query
+          required: false
+          type: string
+        - name: defense
+          description: Defensive team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference filter
+          in: query
+          required: false
+          type: string
+        - name: offenseConference
+          description: Offensive conference filter
+          in: query
+          required: false
+          type: string
+        - name: defenseConference
+          description: Defensive conference filter
+          in: query
+          required: false
+          type: string
+        - name: playType
+          description: Play type filter
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Play'
+  /play/types:
+    get:
+      tags:
+        - plays
+      summary: Get play type list
+      description: Types of plays
+      operationId: getPlayTypes
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayType'
+  /play/stats:
+    get:
+      tags:
+        - plays
+      summary: Get play statistics
+      description: Gets player stats associated by play (limit 1000)
+      operationId: getPlayStats
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: gameId
+          description: gameId filter (from /games endpoint)
+          in: query
+          required: false
+          type: integer
+        - name: athleteId
+          description: athleteId filter (from /roster endpoint)
+          in: query
+          required: false
+          type: integer
+        - name: statTypeId
+          description: statTypeId filter (from /play/stat/types endpoint)
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayStat'
+        '400':
+          description: error
+  /play/stat/types:
+    get:
+      tags:
+        - plays
+      summary: Get play stat type lists
+      description: Type of play stats
+      operationId: getPlayStatTypes
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayStatType'
+        '400':
+          description: error
+  /conferences:
+    get:
+      tags:
+        - conferences
+      summary: Get conference list
+      description: Conferences
+      operationId: getConferences
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Conference'
+        '400':
+          description: error
+  /teams:
+    get:
+      tags:
+        - teams
+      summary: Get team information
+      description: Team information
+      operationId: getTeams
+      produces:
+        - application/json
+      parameters:
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Team'
+        '400':
+          description: error
+  /teams/fbs:
+    get:
+      tags:
+        - teams
+      summary: Get list of major division teams for a given year
+      description: Information on major division teams
+      operationId: getFbsTeams
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Team'
+        '400':
+          description: error
+  /roster:
+    get:
+      tags:
+        - teams
+      summary: Get team roster
+      description: Roster data
+      operationId: getRoster
+      produces:
+        - application/json
+      parameters:
+        - name: team
+          description: Team name
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Player'
+        '400':
+          description: error
+  /talent:
+    get:
+      tags:
+        - teams
+      summary: Get team talent rankings
+      description: Team talent composite
+      operationId: getTalent
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamTalent'
+        '400':
+          description: error
+  /teams/matchup:
+    get:
+      tags:
+        - teams
+      summary: Get matchup history
+      description: Matchup history
+      operationId: getTeamMatchup
+      produces:
+        - application/json
+      parameters:
+        - name: team1
+          description: First team
+          in: query
+          required: true
+          type: string
+        - name: team2
+          description: Second team
+          in: query
+          required: true
+          type: string
+        - name: minYear
+          description: Minimum year
+          in: query
+          required: false
+          type: integer
+        - name: maxYear
+          description: Maximum year
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamMatchup'
+        '400':
+          description: error
+  /venues:
+    get:
+      tags:
+        - venues
+      summary: Get venue information
+      description: Venues
+      operationId: getVenues
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Venue'
+        '400':
+          description: error
+  /coaches:
+    get:
+      tags:
+        - coaches
+      summary: Get coach records and school history
+      description: Coaching history
+      operationId: getCoaches
+      produces:
+        - application/json
+      parameters:
+        - name: firstName
+          description: First name filter
+          in: query
+          required: false
+          type: string
+        - name: lastName
+          description: Last name filter
+          in: query
+          required: false
+          type: string
+        - name: team
+          description: Team name filter
+          in: query
+          required: false
+          type: string
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+        - name: minYear
+          description: Minimum year filter (inclusive)
+          in: query
+          required: false
+          type: integer
+        - name: maxYear
+          description: Maximum year filter (inclusive)
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: object
+            properties:
+              first_name:
+                type: string
+              last_name:
+                type: string
+              seasons:
+                type: array
+                items:
+                  $ref: '#/definitions/TeamSeason'
+  /rankings:
+    get:
+      tags:
+        - rankings
+      summary: Get historical rankings and polls
+      description: Poll rankings
+      operationId: getRankings
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year/season filter for games
+          in: query
+          required: true
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: seasonType
+          description: Season type filter (regular or postseason)
+          default: regular
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RankingWeek'
+        '400':
+          description: error
+  /lines:
+    get:
+      tags:
+        - betting
+      summary: Get betting line information
+      description: Closing betting lines
+      operationId: getLines
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year/season filter for games
+          in: query
+          required: true
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: seasonType
+          description: Season type filter (regular or postseason)
+          default: regular
+          in: query
+          required: false
+          type: string
+        - name: team
+          description: Team
+          in: query
+          required: false
+          type: string
+        - name: home
+          description: Home team filter
+          in: query
+          required: false
+          type: string
+        - name: away
+          description: Away team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/GameLines'
+        '400':
+          description: error
+  /recruiting/players:
+    get:
+      tags:
+        - recruiting
+      summary: Get player recruiting rankings and data. Requires either a year or team to be specified.
+      description: Player recruiting rankings
+      operationId: getRecruitingPlayers
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Recruiting class year (required if team no specified)
+          in: query
+          required: false
+          type: integer
+        - name: classification
+          description: 'Type of recruit (HighSchool, JUCO, PrepSchool)'
+          default: HighSchool
+          in: query
+          required: false
+          type: string
+        - name: position
+          description: Position abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: state
+          description: State or province abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: team
+          description: Committed team filter (required if year not specified)
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Recruit'
+        '400':
+          description: error
+  /recruiting/teams:
+    get:
+      tags:
+        - recruiting
+      summary: Get team recruiting rankings
+      description: Team recruiting rankings
+      operationId: getRecruitingTeams
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Recruiting class year
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamRecruitingRank'
+        '400':
+          description: error
+  /recruiting/groups:
+    get:
+      tags:
+        - recruiting
+      summary: Get position group aggregated ratings
+      description: Gets a list of aggregated statistics by team and position grouping
+      operationId: getRecruitingGroups
+      produces:
+        - application/json
+      parameters:
+        - name: startYear
+          description: Starting year
+          in: query
+          required: false
+          type: integer
+        - name: endYear
+          description: Ending year
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: conference filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PositionGroupRecruitingRating'
+        '400':
+          description: error
+  /ratings/sp:
+    get:
+      tags:
+        - ratings
+      summary: Get S&P+ historical rating data (requires either a year or team specified)
+      description: S&P+ rating data
+      operationId: getSPRatings
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Season filter (required if team not specified)
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter (required if year not specified)
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamSPRating'
+        '400':
+          description: error
+  /ratings/sp/conferences:
+    get:
+      tags:
+        - ratings
+      summary: Get average S&P+ historical rating data by conference
+      description: Conference average S&P+ ratings by year
+      operationId: getConferenceSPRatings
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Season filter
+          in: query
+          required: false
+          type: integer
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ConferenceSPRating'
+        '400':
+          description: error
+  /ppa/predicted:
+    get:
+      tags:
+        - metrics
+      summary: Calculate Predicted Points
+      description: Predicted Points
+      operationId: getPredictedPoints
+      produces:
+        - application/json
+      parameters:
+        - name: down
+          description: Down filter
+          in: query
+          required: true
+          type: integer
+        - name: distance
+          description: Distance filter
+          in: query
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PredictedPoints'
+        '400':
+          description: error
+  /ppa/teams:
+    get:
+      tags:
+        - metrics
+      summary: Get team averages for Predicted Points Added (PPA)
+      description: Predicted Points Added (PPA)
+      operationId: getTeamPPA
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter (required if team not specified)
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter (required if year not specified)
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamPPA'
+        '400':
+          description: error
+  /ppa/games:
+    get:
+      tags:
+        - metrics
+      summary: Get team game averages for Predicted Points Added (PPA)
+      description: Predicted Points Added (PPA) by game
+      operationId: getGamePPA
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: true
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/GamePPA'
+        '400':
+          description: error
+  /ppa/players/games:
+    get:
+      tags:
+        - metrics
+      summary: Get player game averages for Predicted Points Added (PPA)
+      description: Predicted Points Added (PPA) by player game
+      operationId: getPlayerGamePPA
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: position
+          description: Position abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: playerId
+          description: Player id filter
+          in: query
+          required: false
+          type: integer
+        - name: threshold
+          description: Minimum play threshold filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayerGamePPA'
+        '400':
+          description: error
+  /ppa/players/season:
+    get:
+      tags:
+        - metrics
+      summary: Get player season averages for Predicted Points Added (PPA)
+      description: Predicted Points Added (PPA) by player season
+      operationId: getPlayerSeasonPPA
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: position
+          description: Position abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: playerId
+          description: Player id filter
+          in: query
+          required: false
+          type: integer
+        - name: threshold
+          description: Minimum play threshold filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayerSeasonPPA'
+        '400':
+          description: error
+  /metrics/wp:
+    get:
+      tags:
+        - metrics
+      summary: Get win probability chart data
+      description: Win probability data
+      operationId: getWinProbabilityData
+      produces:
+        - application/json
+      parameters:
+        - name: gameId
+          description: Game id filter
+          in: query
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayWP'
+        '400':
+          description: error
+  /stats/season:
+    get:
+      tags:
+        - stats
+      summary: Get season team stats
+      description: Team season stats
+      operationId: getTeamSeasonStats
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter (required if no team specified)
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter (required if no year specified)
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamSeasonStat'
+        '400':
+          description: error
+  /stats/season/advanced:
+    get:
+      tags:
+        - stats
+      summary: Get advanced season team stats
+      description: Advanced team season stats
+      operationId: getAdvancedTeamSeasonStats
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter (required if no team specified)
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter (required if no year specified)
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/AdvancedSeasonStat'
+        '400':
+          description: error
+  /stats/game/advanced:
+    get:
+      tags:
+        - stats
+      summary: Get advanced game team stats
+      description: Advanced team game stats
+      operationId: getAdvancedTeamGameStats
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter (required if no team specified)
+          in: query
+          required: false
+          type: integer
+        - name: week
+          description: Week filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter (required if no year specified)
+          in: query
+          required: false
+          type: string
+        - name: opponent
+          description: Opponent filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/AdvancedGameStat'
+        '400':
+          description: error
+  /stats/categories:
+    get:
+      tags:
+        - stats
+      summary: Get stat category list
+      description: Stat category list
+      operationId: getStatCategories
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              type: string
+  /player/search:
+    get:
+      tags:
+        - players
+      summary: Search for players
+      description: Search for players
+      operationId: playerSearch
+      produces:
+        - application/json
+      parameters:
+        - name: searchTerm
+          description: Term to search on
+          in: query
+          required: true
+          type: string
+        - name: position
+          description: Position abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: school
+          description: school filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayerSearchResult'
+        '400':
+          description: error
+definitions:
+  Game:
+    type: object
+    properties:
+      id:
+        type: integer
+      season:
+        type: integer
+      week:
+        type: integer
+      season_type:
+        type: string
+      start_date:
+        type: string
+      neutral_site:
+        type: boolean
+      conference_game:
+        type: boolean
+      attendance:
+        type: integer
+      venue_id:
+        type: integer
+      venue:
+        type: string
+      home_team:
+        type: string
+      home_conference:
+        type: string
+      home_points:
+        type: integer
+      home_line_scores:
+        type: array
+        items:
+          type: integer
+      away_team:
+        type: string
+      away_conference:
+        type: string
+      away_points:
+        type: integer
+      away_line_scores:
+        type: array
+        items:
+          type: integer
+  PlayerGame:
+    type: object
+    properties:
+      id:
+        type: integer
+      teams:
+        type: array
+        items:
+          type: object
+          properties:
+            school:
+              type: object
+              properties:
+                name:
+                  type: string
+                conference:
+                  type: string
+            homeAway:
+              type: boolean
+            points:
+              type: integer
+            categories:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        athletes:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                              name:
+                                type: string
+                              stat:
+                                type: string
+  TeamGame:
+    type: object
+    properties:
+      id:
+        type: integer
+      teams:
+        type: array
+        items:
+          type: object
+          properties:
+            school:
+              type: string
+            conference:
+              type: string
+            homeAway:
+              type: boolean
+            points:
+              type: integer
+            stats:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                  stat:
+                    type: string
+  Drive:
+    type: object
+    properties:
+      offense:
+        type: string
+      offense_conference:
+        type: string
+      defense:
+        type: string
+      defense_conference:
+        type: string
+      id:
+        type: integer
+      game_id:
+        type: integer
+      scoring:
+        type: boolean
+      start_period:
+        type: integer
+      start_yardline:
+        type: integer
+      start_time:
+        type: object
+        properties:
+          minutes:
+            type: integer
+          seconds:
+            type: integer
+      end_period:
+        type: integer
+      end_yardline:
+        type: integer
+      end_time:
+        type: object
+        properties:
+          minutes:
+            type: integer
+          seconds:
+            type: integer
+      plays:
+        type: integer
+      yards:
+        type: integer
+      drive_result:
+        type: string
+  Play:
+    type: object
+    properties:
+      id:
+        type: integer
+      drive_id:
+        type: integer
+      offense:
+        type: string
+      offense_conference:
+        type: string
+      offense_score:
+        type: integer
+      defense:
+        type: string
+      home:
+        type: string
+      away:
+        type: string
+      defense_conference:
+        type: string
+      defense_points:
+        type: integer
+      period:
+        type: integer
+      clock:
+        type: object
+        properties:
+          minutes:
+            type: integer
+          seconds:
+            type: integer
+      yard_line:
+        type: integer
+      down:
+        type: integer
+      distance:
+        type: integer
+      yards_gained:
+        type: integer
+      play_type:
+        type: string
+      play_text:
+        type: string
+  PlayType:
+    type: object
+    properties:
+      id:
+        type: integer
+      text:
+        type: string
+      abbreviation:
+        type: string
+  Conference:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      short_name:
+        type: string
+      abbreviation:
+        type: string
+  Team:
+    type: object
+    properties:
+      id:
+        type: integer
+      school:
+        type: string
+      mascot:
+        type: string
+      abbreviation:
+        type: string
+      alt_name_1:
+        type: string
+      alt_name_2:
+        type: string
+      alt_name_3:
+        type: string
+      conference:
+        type: string
+      division:
+        type: string
+      color:
+        type: string
+      alt_color:
+        type: string
+      logos:
+        type: array
+        items:
+          type: string
+  Player:
+    type: object
+    properties:
+      id:
+        type: integer
+      first_name:
+        type: string
+      last_name:
+        type: string
+      height:
+        type: integer
+      weight:
+        type: integer
+      jersey:
+        type: integer
+      year:
+        type: integer
+      position:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      country:
+        type: string
+  TeamTalent:
+    type: object
+    properties:
+      year:
+        type: integer
+      school:
+        type: string
+      talent:
+        type: number
+  TeamSeason:
+    type: object
+    properties:
+      school:
+        type: string
+      year:
+        type: string
+      games:
+        type: integer
+      wins:
+        type: integer
+      losses:
+        type: integer
+      ties:
+        type: integer
+      preseason_rank:
+        type: integer
+        description: Rank in the AP preseason poll
+      postseason_rank:
+        type: integer
+        description: Final ranking in the AP poll
+  Venue:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      capacity:
+        type: integer
+      grass:
+        type: boolean
+      city:
+        type: string
+      state:
+        type: string
+      zip:
+        type: string
+      country_code:
+        type: string
+      location:
+        type: object
+        properties:
+          x:
+            type: number
+          'y':
+            type: number
+      elevation:
+        type: integer
+      year:
+        type: integer
+      dome:
+        type: boolean
+  RankingWeek:
+    type: object
+    properties:
+      season:
+        type: integer
+      seasonType:
+        type: string
+      week:
+        type: integer
+      polls:
+        type: array
+        items:
+          type: object
+          properties:
+            poll:
+              type: string
+            ranks:
+              type: array
+              items:
+                type: object
+                properties:
+                  rank:
+                    type: integer
+                  school:
+                    type: string
+                  conference:
+                    type: string
+                  firstPlaceVotes:
+                    type: integer
+                  points:
+                    type: integer
+  TeamMatchup:
+    type: object
+    properties:
+      team1:
+        type: string
+      team2:
+        type: string
+      startYear:
+        type: integer
+      endYear:
+        type: integer
+      team1Wins:
+        type: integer
+      team2Wins:
+        type: integer
+      ties:
+        type: integer
+      games:
+        type: array
+        items:
+          type: object
+          properties:
+            season:
+              type: integer
+            week:
+              type: integer
+            season_type:
+              type: string
+            date:
+              type: string
+            neutralSite:
+              type: boolean
+            venue:
+              type: string
+            homeTeam:
+              type: string
+            homeScore:
+              type: integer
+            awayTeam:
+              type: string
+            awayScore:
+              type: integer
+            winner:
+              type: string
+  GameLines:
+    type: object
+    properties:
+      id:
+        type: integer
+      homeTeam:
+        type: string
+      homeScore:
+        type: integer
+      awayTeam:
+        type: string
+      awayScore:
+        type: integer
+      lines:
+        type: array
+        items:
+          type: object
+          properties:
+            provider:
+              type: string
+            spread:
+              type: number
+            formattedSpread:
+              type: string
+            overUnder:
+              type: integer
+  Recruit:
+    type: object
+    properties:
+      recruitType:
+        type: string
+      year:
+        type: integer
+      ranking:
+        type: integer
+      name:
+        type: string
+      school:
+        type: string
+      committedTo:
+        type: string
+      position:
+        type: string
+      height:
+        type: integer
+      weight:
+        type: integer
+      stars:
+        type: integer
+      rating:
+        type: number
+      city:
+        type: string
+      stateProvince:
+        type: string
+      country:
+        type: string
+  TeamRecruitingRank:
+    type: object
+    properties:
+      year:
+        type: integer
+      rank:
+        type: integer
+      team:
+        type: string
+      points:
+        type: number
+  PositionGroupRecruitingRating:
+    type: object
+    properties:
+      team:
+        type: string
+      conference:
+        type: string
+      positiionGroup:
+        type: string
+      averageRating:
+        type: number
+      totalRating:
+        type: number
+      commits:
+        type: number
+      averageStars:
+        type: number
+  TeamSPRating:
+    type: object
+    properties:
+      year:
+        type: integer
+      team:
+        type: string
+      conference:
+        type: string
+      rating:
+        type: number
+      secondOrderWins:
+        type: number
+      sos:
+        type: number
+      offense:
+        type: object
+        properties:
+          rating:
+            type: number
+          success:
+            type: number
+          explosiveness:
+            type: number
+          rushing:
+            type: number
+          passing:
+            type: number
+          standardDowns:
+            type: number
+          passingDowns:
+            type: number
+          runRate:
+            type: number
+          pace:
+            type: number
+      defense:
+        type: object
+        properties:
+          rating:
+            type: number
+          success:
+            type: number
+          explosiveness:
+            type: number
+          rushing:
+            type: number
+          pasing:
+            type: number
+          standardDowns:
+            type: number
+          passingDowns:
+            type: number
+          havoc:
+            type: object
+            properties:
+              total:
+                type: number
+              frontSeven:
+                type: number
+              db:
+                type: number
+      specialTeams:
+        type: object
+        properties:
+          rating:
+            type: number
+  ConferenceSPRating:
+    type: object
+    properties:
+      year:
+        type: integer
+      conference:
+        type: string
+      rating:
+        type: number
+      secondOrderWins:
+        type: number
+      sos:
+        type: number
+      offense:
+        type: object
+        properties:
+          rating:
+            type: number
+          success:
+            type: number
+          explosiveness:
+            type: number
+          rushing:
+            type: number
+          passing:
+            type: number
+          standardDowns:
+            type: number
+          passingDowns:
+            type: number
+          runRate:
+            type: number
+          pace:
+            type: number
+      defense:
+        type: object
+        properties:
+          rating:
+            type: number
+          success:
+            type: number
+          explosiveness:
+            type: number
+          rushing:
+            type: number
+          pasing:
+            type: number
+          standardDowns:
+            type: number
+          passingDowns:
+            type: number
+          havoc:
+            type: object
+            properties:
+              total:
+                type: number
+              frontSeven:
+                type: number
+              db:
+                type: number
+      specialTeams:
+        type: object
+        properties:
+          rating:
+            type: number
+  PredictedPoints:
+    type: object
+    properties:
+      yardLine:
+        type: integer
+      predictedPoints:
+        type: number
+  TeamSeasonStat:
+    type: object
+    properties:
+      season:
+        type: integer
+      team:
+        type: string
+      conference:
+        type: string
+      statName:
+        type: string
+      statValue:
+        type: integer
+  TeamPPA:
+    type: object
+    properties:
+      season:
+        type: integer
+      team:
+        type: string
+      conference:
+        type: string
+      offense:
+        type: object
+        properties:
+          overall:
+            type: number
+          passing:
+            type: number
+          rushing:
+            type: number
+          firstDown:
+            type: number
+          secondDown:
+            type: number
+          thirdDown:
+            type: number
+      defense:
+        type: object
+        properties:
+          overall:
+            type: number
+          passing:
+            type: number
+          rushing:
+            type: number
+          firstDown:
+            type: number
+          secondDown:
+            type: number
+          thirdDown:
+            type: number
+  GamePPA:
+    type: object
+    properties:
+      id:
+        type: integer
+      season:
+        type: integer
+      week:
+        type: integer
+      team:
+        type: string
+      conference:
+        type: string
+      opponnent:
+        type: string
+      offense:
+        type: object
+        properties:
+          overall:
+            type: number
+          passing:
+            type: number
+          rushing:
+            type: number
+          firstDown:
+            type: number
+          secondDown:
+            type: number
+          thirdDown:
+            type: number
+      defense:
+        type: object
+        properties:
+          overall:
+            type: number
+          passing:
+            type: number
+          rushing:
+            type: number
+          firstDown:
+            type: number
+          secondDown:
+            type: number
+          thirdDown:
+            type: number
+  PlayWP:
+    type: object
+    properties:
+      playId:
+        type: integer
+      playText:
+        type: string
+      homeId:
+        type: integer
+      home:
+        type: string
+      awayId:
+        type: integer
+      away:
+        type: string
+      spread:
+        type: number
+      homeBall:
+        type: boolean
+      homeScore:
+        type: integer
+      awayScore:
+        type: integer
+      timeRemaining:
+        type: integer
+      yardLine:
+        type: integer
+      down:
+        type: integer
+      distance:
+        type: integer
+      homeWinner:
+        type: boolean
+      homeWinProb:
+        type: number
+      playNumber:
+        type: integer
+  PlayStatType:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+  PlayStat:
+    type: object
+    properties:
+      gameId:
+        type: integer
+      season:
+        type: integer
+      week:
+        type: integer
+      opponent:
+        type: string
+      teamScore:
+        type: integer
+      opponentScore:
+        type: integer
+      driveId:
+        type: integer
+      playId:
+        type: integer
+      period:
+        type: integer
+      secondsRemaining:
+        type: integer
+      yardsToGoal:
+        type: integer
+      down:
+        type: integer
+      distance:
+        type: integer
+      athleteId:
+        type: integer
+      athleteName:
+        type: string
+      statType:
+        type: string
+      stat:
+        type: integer
+  AdvancedSeasonStat:
+    type: object
+    properties:
+      season:
+        type: integer
+      team:
+        type: string
+      offense:
+        type: object
+        properties:
+          ppa:
+            type: number
+          successRate:
+            type: number
+          explosiveness:
+            type: number
+          standardDowns:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          passingDowns:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          rushingPlays:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          passingPlays:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+      defense:
+        type: object
+        properties:
+          ppa:
+            type: number
+          successRate:
+            type: number
+          explosiveness:
+            type: number
+          standardDowns:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          passingDowns:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          rushingPlays:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          passingPlays:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+  AdvancedGameStat:
+    type: object
+    properties:
+      gameId:
+        type: integer
+      season:
+        type: integer
+      week:
+        type: integer
+      team:
+        type: string
+      opponent:
+        type: string
+      offense:
+        type: object
+        properties:
+          ppa:
+            type: number
+          successRate:
+            type: number
+          explosiveness:
+            type: number
+          standardDowns:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          passingDowns:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          rushingPlays:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          passingPlays:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+      defense:
+        type: object
+        properties:
+          ppa:
+            type: number
+          successRate:
+            type: number
+          explosiveness:
+            type: number
+          standardDowns:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          passingDowns:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          rushingPlays:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+          passingPlays:
+            type: object
+            properties:
+              ppa:
+                type: number
+              successRate:
+                type: number
+              explosiveness:
+                type: number
+  PlayerSearchResult:
+    type: object
+    properties:
+      id:
+        type: integer
+      team:
+        type: string
+      name:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      weight:
+        type: integer
+      height:
+        type: integer
+      jersey:
+        type: integer
+      position:
+        type: string
+      hometown:
+        type: string
+      teamColor:
+        type: string
+  PlayerGamePPA:
+    type: object
+    properties: 
+      season:
+        type: integer
+      week:
+        type: integer
+      name:
+        type: string
+      position:
+        type: string
+      team:
+        type: string
+      opponent:
+        type: string
+      averagePPA:
+        type: object
+        properties: 
+          all:
+            type: number
+          pass:
+            type: number
+          rush:
+            type: number
+  PlayerSeasonPPA:
+    type: object
+    properties: 
+      season:
+        type: integer
+      name:
+        type: string
+      position:
+        type: string
+      team:
+        type: string
+      conference:
+        type: string
+      averagePPA:
+        type: object
+        properties: 
+          all:
+            type: number
+          pass:
+            type: number
+          rush:
+            type: number
+          firstDown:
+            type: number
+          secondDown:
+            type: number
+          thirdDown:
+            type: number
+          standardDowns:
+            type: number
+          passingDowns:
+            type: number
