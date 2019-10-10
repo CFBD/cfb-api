@@ -320,12 +320,232 @@ module.exports = (db) => {
                 thirdDown: r.third_defense_ppa
             }
         }));
-    }
+    };
+
+    const getPPAByPlayerGame = async (season, week, position, school, playerId, threshold) => {
+        let filters = [];
+        let params = [];
+        let index = 1;
+
+        if (season) {
+            filters.push(`g.season = $${index}`);
+            params.push(season);
+            index++;
+        }
+
+        if (week) {
+            filters.push(`g.week = $${index}`);
+            params.push(week);
+            index++;
+        }
+
+        if (position) {
+            filters.push(`LOWER(po.abbreviation) = LOWER($${index})`);
+            params.push(position);
+            index++;
+        }
+
+        if (school) {
+            filters.push(`LOWER(t.school) = LOWER($${index})`);
+            params.push(school);
+            index++;
+        }
+
+        if (playerId) {
+            filters.push(`a.id = $${index}`);
+            params.push(playerId);
+            index++;
+        }
+
+        let filter = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+        if (!threshold) {
+            threshold = 0;
+        }
+
+        params.push(threshold);
+
+        const results = await db.any(`
+            WITH plays AS (
+                SELECT DISTINCT t.school,
+                                g.season,
+                                g.week,
+                                t2.school AS opponent,
+                                a.id,
+                                a.name,
+                                po.abbreviation AS position,
+                                p.id AS play_id,
+                                p.down,
+                                CASE
+                                    WHEN p.play_type_id IN (3,4,6,7,24,26,36,51,67) THEN 'Pass'
+                                    WHEN p.play_type_id IN (5,9,29,39,68) THEN 'Rush'
+                                    ELSE 'Other'
+                                END AS play_type,
+                                p.ppa
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id
+                    INNER JOIN team AS t ON gt.team_id = t.id
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN conference AS c ON ct.conference_id = c.id
+                    INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+                    INNER JOIN team AS t2 ON gt2.team_id = t2.id
+                    INNER JOIN conference_team AS ct2 ON t2.id = ct2.team_id AND ct2.end_year IS NULL
+                    INNER JOIN conference AS c2 ON ct2.conference_id = c2.id
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN play AS p ON d.id = p.drive_id AND p.offense_id = t.id AND p.ppa IS NOT NULL
+                    INNER JOIN play_stat AS ps ON p.id = ps.play_id
+                    INNER JOIN athlete AS a ON ps.athlete_id = a.id
+                    INNER JOIN position AS po ON a.position_id = po.id
+                ${filter}
+            )
+            SELECT "name", position, school, season, week, opponent, ROUND(CAST(AVG(ppa) AS NUMERIC), 3) AS avg_ppa, ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Pass') AS NUMERIC), 3) AS pass_ppa, ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Rush') AS NUMERIC), 3) AS rush_ppa
+            FROM plays
+            WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR')
+            GROUP BY "name", position, school, season, week, opponent
+            HAVING COUNT(*) >= $${index}
+            ORDER BY avg_ppa
+        `, params);
+
+        return results.map(r => ({
+            season: r.season,
+            week: r.week,
+            name: r.name,
+            position: r.position,
+            team: r.school,
+            opponent: r.opponent,
+            averagePPA: {
+                all: parseFloat(r.avg_ppa),
+                pass: r.pass_ppa ? parseFloat(r.pass_ppa) : null,
+                rush: r.rush_ppa ? parseFloat(r.rush_ppa) : null
+            }
+        }));
+    };
+
+    const getPPAByPlayerSeason = async (season, conference, position, school, playerId, threshold) => {
+        let filters = [];
+        let params = [];
+        let index = 1;
+
+        if (season) {
+            filters.push(`g.season = $${index}`);
+            params.push(season);
+            index++;
+        }
+
+        if (conference) {
+            filters.push(`LOWER(c.abbreviation) = LOWER($${index})`);
+            params.push(conference);
+            index++;
+        }
+
+        if (position) {
+            filters.push(`LOWER(po.abbreviation) = LOWER($${index})`);
+            params.push(position);
+            index++;
+        }
+
+        if (school) {
+            filters.push(`LOWER(t.school) = LOWER($${index})`);
+            params.push(school);
+            index++;
+        }
+
+        if (playerId) {
+            filters.push(`a.id = $${index}`);
+            params.push(playerId);
+            index++;
+        }
+
+        let filter = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+        if (!threshold) {
+            threshold = 0;
+        }
+
+        params.push(threshold);
+
+        const results = await db.any(`
+        WITH plays AS (
+            SELECT DISTINCT g.season,
+                            t.school,
+                            c.name AS conference,
+                            a.id,
+                            a.name,
+                            po.abbreviation AS position,
+                            p.id AS play_id,
+                            p.down,
+                            CASE
+                                WHEN p.play_type_id IN (3,4,6,7,24,26,36,51,67) THEN 'Pass'
+                                WHEN p.play_type_id IN (5,9,29,39,68) THEN 'Rush'
+                                ELSE 'Other'
+                            END AS play_type,
+                            CASE
+                                WHEN p.down = 2 AND p.distance >= 8 THEN 'passing'
+                                WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
+                                ELSE 'standard'
+                            END AS down_type,
+                            p.ppa
+            FROM game AS g
+                INNER JOIN game_team AS gt ON g.id = gt.game_id
+                INNER JOIN team AS t ON gt.team_id = t.id
+                INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+                INNER JOIN team AS t2 ON gt2.team_id = t2.id
+                INNER JOIN conference_team AS ct2 ON t2.id = ct2.team_id AND ct2.end_year IS NULL
+                INNER JOIN conference AS c2 ON ct2.conference_id = c2.id
+                INNER JOIN drive AS d ON g.id = d.game_id
+                INNER JOIN play AS p ON d.id = p.drive_id AND p.offense_id = t.id AND p.ppa IS NOT NULL
+                INNER JOIN play_stat AS ps ON p.id = ps.play_id
+                INNER JOIN athlete AS a ON ps.athlete_id = a.id
+                INNER JOIN position AS po ON a.position_id = po.id
+            ${filter}
+        )
+        SELECT season,
+              "name",
+              position,
+              school,
+              conference,
+              COUNT(ppa) AS countable_plays,
+              ROUND(CAST(AVG(ppa) AS NUMERIC), 3) AS avg_ppa,
+              ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Pass') AS NUMERIC), 3) AS pass_ppa,
+              ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Rush') AS NUMERIC), 3) AS rush_ppa,
+              ROUND(CAST(AVG(ppa) FILTER(WHERE down = 1) AS NUMERIC), 3) AS first_down_ppa,
+              ROUND(CAST(AVG(ppa) FILTER(WHERE down = 2) AS NUMERIC), 3) AS second_down_ppa,
+              ROUND(CAST(AVG(ppa) FILTER(WHERE down = 3) AS NUMERIC), 3) AS third_down_ppa,
+              ROUND(CAST(AVG(ppa) FILTER(WHERE down_type = 'standard') AS NUMERIC), 3) AS standard_down_ppa,
+              ROUND(CAST(AVG(ppa) FILTER(WHERE down_type = 'passing') AS NUMERIC), 3) AS passing_down_ppa
+        FROM plays
+        WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR')
+        GROUP BY season, "name", position, school, conference
+        HAVING COUNT(*) >= $${index}
+        ORDER BY avg_ppa
+        `, params);
+
+        return results.map(r => ({
+            season: r.season,
+            name: r.name,
+            position: r.position,
+            team: r.school,
+            conference: r.conference,
+            countablePlays: parseInt(r.countable_plays),
+            averagePPA: {
+                all: parseFloat(r.avg_ppa),
+                pass: r.pass_ppa ? parseFloat(r.pass_ppa) : null,
+                rush: r.rush_ppa ? parseFloat(r.rush_ppa) : null,
+                firstDown: r.first_down_ppa ? parseFloat(r.first_down_ppa) : null,
+                secondDown: r.second_down_ppa ? parseFloat(r.second_down_ppa) : null,
+                thirdDown: r.third_down_ppa ? parseFloat(r.third_down_ppa) : null,
+                standardDowns: r.standard_down_ppa ? parseFloat(r.standard_down_ppa) : null,
+                passingDowns: r.passing_down_ppa ? parseFloat(r.passing_down_ppa) : null
+            }
+        }));
+    };
 
     return {
         getPP,
         getWP,
         getPPAByTeam,
-        getPPAByGame
+        getPPAByGame,
+        getPPAByPlayerGame,
+        getPPAByPlayerSeason
     }
 }
