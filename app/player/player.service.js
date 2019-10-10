@@ -74,8 +74,157 @@ module.exports = (db) => {
         return results.map(r => ({ playNumber: parseInt(r.row_num), avgPPA: r.avg_ppa }));
     };
 
+    const getPlayerUsage = async (season, conference, position, school, playerId) => {
+        let filters = [];
+        let params = [];
+        let index = 1;
+
+        if (season) {
+            filters.push(`g.season = $${index}`);
+            params.push(season);
+            index++;
+        }
+
+        if (conference) {
+            filters.push(`LOWER(c.abbreviation) = LOWER($${index})`);
+            params.push(conference);
+            index++;
+        }
+
+        if (position) {
+            filters.push(`LOWER(po.abbreviation) = LOWER($${index})`);
+            params.push(position);
+            index++;
+        }
+
+        if (school) {
+            filters.push(`LOWER(t.school) = LOWER($${index})`);
+            params.push(school);
+            index++;
+        }
+
+        if (playerId) {
+            filters.push(`a.id = $${index}`);
+            params.push(playerId);
+            index++;
+        }
+        
+        let filter = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+
+        const results = await db.any(`
+            WITH plays AS (
+                SELECT DISTINCT g.season,
+                                t.id AS team_id,
+                                t.school,
+                                c.name AS conference,
+                                a.id,
+                                a.name,
+                                po.abbreviation AS position,
+                                p.id AS play_id,
+                                p.down,
+                                CASE
+                                    WHEN p.play_type_id IN (3,4,6,7,24,26,36,51,67) THEN 'Pass'
+                                    WHEN p.play_type_id IN (5,9,29,39,68) THEN 'Rush'
+                                    ELSE 'Other'
+                                END AS play_type,
+                                CASE
+                                    WHEN p.down = 2 AND p.distance >= 8 THEN 'passing'
+                                    WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
+                                    ELSE 'standard'
+                                END AS down_type,
+                                p.ppa
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id
+                    INNER JOIN team AS t ON gt.team_id = t.id
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN conference AS c ON ct.conference_id = c.id
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN play AS p ON d.id = p.drive_id AND p.offense_id = t.id AND p.ppa IS NOT NULL
+                    INNER JOIN play_stat AS ps ON p.id = ps.play_id
+                    INNER JOIN athlete AS a ON ps.athlete_id = a.id
+                    INNER JOIN position AS po ON a.position_id = po.id
+                ${filter}
+            ), teams AS (
+                SELECT 	g.season,
+                        t.id,
+                        t.school,
+                        p.down,
+                        CASE
+                            WHEN p.play_type_id IN (3,4,6,7,24,26,36,51,67) THEN 'Pass'
+                            WHEN p.play_type_id IN (5,9,29,39,68) THEN 'Rush'
+                            ELSE 'Other'
+                        END AS play_type,
+                        CASE
+                            WHEN p.down = 2 AND p.distance >= 8 THEN 'passing'
+                            WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
+                            ELSE 'standard'
+                        END AS down_type,
+                        p.ppa
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id
+                    INNER JOIN team AS t ON gt.team_id = t.id
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN conference AS c ON ct.conference_id = c.id
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN play AS p ON d.id = p.drive_id AND p.offense_id = t.id AND p.ppa IS NOT NULL
+                WHERE g.season = $1
+            ), team_counts AS (
+                SELECT 	season,
+                        id,
+                        school,
+                        COUNT(*) AS plays,
+                        COUNT(*) FILTER(WHERE play_type = 'Rush') AS rush,
+                        COUNT(*) FILTER(WHERE play_type = 'Pass') AS pass,
+                        COUNT(*) FILTER(WHERE down = 1) AS first_downs,
+                        COUNT(*) FILTER(WHERE down = 2) AS second_downs,
+                        COUNT(*) FILTER(WHERE down = 3) AS third_downs,
+                        COUNT(*) FILTER(WHERE down_type = 'standard') AS standard_downs,
+                        COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_downs
+                FROM teams
+                GROUP BY season, id, school
+            )
+            SELECT p.season,
+                p."name",
+                p.position,
+                p.school,
+                p.conference,
+                ROUND(CAST(CAST(COUNT(p.ppa) AS NUMERIC) / t.plays AS NUMERIC), 4) AS overall_usage,
+                ROUND(CAST(CAST(COUNT(p.ppa) FILTER(WHERE p.play_type = 'Pass') AS NUMERIC) / t.pass AS NUMERIC), 4) AS pass_usage,
+                ROUND(CAST(CAST(COUNT(p.ppa) FILTER(WHERE p.play_type = 'Rush') AS NUMERIC) / t.rush AS NUMERIC), 4) AS rush_usage,
+                ROUND(CAST(CAST(COUNT(p.ppa) FILTER(WHERE p.down = 1) AS NUMERIC) / t.first_downs AS NUMERIC), 4) AS first_down_usage,
+                ROUND(CAST(CAST(COUNT(p.ppa) FILTER(WHERE p.down = 2) AS NUMERIC) / t.second_downs AS NUMERIC), 3) AS second_down_usage,
+                ROUND(CAST(CAST(COUNT(p.ppa) FILTER(WHERE p.down = 3) AS NUMERIC) / t.third_downs AS NUMERIC), 3) AS third_down_usage,
+                ROUND(CAST(CAST(COUNT(p.ppa) FILTER(WHERE p.down_type = 'standard') AS NUMERIC) / t.standard_downs AS NUMERIC), 3) AS standard_down_usage,
+                ROUND(CAST(CAST(COUNT(p.ppa) FILTER(WHERE p.down_type = 'passing') AS NUMERIC) / t.passing_downs AS NUMERIC), 3) AS passing_down_usage
+            FROM plays AS p
+                INNER JOIN team_counts AS t ON p.team_id = t.id
+            WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR')
+            GROUP BY p.season, p."name", p.position, p.school, p.conference, t.plays, t.pass, t.rush, t.first_downs, t.second_downs, t.third_downs, t.standard_downs, t.passing_downs
+            ORDER BY overall_usage DESC
+        `, params);
+
+        return results.map(r => ({
+            season: r.season,
+            name: r.name,
+            position: r.position,
+            team: r.school,
+            conference: r.conference,
+            usage: {
+                overall: parseFloat(r.overall_usage),
+                pass: parseFloat(r.pass_usage),
+                rush: parseFloat(r.rush_usage),
+                firstDown: parseFloat(r.first_down_usage),
+                secondDown: parseFloat(r.second_down_usage),
+                thirdDown: parseFloat(r.third_down_usage),
+                standardDowns: parseFloat(r.standard_down_usage),
+                passingDowns: parseFloat(r.passing_down_usage)
+            }
+        }));
+    };
+
     return {
         playerSearch,
-        getMeanPassingChartData
+        getMeanPassingChartData,
+        getPlayerUsage
     };
 };

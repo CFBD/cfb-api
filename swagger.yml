@@ -1275,6 +1275,51 @@ paths:
               $ref: '#/definitions/PlayerSearchResult'
         '400':
           description: error
+  /player/usage:
+    get:
+      tags:
+        - players
+      summary: Get player usage metrics for the season
+      description: Player usage metrics by season
+      operationId: getPlayerUsage
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: true
+          default: 2019
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: position
+          description: Position abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: playerId
+          description: Player id filter
+          in: query
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayerUsage'
+        '400':
+          description: error
 definitions:
   Game:
     type: object
@@ -2360,6 +2405,38 @@ definitions:
         type: object
         properties: 
           all:
+            type: number
+          pass:
+            type: number
+          rush:
+            type: number
+          firstDown:
+            type: number
+          secondDown:
+            type: number
+          thirdDown:
+            type: number
+          standardDowns:
+            type: number
+          passingDowns:
+            type: number
+  PlayerUsage:
+    type: object
+    properties: 
+      season:
+        type: integer
+      name:
+        type: string
+      position:
+        type: string
+      team:
+        type: string
+      conference:
+        type: string
+      usage:
+        type: object
+        properties: 
+          overall:
             type: number
           pass:
             type: number
