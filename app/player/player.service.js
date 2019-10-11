@@ -203,6 +203,7 @@ module.exports = (db) => {
                 GROUP BY season, id, school
             )
             SELECT p.season,
+                p.id,
                 p."name",
                 p.position,
                 p.school,
@@ -218,12 +219,13 @@ module.exports = (db) => {
             FROM plays AS p
                 INNER JOIN team_counts AS t ON p.team_id = t.id
             WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR') ${excludeGarbageTime ? 'AND p.garbage_time = false' : ''}
-            GROUP BY p.season, p."name", p.position, p.school, p.conference, t.plays, t.pass, t.rush, t.first_downs, t.second_downs, t.third_downs, t.standard_downs, t.passing_downs
+            GROUP BY p.season, p.id, p."name", p.position, p.school, p.conference, t.plays, t.pass, t.rush, t.first_downs, t.second_downs, t.third_downs, t.standard_downs, t.passing_downs
             ORDER BY overall_usage DESC
         `, params);
 
         return results.map(r => ({
             season: r.season,
+            id: r.id,
             name: r.name,
             position: r.position,
             team: r.school,

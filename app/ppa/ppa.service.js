@@ -570,6 +570,7 @@ module.exports = (db) => {
             ${filter}
         )
         SELECT season,
+              id,
               "name",
               position,
               school,
@@ -585,13 +586,14 @@ module.exports = (db) => {
               ROUND(CAST(AVG(ppa) FILTER(WHERE down_type = 'passing') AS NUMERIC), 3) AS passing_down_ppa
         FROM plays
         WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR')
-        GROUP BY season, "name", position, school, conference
+        GROUP BY season, id, "name", position, school, conference
         HAVING COUNT(*) >= $${index}
         ORDER BY avg_ppa
         `, params);
 
         return results.map(r => ({
             season: r.season,
+            id: r.id,
             name: r.name,
             position: r.position,
             team: r.school,
