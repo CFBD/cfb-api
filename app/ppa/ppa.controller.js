@@ -58,7 +58,7 @@ module.exports = (db) => {
                     error: 'year must be numeric'
                 });
             } else {
-                const results = await service.getPPAByTeam(req.query.year, req.query.team, req.query.conference);
+                const results = await service.getPPAByTeam(req.query.year, req.query.team, req.query.conference, req.query.excludeGarbageTime);
                 res.send(results);
             }
         } catch (err) {
@@ -84,7 +84,7 @@ module.exports = (db) => {
                     error: 'week must be numeric'
                 });
             } else {
-                const results = await service.getPPAByGame(req.query.year, req.query.team, req.query.conference, req.query.week);
+                const results = await service.getPPAByGame(req.query.year, req.query.team, req.query.conference, req.query.week, req.query.excludeGarbageTime);
                 res.send(results);
             }
         } catch (err) {
@@ -118,7 +118,7 @@ module.exports = (db) => {
                     error: 'playerId must be numeric'
                 });
             } else {
-                const results = await service.getPPAByPlayerGame(req.query.year, req.query.week, req.query.position, req.query.team, req.query.playerId, req.query.threshold);
+                const results = await service.getPPAByPlayerGame(req.query.year, req.query.week, req.query.position, req.query.team, req.query.playerId, req.query.threshold, req.query.excludeGarbageTime);
                 res.send(results);
             }
         } catch (err) {
@@ -148,7 +148,7 @@ module.exports = (db) => {
                     error: 'playerId must be numeric'
                 });
             } else {
-                const results = await service.getPPAByPlayerSeason(req.query.year, req.query.conference, req.query.position, req.query.team, req.query.playerId, req.query.threshold);
+                const results = await service.getPPAByPlayerSeason(req.query.year, req.query.conference, req.query.position, req.query.team, req.query.playerId, req.query.threshold, req.query.excludeGarbageTime);
                 res.send(results);
             }
         } catch (err) {

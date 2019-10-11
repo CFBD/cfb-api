@@ -41,7 +41,7 @@ module.exports = (db) => {
                     error: 'year must be numeric'
                 });
             } else {
-                const results = await service.getAdvancedStats(req.query.year, req.query.team);
+                const results = await service.getAdvancedStats(req.query.year, req.query.team, req.query.excludeGarbageTime);
                 res.send(results);
             }
         } catch (err) {
@@ -67,7 +67,7 @@ module.exports = (db) => {
                     error: 'week must be numeric'
                 });
             } else {
-                const results = await service.getAdvancedGameStats(req.query.year, req.query.team, req.query.week, req.query.opponent);
+                const results = await service.getAdvancedGameStats(req.query.year, req.query.team, req.query.week, req.query.opponent, req.query.excludeGarbageTime);
                 res.send(results);
             }
         } catch (err) {

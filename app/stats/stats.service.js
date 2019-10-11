@@ -126,7 +126,7 @@ module.exports = (db) => {
         return results.map(r => r.name);
     }
 
-    const getAdvancedStats = async (year, team) => {
+    const getAdvancedStats = async (year, team, excludeGarbageTime) => {
         let filter = 'WHERE ';
         let params = [];
         let index = 1;
@@ -168,6 +168,15 @@ module.exports = (db) => {
                         WHEN p.play_type_id IN (5,9,29,39,68) THEN 'Rush'
                         ELSE 'Other'
                     END AS play_type,
+                    CASE
+                        WHEN p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 38 THEN true
+                        WHEN p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 28 THEN true
+                        WHEN p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 22 THEN true
+                        WHEN p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 45 THEN true
+                        WHEN p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 35 THEN true
+                        WHEN p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 29 THEN true
+                        ELSE false
+                    END AS garbage_time,
                     p.ppa AS ppa
             FROM game AS g
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
@@ -195,6 +204,7 @@ module.exports = (db) => {
                 CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS pass_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
         FROM plays
+        ${excludeGarbageTime ? 'WHERE garbage_time = false' : ''}
         GROUP BY season, school, o_d
         ORDER BY season, school, o_d
         `, params);
@@ -274,7 +284,7 @@ module.exports = (db) => {
         return stats;
     };
 
-    const getAdvancedGameStats = async (year, team, week, opponent) => {
+    const getAdvancedGameStats = async (year, team, week, opponent, excludeGarbageTime) => {
         let filter = 'WHERE ';
         let params = [];
         let index = 1;
@@ -330,6 +340,15 @@ module.exports = (db) => {
                         WHEN p.play_type_id IN (5,9,29,39,68) THEN 'Rush'
                         ELSE 'Other'
                     END AS play_type,
+                    CASE
+                        WHEN p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 38 THEN true
+                        WHEN p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 28 THEN true
+                        WHEN p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 22 THEN true
+                        WHEN p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 45 THEN true
+                        WHEN p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 35 THEN true
+                        WHEN p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 29 THEN true
+                        ELSE false
+                    END AS garbage_time,
                     p.ppa AS ppa
             FROM game AS g
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
@@ -362,6 +381,7 @@ module.exports = (db) => {
                 CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS pass_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
         FROM plays
+        ${excludeGarbageTime ? 'WHERE garbage_time = false' : ''}
         GROUP BY id, season, week, school, opponent, o_d
         ORDER BY id, season, week, school, opponent, o_d
         `, params);

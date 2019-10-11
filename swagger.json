@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -1401,6 +1401,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -1458,6 +1465,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -1529,6 +1543,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -1600,6 +1621,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -1729,6 +1757,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -1786,6 +1821,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -1925,6 +1967,13 @@
             "in": "query",
             "required": false,
             "type": "integer"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
