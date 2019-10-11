@@ -163,7 +163,7 @@ module.exports = (db) => {
         }));
     }
 
-    const getPPAByTeam = async (year, team, conference) => {
+    const getPPAByTeam = async (year, team, conference, excludeGarbageTime) => {
         let filter = 'WHERE';
         let params = [];
         let index = 1;
@@ -190,6 +190,19 @@ module.exports = (db) => {
             filter += ` LOWER(c.abbreviation) = LOWER($${index})`;
             params.push(conference);
             index++;
+        }
+
+        if (excludeGarbageTime == 'true') {
+            filter += ` AND (
+                p.period = 1
+                    OR (p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 38)
+                    OR (p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 28)
+                    OR (p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 22)
+                    OR (p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 45)
+                    OR (p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 35)
+                    OR (p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 28)
+            )
+            `;
         }
 
         const results = await db.any(`
@@ -242,7 +255,7 @@ module.exports = (db) => {
         }));
     }
 
-    const getPPAByGame = async (year, team, conference, week) => {
+    const getPPAByGame = async (year, team, conference, week, excludeGarbageTime) => {
         let filter = 'WHERE g.season = $1';
         let params = [year];
         let index = 2;
@@ -263,6 +276,19 @@ module.exports = (db) => {
             filter += ` AND g.week = $${index}`;
             params.push(week);
             index++;
+        }
+
+        if (excludeGarbageTime == 'true') {
+            filter += ` AND (
+                p.period = 1
+                    OR (p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 38)
+                    OR (p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 28)
+                    OR (p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 22)
+                    OR (p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 45)
+                    OR (p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 35)
+                    OR (p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 28)
+            )
+            `;
         }
 
         let results = await db.any(`
@@ -322,7 +348,7 @@ module.exports = (db) => {
         }));
     };
 
-    const getPPAByPlayerGame = async (season, week, position, school, playerId, threshold) => {
+    const getPPAByPlayerGame = async (season, week, position, school, playerId, threshold, excludeGarbageTime) => {
         let filters = [];
         let params = [];
         let index = 1;
@@ -360,6 +386,30 @@ module.exports = (db) => {
         let filter = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
         if (!threshold) {
             threshold = 0;
+        }
+
+        if (filters.length && excludeGarbageTime == 'true') {
+                filter += ` AND (
+                p.period = 1
+                    OR (p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 38)
+                    OR (p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 28)
+                    OR (p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 22)
+                    OR (p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 45)
+                    OR (p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 35)
+                    OR (p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 28)
+            )
+            `;
+        } else if (excludeGarbageTime == 'true') {
+            filter += ` WHERE (
+                p.period = 1
+                    OR (p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 38)
+                    OR (p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 28)
+                    OR (p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 22)
+                    OR (p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 45)
+                    OR (p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 35)
+                    OR (p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 28)
+            )
+            `;
         }
 
         params.push(threshold);
@@ -420,7 +470,7 @@ module.exports = (db) => {
         }));
     };
 
-    const getPPAByPlayerSeason = async (season, conference, position, school, playerId, threshold) => {
+    const getPPAByPlayerSeason = async (season, conference, position, school, playerId, threshold, excludeGarbageTime) => {
         let filters = [];
         let params = [];
         let index = 1;
@@ -458,6 +508,30 @@ module.exports = (db) => {
         let filter = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
         if (!threshold) {
             threshold = 0;
+        }
+
+        if (filters.length && excludeGarbageTime == 'true') {
+                filter += ` AND (
+                p.period = 1
+                    OR (p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 38)
+                    OR (p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 28)
+                    OR (p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 22)
+                    OR (p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 45)
+                    OR (p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 35)
+                    OR (p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 28)
+            )
+            `;
+        } else if (excludeGarbageTime == 'true') {
+            filter += ` WHERE (
+                p.period = 1
+                    OR (p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 38)
+                    OR (p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 28)
+                    OR (p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) <= 22)
+                    OR (p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 45)
+                    OR (p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 35)
+                    OR (p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 28)
+            )
+            `;
         }
 
         params.push(threshold);

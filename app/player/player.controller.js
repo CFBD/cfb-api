@@ -54,7 +54,7 @@ module.exports = (db) => {
                     error: 'playerId must be numeric'
                 });
             } else {
-                const results = await service.getPlayerUsage(req.query.year, req.query.conference, req.query.position, req.query.team, req.query.playerId);
+                const results = await service.getPlayerUsage(req.query.year, req.query.conference, req.query.position, req.query.team, req.query.playerId, req.query.excludeGarbageTime);
                 res.send(results);
             }
         } catch (err) {

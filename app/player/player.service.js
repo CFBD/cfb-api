@@ -74,7 +74,7 @@ module.exports = (db) => {
         return results.map(r => ({ playNumber: parseInt(r.row_num), avgPPA: r.avg_ppa }));
     };
 
-    const getPlayerUsage = async (season, conference, position, school, playerId) => {
+    const getPlayerUsage = async (season, conference, position, school, playerId, excludeGarbageTime) => {
         let filters = [];
         let params = [];
         let index = 1;
@@ -132,6 +132,15 @@ module.exports = (db) => {
                                     WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
                                     ELSE 'standard'
                                 END AS down_type,
+                                CASE
+                                    WHEN p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 38 THEN true
+                                    WHEN p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 28 THEN true
+                                    WHEN p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 22 THEN true
+                                    WHEN p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 45 THEN true
+                                    WHEN p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 35 THEN true
+                                    WHEN p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 29 THEN true
+                                    ELSE false
+                                END AS garbage_time,
                                 p.ppa
                 FROM game AS g
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
@@ -159,6 +168,15 @@ module.exports = (db) => {
                             WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
                             ELSE 'standard'
                         END AS down_type,
+						CASE
+							WHEN p.period = 2 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 38 THEN true
+							WHEN p.period = 3 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 28 THEN true
+							WHEN p.period = 4 AND p.scoring = false AND ABS(p.home_score - p.away_score) > 22 THEN true
+							WHEN p.period = 2 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 45 THEN true
+							WHEN p.period = 3 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 35 THEN true
+							WHEN p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) > 29 THEN true
+							ELSE false
+						END AS garbage_time,
                         p.ppa
                 FROM game AS g
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
@@ -181,6 +199,7 @@ module.exports = (db) => {
                         COUNT(*) FILTER(WHERE down_type = 'standard') AS standard_downs,
                         COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_downs
                 FROM teams
+                ${excludeGarbageTime ? 'WHERE garbage_time = false' : ''}
                 GROUP BY season, id, school
             )
             SELECT p.season,
@@ -198,7 +217,7 @@ module.exports = (db) => {
                 ROUND(CAST(CAST(COUNT(p.ppa) FILTER(WHERE p.down_type = 'passing') AS NUMERIC) / t.passing_downs AS NUMERIC), 3) AS passing_down_usage
             FROM plays AS p
                 INNER JOIN team_counts AS t ON p.team_id = t.id
-            WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR')
+            WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR') ${excludeGarbageTime ? 'AND p.garbage_time = false' : ''}
             GROUP BY p.season, p."name", p.position, p.school, p.conference, t.plays, t.pass, t.rush, t.first_downs, t.second_downs, t.third_downs, t.standard_downs, t.passing_downs
             ORDER BY overall_usage DESC
         `, params);
