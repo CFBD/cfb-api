@@ -1897,8 +1897,8 @@
             "type": "string"
           },
           {
-            "name": "school",
-            "description": "school filter",
+            "name": "team",
+            "description": "Team filter",
             "in": "query",
             "required": false,
             "type": "string"
