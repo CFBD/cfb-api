@@ -158,8 +158,9 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.down = 1 AND (p.yards_gained / p.distance) >= 0.5 THEN true
-                        WHEN p.down = 2 AND (p.yards_gained / p.distance) >= 0.7 THEN true
+                        WHEN p.scoring = true THEN true
+                        WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
+                        WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                         WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
                         ELSE false
                     END AS success,
@@ -204,7 +205,7 @@ module.exports = (db) => {
                 CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS pass_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
         FROM plays
-        ${excludeGarbageTime ? 'WHERE garbage_time = false' : ''}
+        ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
         GROUP BY season, school, o_d
         ORDER BY season, school, o_d
         `, params);
@@ -330,8 +331,9 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.down = 1 AND (p.yards_gained / p.distance) >= 0.5 THEN true
-                        WHEN p.down = 2 AND (p.yards_gained / p.distance) >= 0.7 THEN true
+                        WHEN p.success = true THEN true
+                        WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
+                        WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                         WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
                         ELSE false
                     END AS success,
@@ -381,7 +383,7 @@ module.exports = (db) => {
                 CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS pass_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
         FROM plays
-        ${excludeGarbageTime ? 'WHERE garbage_time = false' : ''}
+        ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
         GROUP BY id, season, week, school, opponent, o_d
         ORDER BY id, season, week, school, opponent, o_d
         `, params);
