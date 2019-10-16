@@ -200,9 +200,9 @@ module.exports = (db) => {
                 AVG(ppa) FILTER(WHERE success = true AND down_type = 'standard') AS standard_down_explosiveness,
                 CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'passing')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_down_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND down_type = 'passing') AS passing_down_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS rush_success_rate,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Rush') AS rush_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Rush') AS rush_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS pass_success_rate,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Pass') AS pass_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
@@ -378,9 +378,9 @@ module.exports = (db) => {
                 AVG(ppa) FILTER(WHERE success = true AND down_type = 'standard') AS standard_down_explosiveness,
                 CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'passing')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_down_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND down_type = 'passing') AS passing_down_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS rush_success_rate,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Rush') AS rush_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Rush') AS rush_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS pass_success_rate,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Pass') AS pass_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
