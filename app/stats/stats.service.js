@@ -331,7 +331,7 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.success = true THEN true
+                        WHEN p.scoring = true THEN true
                         WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                         WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                         WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
