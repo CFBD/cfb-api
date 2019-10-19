@@ -194,6 +194,10 @@ module.exports = (db) => {
                 AVG(ppa) FILTER(WHERE down_type = 'passing') AS passing_down_ppa,
                 AVG(ppa) FILTER(WHERE play_type = 'Pass') AS passing_ppa,
                 AVG(ppa) FILTER(WHERE play_type = 'Rush') AS rushing_ppa,
+                CAST(COUNT(*) FILTER(WHERE down_type = 'standard') AS NUMERIC) / COUNT(*) AS standard_down_rate,
+                CAST(COUNT(*) FILTER(WHERE down_type = 'passing') AS NUMERIC) / COUNT(*) AS passing_down_rate,
+                CAST(COUNT(*) FILTER(WHERE play_type = 'Pass') AS NUMERIC) / COUNT(*) AS passing_rate,
+                CAST(COUNT(*) FILTER(WHERE play_type = 'Rush') AS NUMERIC) / COUNT(*) AS rush_rate,
                 CAST((COUNT(*) FILTER(WHERE success = true)) AS NUMERIC) / COUNT(*) AS success_rate,
                 AVG(ppa) FILTER(WHERE success = true) AS explosiveness,
                 CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'standard')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS standard_down_success_rate,
@@ -228,21 +232,25 @@ module.exports = (db) => {
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
                         standardDowns: {
+                            rate: parseFloat(offense.standard_down_rate),
                             ppa: parseFloat(offense.standard_down_ppa),
                             successRate: parseFloat(offense.standard_down_success_rate),
                             explosiveness: parseFloat(offense.standard_down_explosiveness)
                         },
                         passingDowns: {
+                            rate: parseFloat(offense.passing_down_rate),
                             ppa: parseFloat(offense.passing_down_ppa),
                             successRate: parseFloat(offense.passing_down_success_rate),
                             explosiveness: parseFloat(offense.passing_down_explosiveness)
                         },
                         rushingPlays: {
+                            rate: parseFloat(offense.rush_rate),
                             ppa: parseFloat(offense.rushing_ppa),
                             successRate: parseFloat(offense.rush_success_rate),
                             explosiveness: parseFloat(offense.rush_explosiveness)
                         },
                         passingPlays: {
+                            rate: parseFloat(offense.passing_rate),
                             ppa: parseFloat(offense.passing_ppa),
                             successRate: parseFloat(offense.pass_success_rate),
                             explosiveness: parseFloat(offense.pass_explosiveness)
@@ -253,21 +261,25 @@ module.exports = (db) => {
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
                         standardDowns: {
+                            rate: parseFloat(defense.standard_down_rate),
                             ppa: parseFloat(defense.standard_down_ppa),
                             successRate: parseFloat(defense.standard_down_success_rate),
                             explosiveness: parseFloat(defense.standard_down_explosiveness)
                         },
                         passingDowns: {
+                            rate: parseFloat(defense.passing_down_rate),
                             ppa: parseFloat(defense.passing_down_ppa),
                             successRate: parseFloat(defense.passing_down_success_rate),
                             explosiveness: parseFloat(defense.passing_down_explosiveness)
                         },
                         rushingPlays: {
+                            rate: parseFloat(defense.rush_rate),
                             ppa: parseFloat(defense.rushing_ppa),
                             successRate: parseFloat(defense.rush_success_rate),
                             explosiveness: parseFloat(defense.rush_explosiveness)
                         },
                         passingPlays: {
+                            rate: parseFloat(defense.passing_rate),
                             ppa: parseFloat(defense.passing_ppa),
                             successRate: parseFloat(defense.pass_success_rate),
                             explosiveness: parseFloat(defense.pass_explosiveness)
