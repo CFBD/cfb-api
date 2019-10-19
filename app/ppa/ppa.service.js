@@ -98,6 +98,10 @@ module.exports = (db) => {
                 ...plays
             ];
 
+            for (let play of plays) {
+                play.spread *= (play.time_remaining / 3600);
+            }
+
             for (let i = 0; i < plays.length; i++) {
                 let play = plays[i];
                 let playInputs = [
