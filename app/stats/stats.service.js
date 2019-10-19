@@ -148,6 +148,7 @@ module.exports = (db) => {
             SELECT  g.id,
                     g.season,
                     t.school,
+                    c.name AS conference,
                     CASE
                         WHEN p.offense_id = t.id THEN 'offense'
                         ELSE 'defense'
@@ -182,12 +183,15 @@ module.exports = (db) => {
             FROM game AS g
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
                 INNER JOIN team AS t ON gt.team_id = t.id
+                INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                INNER JOIN conference AS c ON ct.conference_id = c.id
                 INNER JOIN drive AS d ON g.id = d.game_id
                 INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
             ${filter}
         )
         SELECT 	season,
                 school AS team,
+                conference,
                 o_d AS unit,
                 AVG(ppa) AS ppa,
                 AVG(ppa) FILTER(WHERE down_type = 'standard') AS standard_down_ppa,
@@ -210,7 +214,7 @@ module.exports = (db) => {
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
-        GROUP BY season, school, o_d
+        GROUP BY season, school, conference, o_d
         ORDER BY season, school, o_d
         `, params);
 
@@ -227,6 +231,7 @@ module.exports = (db) => {
                 return {
                     season: year,
                     team: t,
+                    conference: offense.conference,
                     offense: {
                         ppa: parseFloat(offense.ppa),
                         successRate: parseFloat(offense.success_rate),

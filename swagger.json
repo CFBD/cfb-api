@@ -3256,6 +3256,9 @@
         "team": {
           "type": "string"
         },
+        "conference": {
+          "type": "string"
+        },
         "offense": {
           "type": "object",
           "properties": {
