@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 1.9.2
+  version: 1.10.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -199,6 +199,28 @@ paths:
               $ref: '#/definitions/TeamGame'
         '400':
           description: error
+  /game/box/advanced:
+    get:
+      tags:
+        - games
+      summary: Get advanced box score
+      description: Advanced box score
+      operationId: getAdvancedBoxScore
+      produces:
+        - application/json
+      parameters:
+        - name: gameId
+          description: Game id parameters
+          in: query
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/BoxScore'
   /drives:
     get:
       tags:
@@ -2509,3 +2531,194 @@ definitions:
             type: number
           passingDowns:
             type: number
+  BoxScore:
+    type: object
+    properties:
+      teams:
+        type: object
+        properties:
+          ppa:
+            type: array
+            items:
+              type: object
+              properties: 
+                team:
+                  type: string
+                overall:
+                  type: object
+                  properties: 
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+                passing:
+                  type: object
+                  properties: 
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+                rushing:
+                  type: object
+                  properties: 
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+          successRates:
+            type: array
+            items:
+              type: object
+              properties: 
+                team:
+                  type: string
+                overall:
+                  type: object
+                  properties: 
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+                standardDowns:
+                  type: object
+                  properties: 
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+                passingDowns:
+                  type: object
+                  properties: 
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+          explosiveness:
+            type: array
+            items:
+              type: object
+              properties: 
+                team:
+                  type: string
+                overall:
+                  type: object
+                  properties: 
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+      players:
+        type: object
+        properties:
+          usage:
+            type: array
+            items:
+              type: object
+              properties:
+                player:
+                  type: string
+                team:
+                  type: string
+                position:
+                  type: string
+                overall:
+                  type: number
+                quarter1:
+                  type: number
+                quarter2:
+                  type: number
+                quarter3:
+                  type: number
+                quarter4:
+                  type: number
+                rushing:
+                  type: number
+                passing:
+                  type: number
+          ppa:
+            type: array
+            items:
+              type: object
+              properties:
+                player:
+                  type: string
+                team:
+                  type: string
+                position:
+                  type: string
+                average:
+                  type: object
+                  properties:
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+                    rushing:
+                      type: number
+                    passing:
+                      type: number
+                cumulative:
+                  type: object
+                  properties:
+                    total:
+                      type: number
+                    quarter1:
+                      type: number
+                    quarter2:
+                      type: number
+                    quarter3:
+                      type: number
+                    quarter4:
+                      type: number
+                    rushing:
+                      type: number
+                    passing:
+                      type: number

@@ -78,10 +78,33 @@ module.exports = (db) => {
         }
     };
 
+    const getAdvancedBoxScore = async (req, res) => {
+        try {
+            if (!req.query.gameId) {
+                res.status(400).send({
+                    error: 'gameId must be specified'
+                });
+            } else if (!parseInt(req.query.gameId)) {
+                res.status(400).send({
+                    error: 'gameId must be numeric'
+                });
+            } else {
+                const result = await service.getAdvancedBoxScore(req.query.gameId);
+                res.send(result);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'something went wrong'
+            });
+        }
+    }
+
     return {
         getTeamStats,
         getCategories,
         getAdvancedStats,
-        getAdvancedGameStats
+        getAdvancedGameStats,
+        getAdvancedBoxScore
     }
 }
