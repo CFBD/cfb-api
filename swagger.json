@@ -3995,7 +3995,7 @@
                   "position": {
                     "type": "string"
                   },
-                  "overall": {
+                  "total": {
                     "type": "number"
                   },
                   "quarter1": {

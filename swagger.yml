@@ -2663,7 +2663,7 @@ definitions:
                   type: string
                 position:
                   type: string
-                overall:
+                total:
                   type: number
                 quarter1:
                   type: number
