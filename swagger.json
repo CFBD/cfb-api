@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.10.0",
+    "version": "1.11.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -3304,6 +3304,18 @@
             "explosiveness": {
               "type": "number"
             },
+            "powerSuccess": {
+              "type": "number"
+            },
+            "stuffRate": {
+              "type": "number"
+            },
+            "secondLevelYards": {
+              "type": "number"
+            },
+            "openFieldYards": {
+              "type": "number"
+            },
             "standardDowns": {
               "type": "object",
               "properties": {
@@ -3384,6 +3396,18 @@
               "type": "number"
             },
             "explosiveness": {
+              "type": "number"
+            },
+            "powerSuccess": {
+              "type": "number"
+            },
+            "stuffRate": {
+              "type": "number"
+            },
+            "secondLevelYards": {
+              "type": "number"
+            },
+            "openFieldYards": {
               "type": "number"
             },
             "standardDowns": {
@@ -3488,6 +3512,18 @@
             "explosiveness": {
               "type": "number"
             },
+            "powerSuccess": {
+              "type": "number"
+            },
+            "stuffRate": {
+              "type": "number"
+            },
+            "secondLevelYards": {
+              "type": "number"
+            },
+            "openFieldYards": {
+              "type": "number"
+            },
             "standardDowns": {
               "type": "object",
               "properties": {
@@ -3556,6 +3592,18 @@
               "type": "number"
             },
             "explosiveness": {
+              "type": "number"
+            },
+            "powerSuccess": {
+              "type": "number"
+            },
+            "stuffRate": {
+              "type": "number"
+            },
+            "secondLevelYards": {
+              "type": "number"
+            },
+            "openFieldYards": {
               "type": "number"
             },
             "standardDowns": {

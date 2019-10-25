@@ -148,6 +148,9 @@ module.exports = (db) => {
             SELECT  g.id,
                     g.season,
                     t.school,
+                    p.down,
+                    p.distance,
+                    p.yards_gained,
                     c.name AS conference,
                     CASE
                         WHEN p.offense_id = t.id THEN 'offense'
@@ -211,7 +214,11 @@ module.exports = (db) => {
                 CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Rush') AS rush_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Rush') AS rush_explosiveness,
                 CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Pass') AS pass_success_rate,
-                AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
+                AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness,
+                CAST(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush' AND success = true) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush'), 0), 1) AS power_success,
+                CAST(COUNT(*) FILTER(WHERE play_type = 'Rush' AND yards_gained <= 0) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS stuff_rate,
+                CAST(SUM(CASE WHEN yards_gained >= 10 THEN 10 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS second_level_yards,
+                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS open_field_yards
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
         GROUP BY season, school, conference, o_d
@@ -236,6 +243,10 @@ module.exports = (db) => {
                         ppa: parseFloat(offense.ppa),
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
+                        powerSuccess: parseFloat(offense.power_success),
+                        stuffRate: parseFloat(offense.stuff_rate),
+                        secondLevelYards: parseFloat(offense.second_level_yards),
+                        openFieldYards: parseFloat(offense.open_field_yards),
                         standardDowns: {
                             rate: parseFloat(offense.standard_down_rate),
                             ppa: parseFloat(offense.standard_down_ppa),
@@ -265,6 +276,10 @@ module.exports = (db) => {
                         ppa: parseFloat(defense.ppa),
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
+                        powerSuccess: parseFloat(defense.power_success),
+                        stuffRate: parseFloat(defense.stuff_rate),
+                        secondLevelYards: parseFloat(defense.second_level_yards),
+                        openFieldYards: parseFloat(defense.open_field_yards),
                         standardDowns: {
                             rate: parseFloat(defense.standard_down_rate),
                             ppa: parseFloat(defense.standard_down_ppa),
@@ -338,6 +353,9 @@ module.exports = (db) => {
                     g.week,
                     t.school,
                     t2.school AS opponent,
+                    p.down,
+                    p.distance,
+                    p.yards_gained,
                     CASE
                         WHEN p.offense_id = t.id THEN 'offense'
                         ELSE 'defense'
@@ -391,14 +409,18 @@ module.exports = (db) => {
                 AVG(ppa) FILTER(WHERE play_type = 'Rush') AS rushing_ppa,
                 CAST((COUNT(*) FILTER(WHERE success = true)) AS NUMERIC) / COUNT(*) AS success_rate,
                 AVG(ppa) FILTER(WHERE success = true) AS explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'standard')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS standard_down_success_rate,
+                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'standard')) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE down_type = 'standard'), 0), 1) AS standard_down_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND down_type = 'standard') AS standard_down_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'passing')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_down_success_rate,
+                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'passing')) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE down_type = 'passing'), 0), 1) AS passing_down_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND down_type = 'passing') AS passing_down_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Rush') AS rush_success_rate,
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS rush_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Rush') AS rush_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Pass') AS pass_success_rate,
-                AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness
+                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Pass'), 0), 1) AS pass_success_rate,
+                AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness,
+                CAST(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush' AND success = true) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush'), 0), 1) AS power_success,
+                CAST(COUNT(*) FILTER(WHERE play_type = 'Rush' AND yards_gained <= 0) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS stuff_rate,
+                CAST(SUM(CASE WHEN yards_gained >= 10 THEN 10 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS second_level_yards,
+                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS open_field_yards
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
         GROUP BY id, season, week, school, opponent, o_d
@@ -425,6 +447,10 @@ module.exports = (db) => {
                         ppa: parseFloat(offense.ppa),
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
+                        powerSuccess: parseFloat(offense.power_success),
+                        stuffRate: parseFloat(offense.stuff_rate),
+                        secondLevelYards: parseFloat(offense.second_level_yards),
+                        openFieldYards: parseFloat(offense.open_field_yards),
                         standardDowns: {
                             ppa: parseFloat(offense.standard_down_ppa),
                             successRate: parseFloat(offense.standard_down_success_rate),
@@ -450,6 +476,10 @@ module.exports = (db) => {
                         ppa: parseFloat(defense.ppa),
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
+                        powerSuccess: parseFloat(defense.power_success),
+                        stuffRate: parseFloat(defense.stuff_rate),
+                        secondLevelYards: parseFloat(defense.second_level_yards),
+                        openFieldYards: parseFloat(defense.open_field_yards),
                         standardDowns: {
                             ppa: parseFloat(defense.standard_down_ppa),
                             successRate: parseFloat(defense.standard_down_success_rate),
