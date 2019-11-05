@@ -5,6 +5,8 @@ module.exports = (db) => {
                 res.status(400).send({
                     error: 'A year or team filter must be specified.'
                 });
+
+                return;
             }
 
             if (req.query.year && isNaN(req.query.year)) {
