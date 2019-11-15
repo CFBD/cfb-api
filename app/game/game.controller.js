@@ -2,69 +2,76 @@ module.exports = (db) => {
     return {
         getGames: async (req, res) => {
             try {
-                if (!req.query.year || isNaN(req.query.year)) {
-                    res.status(400).send({
-                        error: 'A numeric year parameter must be specified.'
-                    });
-
-                    return;
-                }
-
-                let filter = 'WHERE g.season = $1';
-                let params = [req.query.year];
-
-                let index = 2;
-
-                if (req.query.seasonType != 'both') {
-                    if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
+                let filter = '';
+                let params = [];
+                if (!req.query.id) {
+                    if (!req.query.year || isNaN(req.query.year)) {
                         res.status(400).send({
-                            error: 'Invalid season type'
+                            error: 'A numeric year parameter must be specified.'
                         });
 
                         return;
                     }
 
-                    filter += ` AND g.season_type = $${index}`;
-                    params.push(req.query.seasonType || 'regular');
-                    index++;
-                }
+                    filter = 'WHERE g.season = $1';
+                    params = [req.query.year];
 
-                if (req.query.week) {
-                    if (isNaN(req.query.week)) {
-                        res.status(400).send({
-                            error: 'Week parameter must be numeric'
-                        });
+                    let index = 2;
 
-                        return;
+                    if (req.query.seasonType != 'both') {
+                        if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
+                            res.status(400).send({
+                                error: 'Invalid season type'
+                            });
+
+                            return;
+                        }
+
+                        filter += ` AND g.season_type = $${index}`;
+                        params.push(req.query.seasonType || 'regular');
+                        index++;
                     }
 
-                    filter += ` AND g.week = $${index}`;
-                    params.push(req.query.week);
-                    index++;
-                }
+                    if (req.query.week) {
+                        if (isNaN(req.query.week)) {
+                            res.status(400).send({
+                                error: 'Week parameter must be numeric'
+                            });
 
-                if (req.query.team) {
-                    filter += ` AND (LOWER(away.school) = LOWER($${index}) OR LOWER(home.school) = LOWER($${index}))`;
-                    params.push(req.query.team);
-                    index++;
-                }
+                            return;
+                        }
 
-                if (req.query.home) {
-                    filter += ` AND LOWER(home.school) = LOWER($${index})`;
-                    params.push(req.query.home);
-                    index++;
-                }
+                        filter += ` AND g.week = $${index}`;
+                        params.push(req.query.week);
+                        index++;
+                    }
 
-                if (req.query.away) {
-                    filter += ` AND LOWER(away.school) = LOWER($${index})`;
-                    params.push(req.query.away);
-                    index++;
-                }
+                    if (req.query.team) {
+                        filter += ` AND (LOWER(away.school) = LOWER($${index}) OR LOWER(home.school) = LOWER($${index}))`;
+                        params.push(req.query.team);
+                        index++;
+                    }
 
-                if (req.query.conference) {
-                    filter += ` AND (LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`;
-                    params.push(req.query.conference);
-                    index++;
+                    if (req.query.home) {
+                        filter += ` AND LOWER(home.school) = LOWER($${index})`;
+                        params.push(req.query.home);
+                        index++;
+                    }
+
+                    if (req.query.away) {
+                        filter += ` AND LOWER(away.school) = LOWER($${index})`;
+                        params.push(req.query.away);
+                        index++;
+                    }
+
+                    if (req.query.conference) {
+                        filter += ` AND (LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`;
+                        params.push(req.query.conference);
+                        index++;
+                    }
+                } else {
+                    filter = 'WHERE g.id = $1';
+                    params = [req.query.id];
                 }
 
                 let games = await db.any(`
