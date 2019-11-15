@@ -8,6 +8,8 @@ module.exports = async () => {
     const cookieParser = require('cookie-parser');
     const cors = require('cors');
     const swStats = require('swagger-stats');
+    const Sentry = require('@sentry/node');
+    Sentry.init({ dsn: `https://${process.env.SENTRY_KEY}@sentry.io/${process.env.SENTRY_ID}` });
 
     const slowDown = require('express-slow-down');
     const speedLimiter = slowDown({
@@ -41,6 +43,8 @@ module.exports = async () => {
     const expressWsObj = expressWs(app);
 
     app.enable('trust proxy');
+
+    app.use(Sentry.Handlers.requestHandler());
 
     app.use(helmet());
     app.use(session({
@@ -94,6 +98,8 @@ module.exports = async () => {
     app.get('*', (req, res) => {
         res.redirect('/api/docs/?url=/api-docs.json');
     });
+
+    app.use(Sentry.Handlers.errorHandler());
 
     return app;
 }
