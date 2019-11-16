@@ -42,7 +42,11 @@ module.exports = (db) => {
                 away_team.id AS away_id,
                 away_team.school AS away,
                 COALESCE(gl.spread, 0) AS spread,
-                CASE WHEN home.team_id = p.offense_id THEN true ELSE false END AS has_ball,
+                CASE 
+                    WHEN home.team_id = p.offense_id AND p.scoring = false THEN true 
+                    WHEN home.team_id = p.defense_id AND p.scoring = true THEN true
+                    ELSE false 
+                END AS has_ball,
                 p.home_score,
                 p.away_score,
                 (((4 - p.period) * 60 * 15) + EXTRACT(epoch FROM p.clock)) as time_remaining,
