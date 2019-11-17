@@ -514,8 +514,30 @@ module.exports = (db) => {
     };
 
     const getAdvancedBoxScore = async (id) => {
-        const teamResults = await db.any(`
-            WITH plays AS (
+        const teamResults = await db.any(` 
+            WITH havoc AS (
+                WITH fumbles AS (
+                    SELECT t.school, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0.0) AS fumbles
+                    FROM game AS g
+                        INNER JOIN game_team AS gt ON g.id = gt.game_id
+                        INNER JOIN team AS t ON gt.team_id = t.id
+                        LEFT JOIN game_player_stat AS s ON s.game_team_id = gt.id AND s.type_id = 4 AND s.category_id = 10
+                    WHERE g.id = $1
+                    GROUP BY t.school
+                )
+                SELECT 	t.school,
+                        (COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0.0) + fumbles) AS total_havoc,
+                        COALESCE(SUM(CAST(s.stat AS NUMERIC)) FILTER (WHERE s.type_id IN (16,24)), 0.0) AS db_havoc,
+                        (COALESCE(SUM(CAST(s.stat AS NUMERIC)) FILTER (WHERE s.type_id = 21), 0.0) + f.fumbles) AS front_seven_havoc
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id
+                    INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+                    INNER JOIN team AS t ON gt.team_id = t.id
+                    INNER JOIN game_team_stat AS s ON s.game_team_id = gt.id AND s.type_id IN (16,21,24)
+                    LEFT JOIN fumbles AS f ON t.school <> f.school
+                WHERE g.id = $1
+                GROUP BY t.school, f.fumbles
+            ), plays AS (
                 SELECT  g.id,
                         g.season,
                         g.week,
@@ -550,11 +572,15 @@ module.exports = (db) => {
                         p.down,
                         p.distance,
                         p.yards_gained,
-                        p.ppa AS ppa
+                        p.ppa AS ppa,
+                        COALESCE(h.total_havoc, 0.0) AS total_havoc,
+                        COALESCE(h.db_havoc, 0.0) AS db_havoc,
+                        COALESCE(h.front_seven_havoc, 0.0) AS front_seven_havoc
                 FROM game AS g
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
                     INNER JOIN team AS t ON p.offense_id = t.id
+                    LEFT JOIN havoc AS h ON t.school <> h.school
                 WHERE g.id = $1
             )
             SELECT 	school AS team,
@@ -599,13 +625,16 @@ module.exports = (db) => {
                     CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards,
                     ROUND(CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1), 1) AS second_level_yards_avg,
                     ROUND(CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1), 1) AS open_field_yards_avg,
+                    ROUND(total_havoc / COUNT(*), 3) AS total_havoc,
+                    ROUND(db_havoc / COUNT(*), 3) AS db_havoc,
+                    ROUND(front_seven_havoc / COUNT(*), 3) AS front_seven_havoc,
                     COUNT(*) AS plays,
                     COUNT(*) FILTER(WHERE period = 1) AS plays_1,
                     COUNT(*) FILTER(WHERE period = 2) AS plays_2,
                     COUNT(*) FILTER(WHERE period = 3) AS plays_3,
                     COUNT(*) FILTER(WHERE period = 4) AS plays_4
             FROM plays
-            GROUP BY school
+            GROUP BY school, total_havoc, db_havoc, front_seven_havoc
         `, [id]);
 
         const playerResults = await db.any(`
@@ -717,6 +746,8 @@ module.exports = (db) => {
             ORDER BY overall_usage DESC
         `, [id]);
 
+        let teams = Array.from(new Set(teamResults.map(t => t.team)));
+
         return {
             teams: {
                 ppa: teamResults.map(t => ({
@@ -785,6 +816,12 @@ module.exports = (db) => {
                     secondLevelYardsAverage: t.second_level_yards_avg,
                     openFieldYards: t.open_field_yards,
                     openFieldYardsAverage: t.open_field_yards_avg
+                })),
+                havoc: teamResults.map(t => ({
+                    team: teams.find(te => te != t.team),
+                    total: t.total_havoc,
+                    frontSeven: t.front_seven_havoc,
+                    db: t.db_havoc
                 }))
             },
             players: {
