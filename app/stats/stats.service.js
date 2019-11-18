@@ -437,6 +437,10 @@ module.exports = (db) => {
                 let offense = results.find(r => r.id == id && r.team == t && r.unit == 'offense');
                 let defense = results.find(r => r.id == id && r.team == t && r.unit == 'defense');
 
+                if (!offense || ! defense) {
+                    return null;
+                }
+
                 return {
                     gameId: id,
                     season: offense.year,
@@ -502,7 +506,7 @@ module.exports = (db) => {
                         }
                     }
                 }
-            });
+            }).filter(r => r != null);
 
             stats = [
                 ...stats,
