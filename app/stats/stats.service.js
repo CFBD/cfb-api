@@ -218,7 +218,9 @@ module.exports = (db) => {
                 CAST(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush' AND success = true) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush'), 0), 1) AS power_success,
                 CAST(COUNT(*) FILTER(WHERE play_type = 'Rush' AND yards_gained <= 0) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS stuff_rate,
                 CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS second_level_yards,
-                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS open_field_yards
+                CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) AS second_level_yards_sum,
+                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS open_field_yards,
+                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards_sum
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
         GROUP BY season, school, conference, o_d
@@ -246,7 +248,9 @@ module.exports = (db) => {
                         powerSuccess: parseFloat(offense.power_success),
                         stuffRate: parseFloat(offense.stuff_rate),
                         secondLevelYards: parseFloat(offense.second_level_yards),
+                        secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
                         openFieldYards: parseFloat(offense.open_field_yards),
+                        openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
                         standardDowns: {
                             rate: parseFloat(offense.standard_down_rate),
                             ppa: parseFloat(offense.standard_down_ppa),
@@ -279,7 +283,9 @@ module.exports = (db) => {
                         powerSuccess: parseFloat(defense.power_success),
                         stuffRate: parseFloat(defense.stuff_rate),
                         secondLevelYards: parseFloat(defense.second_level_yards),
+                        secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
                         openFieldYards: parseFloat(defense.open_field_yards),
+                        openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
                         standardDowns: {
                             rate: parseFloat(defense.standard_down_rate),
                             ppa: parseFloat(defense.standard_down_ppa),
@@ -420,7 +426,9 @@ module.exports = (db) => {
                 CAST(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush' AND success = true) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush'), 0), 1) AS power_success,
                 CAST(COUNT(*) FILTER(WHERE play_type = 'Rush' AND yards_gained <= 0) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS stuff_rate,
                 CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS second_level_yards,
-                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS open_field_yards
+                CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) AS second_level_yards_sum,
+                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS open_field_yards,
+                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards_sum
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
         GROUP BY id, season, week, school, opponent, o_d
@@ -454,7 +462,9 @@ module.exports = (db) => {
                         powerSuccess: parseFloat(offense.power_success),
                         stuffRate: parseFloat(offense.stuff_rate),
                         secondLevelYards: parseFloat(offense.second_level_yards),
+                        secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
                         openFieldYards: parseFloat(offense.open_field_yards),
+                        openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
                         standardDowns: {
                             ppa: parseFloat(offense.standard_down_ppa),
                             successRate: parseFloat(offense.standard_down_success_rate),
@@ -483,7 +493,9 @@ module.exports = (db) => {
                         powerSuccess: parseFloat(defense.power_success),
                         stuffRate: parseFloat(defense.stuff_rate),
                         secondLevelYards: parseFloat(defense.second_level_yards),
+                        secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
                         openFieldYards: parseFloat(defense.open_field_yards),
+                        openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
                         standardDowns: {
                             ppa: parseFloat(defense.standard_down_ppa),
                             successRate: parseFloat(defense.standard_down_success_rate),
