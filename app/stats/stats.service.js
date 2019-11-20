@@ -1,5 +1,5 @@
 module.exports = (db) => {
-    const getTeamStats = async (year, team, conference) => {
+    const getTeamStats = async (year, team, conference, startWeek, endWeek) => {
         let filter = '';
         let params = [];
         let index = 1;
@@ -19,6 +19,18 @@ module.exports = (db) => {
         if (conference) {
             filter += ` AND LOWER(c.abbreviation) = LOWER($${index})`;
             params.push(conference);
+            index++;
+        }
+
+        if (startWeek) {
+            filter += ` AND g.week >= $${index}`;
+            params.push(startWeek);
+            index++;
+        }
+
+        if (endWeek) {
+            filter += ` AND g.week <= $${index}`;
+            params.push(endWeek);
             index++;
         }
 
@@ -126,7 +138,7 @@ module.exports = (db) => {
         return results.map(r => r.name);
     }
 
-    const getAdvancedStats = async (year, team, excludeGarbageTime) => {
+    const getAdvancedStats = async (year, team, excludeGarbageTime, startWeek, endWeek) => {
         let filter = 'WHERE ';
         let params = [];
         let index = 1;
@@ -140,6 +152,18 @@ module.exports = (db) => {
         if (team) {
             filter += ` ${year ? 'AND ' : ''}LOWER(t.school) = LOWER($${index})`;
             params.push(team);
+            index++;
+        }
+
+        if (startWeek) {
+            filter += ` AND g.week >= $${index}`;
+            params.push(startWeek);
+            index++;
+        }
+
+        if (endWeek) {
+            filter += ` AND g.week <= $${index}`;
+            params.push(endWeek);
             index++;
         }
 

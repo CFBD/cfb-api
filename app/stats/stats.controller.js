@@ -13,8 +13,16 @@ module.exports = (db) => {
                 res.status(400).send({
                     error: 'year must be numeric'
                 });
+            } else if (req.query.startWeek && !parseInt(req.query.startWeek)) {
+                res.status(400).send({
+                    error: 'startWeek must be numeric'
+                });
+            } else if (req.query.endWeek && !parseInt(req.query.endWeek)) {
+                res.status(400).send({
+                    error: 'endWeek must be numeric'
+                });
             } else {
-                const stats = await service.getTeamStats(req.query.year, req.query.team, req.query.conference);
+                const stats = await service.getTeamStats(req.query.year, req.query.team, req.query.conference, req.query.startWeek, req.query.endWeek);
                 res.send(stats);
             }
         } catch (err) {
@@ -40,8 +48,16 @@ module.exports = (db) => {
                 res.status(400).send({
                     error: 'year must be numeric'
                 });
+            } else if (req.query.startWeek && !parseInt(req.query.startWeek)) {
+                res.status(400).send({
+                    error: 'startWeek must be numeric'
+                });
+            } else if (req.query.endWeek && !parseInt(req.query.endWeek)) {
+                res.status(400).send({
+                    error: 'endWeek must be numeric'
+                });
             } else {
-                const results = await service.getAdvancedStats(req.query.year, req.query.team, req.query.excludeGarbageTime);
+                const results = await service.getAdvancedStats(req.query.year, req.query.team, req.query.excludeGarbageTime, req.query.startWeek, req.query.endWeek);
                 res.send(results);
             }
         } catch (err) {
