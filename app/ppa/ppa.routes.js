@@ -9,4 +9,5 @@ module.exports = (app, db, cors) => {
     app.route('/ppa/players/games').get(cors, controller.getPPAByPlayerGame);
     app.route('/ppa/players/season').get(cors, controller.getPPAByPlayerSeason);
     app.route('/metrics/wp').get(cors, controller.getWP);
+    app.route('/metrics/wp/pregame').get(cors, controller.getPregameWP);
 }

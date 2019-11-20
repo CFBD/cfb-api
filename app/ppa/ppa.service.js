@@ -1,4 +1,6 @@
 const synaptic = require('synaptic');
+const gaussian = require('gaussian');
+const gaussianDistro = gaussian(0, Math.pow(17, 2));
 
 module.exports = (db) => {
     const Architect = synaptic.Architect;
@@ -620,12 +622,63 @@ module.exports = (db) => {
         }));
     };
 
+    const getPregameWP = async (season, week, team) => {
+        let filters = [];
+        let params = [];
+        let index = 1;
+
+        if (season) {
+            filters.push(`g.season = $${index}`);
+            params.push(season);
+            index++;
+        }
+
+        if (week) {
+            filters.push(`g.week = $${index}`);
+            params.push(week);
+            index++;
+        }
+
+        if (team) {
+            filters.push(`(LOWER(home.school) = LOWER($${index}) OR LOWER(away.school) = LOWER($${index}))`);
+            params.push(team);
+            index++;
+        }
+
+        let filter = filters.join(' AND ')
+
+        let results = await db.any(`
+            SELECT g.id, g.season, g.week, home.school AS home, away.school AS away, COALESCE(gl.spread, gl2.spread) AS spread
+            FROM game AS g
+                INNER JOIN game_team AS gt ON gt.game_id = g.id AND gt.home_away = 'home'
+                INNER JOIN team AS home ON gt.team_id = home.id
+                INNER JOIN game_team AS gt2 ON gt2.game_id = g.id AND gt2.home_away = 'away'
+                INNER JOIN team AS away ON gt2.team_id = away.id
+                LEFT JOIN game_lines AS gl ON gl.game_id = g.id AND gl.lines_provider_id = 1004
+                LEFT JOIN game_lines AS gl2 ON gl2.game_id = g.id AND gl2.lines_provider_id = 999999
+            WHERE (gl.spread IS NOT NULL OR gl2.spread IS NOT NULL) AND ${filter}
+            ORDER BY g.season, g.week, home.school
+            LIMIT 1000
+        `, params);
+
+        return results.map(r => ({
+            season: r.season,
+            week: r.week,
+            gameId: r.id,
+            homeTeam: r.home,
+            awayTeam: r.away,
+            spread: parseFloat(r.spread),
+            homeWinProb: Math.round(gaussianDistro.cdf(r.spread * -1) * 1000) / 1000
+        }));
+    };
+
     return {
         getPP,
         getWP,
         getPPAByTeam,
         getPPAByGame,
         getPPAByPlayerGame,
-        getPPAByPlayerSeason
+        getPPAByPlayerSeason,
+        getPregameWP
     }
 }

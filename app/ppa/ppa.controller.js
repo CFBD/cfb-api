@@ -159,12 +159,35 @@ module.exports = (db) => {
         }
     };
 
+    const getPregameWP = async (req, res) => {
+        try {
+            if (req.query.year && !parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be numeric'
+                });
+            } else if (req.query.week && !parseInt(req.query.week)) {
+                res.status(400).send({
+                    error: 'week must be numeric'
+                });
+            } else {
+                const results = await service.getPregameWP(req.query.year, req.query.week, req.query.team);
+                res.send(results);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    }
+
     return {
         getPP,
         getPPAByTeam,
         getWP,
         getPPAByGame,
         getPPAByPlayerGame,
-        getPPAByPlayerSeason
+        getPPAByPlayerSeason,
+        getPregameWP
     }
 }
