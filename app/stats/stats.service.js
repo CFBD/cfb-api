@@ -148,6 +148,7 @@ module.exports = (db) => {
             SELECT  g.id,
                     g.season,
                     t.school,
+                    p.drive_id,
                     p.down,
                     p.distance,
                     p.yards_gained,
@@ -196,6 +197,8 @@ module.exports = (db) => {
                 school AS team,
                 conference,
                 o_d AS unit,
+                COUNT(ppa) AS plays,
+                COUNT(DISTINCT(drive_id)) AS drives,
                 AVG(ppa) AS ppa,
                 AVG(ppa) FILTER(WHERE down_type = 'standard') AS standard_down_ppa,
                 AVG(ppa) FILTER(WHERE down_type = 'passing') AS passing_down_ppa,
@@ -227,6 +230,49 @@ module.exports = (db) => {
         ORDER BY season, school, o_d
         `, params);
 
+        const havocResults = await db.any(`
+            WITH havoc_events AS (
+                WITH fumbles AS (
+                    SELECT g.season, t.id AS team_id, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0) AS fumbles
+                    FROM game AS g
+                        INNER JOIN game_team AS gt ON g.id = gt.game_id
+                        INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+                        INNER JOIN team AS t ON gt2.team_id = t.id
+                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                        LEFT JOIN game_player_stat AS s ON s.game_team_id = gt.id AND s.type_id = 4 AND s.category_id = 10
+                    ${filter}
+                    GROUP BY g.season, t.id
+                )
+                SELECT 	g.season,
+                        t.id AS team_id,
+                        COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0.0) + f.fumbles AS total_havoc,
+                        COALESCE(SUM(CAST(s.stat AS NUMERIC)) FILTER (WHERE s.type_id IN (16,24)), 0.0) AS db_havoc,
+                        COALESCE(SUM(CAST(s.stat AS NUMERIC)) FILTER (WHERE s.type_id = 21), 0.0) + f.fumbles AS front_seven_havoc
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id
+                    INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+                    INNER JOIN team AS t ON gt.team_id = t.id
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN game_team_stat AS s ON s.game_team_id = gt.id AND s.type_id IN (16,21,24)
+                    LEFT JOIN fumbles AS f ON f.team_id = t.id
+                ${filter}
+                GROUP BY g.season, t.id, f.fumbles
+            ), plays AS (
+                SELECT g.season, t.id AS team_id, COUNT(p.id) AS total
+                FROM game AS g
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
+                    INNER JOIN team AS t ON p.defense_id = t.id
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                ${filter}
+                GROUP BY g.season, t.id
+            )
+            SELECT p.season AS season, t.school AS team, (h.total_havoc / p.total) AS total_havoc, (h.front_seven_havoc / p.total) AS front_seven_havoc, (h.db_havoc / p.total) AS db_havoc
+            FROM plays AS p
+                INNER JOIN havoc_events AS h ON p.team_id = h.team_id AND h.season = p.season
+                INNER JOIN team AS t ON t.id = p.team_id
+        `, params);
+
         let stats = [];
         let years = Array.from(new Set(results.map(r => r.season)));
 
@@ -236,12 +282,15 @@ module.exports = (db) => {
             let yearStats = teams.map(t => {
                 let offense = results.find(r => r.season == year && r.team == t && r.unit == 'offense');
                 let defense = results.find(r => r.season == year && r.team == t && r.unit == 'defense');
+                let havoc = havocResults.find(r => r.season == year && r.team == t);
 
                 return {
                     season: year,
                     team: t,
                     conference: offense.conference,
                     offense: {
+                        plays: parseInt(offense.plays),
+                        drives: parseInt(offense.drives),
                         ppa: parseFloat(offense.ppa),
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
@@ -277,6 +326,8 @@ module.exports = (db) => {
                         }
                     },
                     defense: {
+                        plays: parseInt(defense.plays),
+                        drives: parseInt(defense.drives),
                         ppa: parseFloat(defense.ppa),
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
@@ -286,6 +337,11 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
                         openFieldYards: parseFloat(defense.open_field_yards),
                         openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
+                        havoc: {
+                            total: havoc ? parseFloat(havoc.total_havoc) : null,
+                            frontSeven: havoc ? parseFloat(havoc.front_seven_havoc) : null,
+                            db: havoc ? parseFloat(havoc.db_havoc) : null
+                        },
                         standardDowns: {
                             rate: parseFloat(defense.standard_down_rate),
                             ppa: parseFloat(defense.standard_down_ppa),
@@ -359,6 +415,7 @@ module.exports = (db) => {
                     g.week,
                     t.school,
                     t2.school AS opponent,
+                    p.drive_id,
                     p.down,
                     p.distance,
                     p.yards_gained,
@@ -408,6 +465,8 @@ module.exports = (db) => {
                 school AS team,
                 opponent,
                 o_d AS unit,
+                COUNT(ppa) AS plays,
+                COUNT(DISTINCT(drive_id)) AS drives,
                 AVG(ppa) AS ppa,
                 AVG(ppa) FILTER(WHERE down_type = 'standard') AS standard_down_ppa,
                 AVG(ppa) FILTER(WHERE down_type = 'passing') AS passing_down_ppa,
@@ -456,6 +515,8 @@ module.exports = (db) => {
                     team: t,
                     opponent: offense.opponent,
                     offense: {
+                        plays: parseInt(offense.plays),
+                        drives: parseInt(offense.drives),
                         ppa: parseFloat(offense.ppa),
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
@@ -487,6 +548,8 @@ module.exports = (db) => {
                         }
                     },
                     defense: {
+                        plays: parseInt(defense.plays),
+                        drives: parseInt(defense.drives),
                         ppa: parseFloat(defense.ppa),
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
