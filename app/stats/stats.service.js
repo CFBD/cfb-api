@@ -297,6 +297,49 @@ module.exports = (db) => {
                 INNER JOIN team AS t ON t.id = p.team_id
         `, params);
 
+        let scoringOppResults = await db.any(`
+            WITH drive_data AS (
+                SELECT 	p.drive_id,
+                        g.season,
+                        CASE
+                            WHEN gt.team_id = p.offense_id THEN (100 - p.yard_line)
+                            ELSE p.yard_line
+                        END AS yardsToGoal
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.home_away = 'home'
+                    INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
+                    INNER JOIN team AS t ON t.id IN (gt.team_id, gt2.team_id)
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN play AS p ON d.id = p.drive_id
+                ${filter} AND d.start_period < 5
+            ), drives AS (
+                SELECT season, drive_id, MIN(yardsToGoal) AS min_yards
+                FROM drive_data
+                GROUP BY season, drive_id
+            ), drive_points AS (
+                SELECT  t.school,
+                        season,
+                        CASE
+                            WHEN d.offense_id = t.id THEN 'offense'
+                            ELSE 'defense'
+                        END AS unit,
+                        CASE
+                            WHEN d.scoring AND d.result_id IN (12,20,24,26) THEN 7
+                            WHEN d.scoring AND d.result_id IN (30) THEN 3
+                            WHEN d.result_id IN (4,10,15,42,46) THEN -7
+                            WHEN d.result_id IN (6) THEN -2
+                            ELSE 0
+                        END AS points
+                FROM team AS t
+                    INNER JOIN drive AS d ON t.id IN (d.offense_id, d.defense_id)
+                    INNER JOIN drives AS dr ON d.id = dr.drive_id
+                WHERE dr.min_yards <= 40
+            )
+            SELECT season, school, unit, AVG(points) AS points 
+            FROM drive_points
+            GROUP BY season, school, unit
+        `, params);
+
         let stats = [];
         let years = Array.from(new Set(results.map(r => r.season)));
 
@@ -307,6 +350,8 @@ module.exports = (db) => {
                 let offense = results.find(r => r.season == year && r.team == t && r.unit == 'offense');
                 let defense = results.find(r => r.season == year && r.team == t && r.unit == 'defense');
                 let havoc = havocResults.find(r => r.season == year && r.team == t);
+                let scoringOppO = scoringOppResults.find(r => r.season == year && r.school == t && r.unit == 'offense');
+                let scoringOppD = scoringOppResults.find(r => r.season == year && r.school == t && r.unit == 'defense');
 
                 return {
                     season: year,
@@ -324,6 +369,7 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
                         openFieldYards: parseFloat(offense.open_field_yards),
                         openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
+                        pointsPerOpportunity: parseFloat(scoringOppO.points),
                         standardDowns: {
                             rate: parseFloat(offense.standard_down_rate),
                             ppa: parseFloat(offense.standard_down_ppa),
@@ -361,6 +407,7 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
                         openFieldYards: parseFloat(defense.open_field_yards),
                         openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
+                        pointsPerOpportunity: parseFloat(scoringOppD.points),
                         havoc: {
                             total: havoc ? parseFloat(havoc.total_havoc) : null,
                             frontSeven: havoc ? parseFloat(havoc.front_seven_havoc) : null,
