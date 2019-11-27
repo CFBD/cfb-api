@@ -771,10 +771,10 @@ module.exports = (db) => {
                     ROUND(CAST(AVG(ppa) FILTER(WHERE success = true AND period = 4) AS NUMERIC), 2) AS explosiveness_4,
                     ROUND(CAST(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush' AND success = true) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush'), 0), 1), 3) AS power_success,
                     ROUND(CAST(COUNT(*) FILTER(WHERE play_type = 'Rush' AND yards_gained <= 0) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1), 3) AS stuff_rate,
-                    CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) AS second_level_yards,
-                    CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards,
-                    ROUND(CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1), 1) AS second_level_yards_avg,
-                    ROUND(CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1), 1) AS open_field_yards_avg,
+                    COALESCE(CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC), 0) AS second_level_yards,
+                    COALESCE(CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC), 0) AS open_field_yards,
+                    COALESCE(ROUND(CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1), 1), 0) AS second_level_yards_avg,
+                    COALESCE(ROUND(CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1), 1), 0) AS open_field_yards_avg,
                     ROUND(total_havoc / COUNT(*), 3) AS total_havoc,
                     ROUND(db_havoc / COUNT(*), 3) AS db_havoc,
                     ROUND(front_seven_havoc / COUNT(*), 3) AS front_seven_havoc,
@@ -896,6 +896,49 @@ module.exports = (db) => {
             ORDER BY overall_usage DESC
         `, [id]);
 
+        let scoringOppResults = await db.any(`
+            WITH drive_data AS (
+                SELECT 	p.drive_id,
+                        g.season,
+                        CASE
+                            WHEN gt.team_id = p.offense_id THEN (100 - p.yard_line)
+                            ELSE p.yard_line
+                        END AS yardsToGoal
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.home_away = 'home'
+                    INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
+                    INNER JOIN team AS t ON t.id IN (gt.team_id, gt2.team_id)
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN play AS p ON d.id = p.drive_id
+                WHERE g.id = $1 AND d.start_period < 5
+            ), drives AS (
+                SELECT season, drive_id, MIN(yardsToGoal) AS min_yards
+                FROM drive_data
+                GROUP BY season, drive_id
+            ), drive_points AS (
+                SELECT  t.school AS team,
+                        season,
+                        CASE
+                            WHEN d.offense_id = t.id THEN 'offense'
+                            ELSE 'defense'
+                        END AS unit,
+                        CASE
+                            WHEN d.scoring AND d.result_id IN (12,20,24,26) THEN 7
+                            WHEN d.scoring AND d.result_id IN (30) THEN 3
+                            WHEN d.result_id IN (4,10,15,42,46) THEN -7
+                            WHEN d.result_id IN (6) THEN -2
+                            ELSE 0
+                        END AS points
+                FROM team AS t
+                    INNER JOIN drive AS d ON t.id IN (d.offense_id, d.defense_id)
+                    INNER JOIN drives AS dr ON d.id = dr.drive_id
+                WHERE dr.min_yards <= 40
+            )
+            SELECT team, unit, COUNT(*) AS opportunities, ROUND(AVG(points), 2) AS avg_points, SUM(points) AS points
+            FROM drive_points
+            GROUP BY season, team, unit
+        `, [id]);
+
         let teams = Array.from(new Set(teamResults.map(t => t.team)));
 
         return {
@@ -972,7 +1015,17 @@ module.exports = (db) => {
                     total: t.total_havoc,
                     frontSeven: t.front_seven_havoc,
                     db: t.db_havoc
-                }))
+                })),
+                scoringOpportunities: teamResults.map(t => {
+                    let scoring = scoringOppResults.find(o => t.team == o.team && o.unit == 'offense');
+
+                    return {
+                        team: t.team,
+                        opportunities: scoring ? parseInt(scoring.opportunities) : 0,
+                        points: scoring ? parseInt(scoring.points) : 0,
+                        pointsPerOpportunity: scoring ? parseFloat(scoring.avg_points) : 0
+                    };
+                })
             },
             players: {
                 usage: playerResults.map(p => ({
