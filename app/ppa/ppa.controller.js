@@ -36,7 +36,7 @@ module.exports = (db) => {
                     error: 'gameId is required.'
                 });
             } else {
-                let results = await service.getWP(req.query.gameId);
+                let results = await service.getWP(req.query.gameId, req.query.adjustForSpread);
                 res.send(results);
             }
         } catch (err) {

@@ -34,7 +34,7 @@ module.exports = (db) => {
         return inputNorm;
     }
 
-    const getWP = async (gameId) => {
+    const getWP = async (gameId, includeSpread = true) => {
         let plays = await db.any(`
         SELECT 	g.id,
 		        p.id AS play_id,
@@ -68,7 +68,7 @@ module.exports = (db) => {
             INNER JOIN drive AS d ON g.id = d.game_id
             INNER JOIN play AS p 
                 ON d.id = p.drive_id 
-                    AND p.play_type_id NOT IN (8,12,13,14,15,16,17,18,21,29,40,41,43,52,53,56,57,59,60,61,62,65,66,999,78)
+                    AND p.play_type_id NOT IN (12,13,15,16,21,43,53,56,57,61,62,65,66,999,78)
                     AND p.period < 5
                     AND p.yard_line <= 99 
                     AND p.yard_line >= 1
@@ -105,7 +105,7 @@ module.exports = (db) => {
             ];
 
             for (let play of plays) {
-                play.spread *= (play.time_remaining / 3600);
+                play.spread *= (play.time_remaining / 3600) * (includeSpread == true || includeSpread == 'true' ? 1 : 0);
             }
 
             for (let i = 0; i < plays.length; i++) {
