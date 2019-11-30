@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 1.19.1
+  version: 1.19.2
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -2381,6 +2381,10 @@ definitions:
             type: number
           stuffRate:
             type: number
+          lineYards:
+            type: number
+          lineYardsTotal:
+            type: number
           secondLevelYards:
             type: number
           secondLevelYardsTotal:
@@ -2474,6 +2478,10 @@ definitions:
             type: number
           stuffRate:
             type: number
+          lineYards:
+            type: number
+          lineYardsTotal:
+            type: number
           secondLevelYards:
             type: number
           secondLevelYardsTotal:
@@ -2534,6 +2542,10 @@ definitions:
           powerSuccess:
             type: number
           stuffRate:
+            type: number
+          lineYards:
+            type: number
+          lineYardsTotal:
             type: number
           secondLevelYards:
             type: number
@@ -2824,6 +2836,10 @@ definitions:
                 powerSuccess:
                   type: number
                 stuffRate:
+                  type: number
+                lineYards:
+                  type: number
+                lineYardsAverage:
                   type: number
                 secondLevelYards:
                   type: integer
