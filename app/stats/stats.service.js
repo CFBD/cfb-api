@@ -798,6 +798,7 @@ module.exports = (db) => {
                     COUNT(*) FILTER(WHERE period = 3) AS plays_3,
                     COUNT(*) FILTER(WHERE period = 4) AS plays_4
             FROM plays
+            WHERE garbage_time = false
             GROUP BY school, total_havoc, db_havoc, front_seven_havoc
         `, [id]);
 
