@@ -167,7 +167,7 @@ module.exports = (db) => {
             index++;
         }
 
-        const results = await db.any(`
+        const mainTask = db.any(`
         WITH plays AS (
             SELECT  g.id,
                     g.season,
@@ -256,7 +256,7 @@ module.exports = (db) => {
         ORDER BY season, school, o_d
         `, params);
 
-        const havocResults = await db.any(`
+        const havocTask = db.any(`
             WITH havoc_events AS (
                 WITH fumbles AS (
                     SELECT g.season, t.id AS team_id, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0) AS fumbles
@@ -299,7 +299,7 @@ module.exports = (db) => {
                 INNER JOIN team AS t ON t.id = p.team_id
         `, params);
 
-        let scoringOppResults = await db.any(`
+        let scoringOppTasks = db.any(`
             WITH drive_data AS (
                 SELECT 	p.drive_id,
                         g.season,
@@ -342,6 +342,63 @@ module.exports = (db) => {
             GROUP BY season, school, unit
         `, params);
 
+        const fieldPositionTask = db.any(`
+            WITH offensive_drives AS (
+                SELECT 	g.season,
+                        t.id AS team_id,
+                        AVG(CASE
+                            WHEN gt.home_away = 'home' THEN (100 - d.start_yardline)
+                            ELSE d.start_yardline
+                        END) as drive_start,
+                        AVG(ppa.predicted_points) AS ppa
+                FROM game AS g
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.offense_id
+                    INNER JOIN team AS t ON d.offense_id = t.id
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'home' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'away' AND d.start_yardline = ppa.yard_line))
+                ${filter} AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
+                GROUP BY g.season, t.id
+            ), defensive_drives AS (
+                SELECT 	g.season,
+                        t.id AS team_id,
+                        AVG(CASE
+                            WHEN gt.home_away = 'away' THEN (100 - d.start_yardline)
+                            ELSE d.start_yardline
+                        END) as drive_start,
+                        AVG(ppa.predicted_points) AS ppa
+                FROM game AS g
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.defense_id
+                    INNER JOIN team AS t ON d.defense_id = t.id
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'away' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'home' AND d.start_yardline = ppa.yard_line))
+                ${filter} AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
+                GROUP BY g.season, t.id
+            )
+            SELECT 	o.season,
+                    t.school,
+                    ROUND(o.drive_start, 1) AS avg_start_off,
+                    ROUND((o.ppa), 3) AS avg_predicted_points_off,
+                    ROUND((d.drive_start), 1) AS avg_start_def,
+                    ROUND((-d.ppa), 3) AS avg_predicted_points_def
+            FROM team AS t
+                INNER JOIN offensive_drives AS o ON o.team_id = t.id
+                INNER JOIN defensive_drives AS d ON t.id = d.team_id AND o.season = d.season
+        `, params);
+
+        const fullResults = await Promise.all([
+            mainTask,
+            havocTask,
+            scoringOppTasks,
+            fieldPositionTask
+        ]);
+
+        const results = fullResults[0];
+        const havocResults = fullResults[1];
+        const scoringOppResults = fullResults[2];
+        const fieldPositionResults = fullResults[3];
+
         let stats = [];
         let years = Array.from(new Set(results.map(r => r.season)));
 
@@ -354,6 +411,7 @@ module.exports = (db) => {
                 let havoc = havocResults.find(r => r.season == year && r.team == t);
                 let scoringOppO = scoringOppResults.find(r => r.season == year && r.school == t && r.unit == 'offense');
                 let scoringOppD = scoringOppResults.find(r => r.season == year && r.school == t && r.unit == 'defense');
+                let fieldPosition = fieldPositionResults.find(r => r.season == year && r.school == t);
 
                 return {
                     season: year,
@@ -374,6 +432,10 @@ module.exports = (db) => {
                         openFieldYards: parseFloat(offense.open_field_yards),
                         openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
                         pointsPerOpportunity: parseFloat(scoringOppO.points),
+                        fieldPosition: {
+                            averageStart: parseFloat(fieldPosition.avg_start_off),
+                            averagePredictedPoints: parseFloat(fieldPosition.avg_predicted_points_off)
+                        },
                         standardDowns: {
                             rate: parseFloat(offense.standard_down_rate),
                             ppa: parseFloat(offense.standard_down_ppa),
@@ -414,6 +476,10 @@ module.exports = (db) => {
                         openFieldYards: parseFloat(defense.open_field_yards),
                         openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
                         pointsPerOpportunity: parseFloat(scoringOppD.points),
+                        fieldPosition: {
+                            averageStart: parseFloat(fieldPosition.avg_start_def),
+                            averagePredictedPoints: parseFloat(fieldPosition.avg_predicted_points_def)
+                        },
                         havoc: {
                             total: havoc ? parseFloat(havoc.total_havoc) : null,
                             frontSeven: havoc ? parseFloat(havoc.front_seven_havoc) : null,
@@ -676,7 +742,7 @@ module.exports = (db) => {
     };
 
     const getAdvancedBoxScore = async (id) => {
-        const teamResults = await db.any(` 
+        const teamTask = db.any(` 
             WITH havoc AS (
                 WITH fumbles AS (
                     SELECT t.school, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0.0) AS fumbles
@@ -802,7 +868,7 @@ module.exports = (db) => {
             GROUP BY school, total_havoc, db_havoc, front_seven_havoc
         `, [id]);
 
-        const playerResults = await db.any(`
+        const playerTask = db.any(`
             WITH plays AS (
                 SELECT DISTINCT t.id AS team_id,
                                 t.school,
@@ -911,7 +977,7 @@ module.exports = (db) => {
             ORDER BY overall_usage DESC
         `, [id]);
 
-        let scoringOppResults = await db.any(`
+        let scoringOppTask = db.any(`
             WITH drive_data AS (
                 SELECT 	p.drive_id,
                         g.season,
@@ -953,6 +1019,60 @@ module.exports = (db) => {
             FROM drive_points
             GROUP BY season, team, unit
         `, [id]);
+
+        const fieldPositionTask = db.any(`
+            WITH offensive_drives AS (
+                SELECT 	t.id AS team_id,
+                        AVG(CASE
+                            WHEN gt.home_away = 'home' THEN (100 - d.start_yardline)
+                            ELSE d.start_yardline
+                        END) as drive_start,
+                        AVG(ppa.predicted_points) AS ppa
+                FROM game AS g
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.offense_id
+                    INNER JOIN team AS t ON d.offense_id = t.id
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'home' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'away' AND d.start_yardline = ppa.yard_line))
+                WHERE g.id = $1 AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
+                GROUP BY t.id
+            ), defensive_drives AS (
+                SELECT 	t.id AS team_id,
+                        AVG(CASE
+                            WHEN gt.home_away = 'away' THEN (100 - d.start_yardline)
+                            ELSE d.start_yardline
+                        END) as drive_start,
+                        AVG(ppa.predicted_points) AS ppa
+                FROM game AS g
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.defense_id
+                    INNER JOIN team AS t ON d.defense_id = t.id
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'away' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'home' AND d.start_yardline = ppa.yard_line))
+                WHERE g.id = $1 AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
+                GROUP BY t.id
+            )
+            SELECT 	t.school,
+                    ROUND(o.drive_start, 1) AS avg_start_off,
+                    ROUND((o.ppa), 2) AS avg_predicted_points_off,
+                    ROUND((d.drive_start), 1) AS avg_start_def,
+                    ROUND((-d.ppa), 2) AS avg_predicted_points_def
+            FROM team AS t
+                INNER JOIN offensive_drives AS o ON o.team_id = t.id
+                INNER JOIN defensive_drives AS d ON t.id = d.team_id
+        `, [id]);
+
+        const results = await Promise.all([
+            teamTask,
+            playerTask,
+            scoringOppTask,
+            fieldPositionTask
+        ]);
+
+        const teamResults = results[0];
+        const playerResults = results[1];
+        const scoringOppResults = results[2];
+        const fieldPositionResults = results[3];
 
         let teams = Array.from(new Set(teamResults.map(t => t.team)));
 
@@ -1042,6 +1162,15 @@ module.exports = (db) => {
                         points: scoring ? parseInt(scoring.points) : 0,
                         pointsPerOpportunity: scoring ? parseFloat(scoring.avg_points) : 0
                     };
+                }),
+                fieldPosition: teamResults.map(t => {
+                    let fieldPosition = fieldPositionResults.find(o => t.team == o.school);
+
+                    return {
+                        team: t.team,
+                        averageStart: fieldPosition.avg_start_off,
+                        averageStartingPredictedPoints: fieldPosition.avg_predicted_points_off
+                    }
                 })
             },
             players: {
