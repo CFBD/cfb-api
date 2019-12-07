@@ -47,7 +47,9 @@ module.exports = (db) => {
         }));
     };
 
-    const getMeanPassingChartData = async (id) => {
+    const getMeanPassingChartData = async (id, rollingPlays) => {
+        const condition = rollingPlays ? `p2.row_num <= p1.row_num AND (p2.row_num + ${rollingPlays}) > p1.row_num` : 'p2.row_num <= p1.row_num';
+
         const results = await db.any(`
             WITH plays AS (
                 SELECT a.id, a.name, t.school, p.ppa, ROW_NUMBER() OVER(PARTITION BY a.name, t.school ORDER BY g.season, g.week, p.period, p.clock DESC, d.id, p.id) AS row_num
@@ -63,7 +65,7 @@ module.exports = (db) => {
             ), grouped AS (
                 SELECT p1.row_num, p2.ppa
                 FROM plays AS p1
-                    INNER JOIN plays AS p2 ON p2.row_num <= p1.row_num
+                    INNER JOIN plays AS p2 ON ${condition}
             )
             SELECT row_num, AVG(ppa) AS avg_ppa
             FROM grouped

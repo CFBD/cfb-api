@@ -27,8 +27,12 @@ module.exports = (db) => {
                 res.status(400).send({
                     error: 'a numeric id param is required'
                 });
+            } else if (req.query.rollingPlays && !parseInt(req.query.rollingPlays)) {
+                res.status(400).send({
+                    error: 'rollingPlays must be numeric'
+                });
             } else {
-                let results = await service.getMeanPassingChartData(req.query.id);
+                let results = await service.getMeanPassingChartData(req.query.id, req.query.rollingPlays);
                 res.send(results);
             }
         } catch (err) {
