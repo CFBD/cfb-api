@@ -253,7 +253,6 @@ module.exports = (db) => {
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
         GROUP BY season, school, conference, o_d
-        ORDER BY season, school, o_d
         `, params);
 
         const havocTask = db.any(`
@@ -636,7 +635,6 @@ module.exports = (db) => {
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
         GROUP BY id, season, week, school, opponent, o_d
-        ORDER BY id, season, week, school, opponent, o_d
         `, params);
 
         let stats = [];
