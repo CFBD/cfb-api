@@ -1019,45 +1019,45 @@ module.exports = (db) => {
         `, [id]);
 
         const fieldPositionTask = db.any(`
-            WITH offensive_drives AS (
-                SELECT 	t.id AS team_id,
-                        AVG(CASE
-                            WHEN gt.home_away = 'home' THEN (100 - d.start_yardline)
-                            ELSE d.start_yardline
-                        END) as drive_start,
-                        AVG(ppa.predicted_points) AS ppa
-                FROM game AS g
-                    INNER JOIN drive AS d ON g.id = d.game_id
-                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.offense_id
-                    INNER JOIN team AS t ON d.offense_id = t.id
-                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
-                    INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'home' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'away' AND d.start_yardline = ppa.yard_line))
-                WHERE g.id = $1 AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
-                GROUP BY t.id
-            ), defensive_drives AS (
-                SELECT 	t.id AS team_id,
-                        AVG(CASE
-                            WHEN gt.home_away = 'away' THEN (100 - d.start_yardline)
-                            ELSE d.start_yardline
-                        END) as drive_start,
-                        AVG(ppa.predicted_points) AS ppa
-                FROM game AS g
-                    INNER JOIN drive AS d ON g.id = d.game_id
-                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.defense_id
-                    INNER JOIN team AS t ON d.defense_id = t.id
-                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
-                    INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'away' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'home' AND d.start_yardline = ppa.yard_line))
-                WHERE g.id = $1 AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
-                GROUP BY t.id
-            )
-            SELECT 	t.school,
-                    ROUND(o.drive_start, 1) AS avg_start_off,
-                    ROUND((o.ppa), 2) AS avg_predicted_points_off,
-                    ROUND((d.drive_start), 1) AS avg_start_def,
-                    ROUND((-d.ppa), 2) AS avg_predicted_points_def
-            FROM team AS t
-                INNER JOIN offensive_drives AS o ON o.team_id = t.id
-                INNER JOIN defensive_drives AS d ON t.id = d.team_id
+WITH offensive_drives AS (
+	SELECT 	t.id AS team_id,
+			AVG(CASE
+				WHEN gt.home_away = 'home' THEN (100 - d.start_yardline)
+				ELSE d.start_yardline
+			END) as drive_start,
+			AVG(ppa.predicted_points) AS ppa
+	FROM game AS g
+		LEFT JOIN drive AS d ON g.id = d.game_id AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
+		LEFT JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.offense_id
+		LEFT JOIN team AS t ON d.offense_id = t.id
+		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+		LEFT JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'home' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'away' AND d.start_yardline = ppa.yard_line))
+	WHERE g.id = $1
+	GROUP BY t.id
+), defensive_drives AS (
+	SELECT 	t.id AS team_id,
+			AVG(CASE
+				WHEN gt.home_away = 'away' THEN (100 - d.start_yardline)
+				ELSE d.start_yardline
+			END) as drive_start,
+			AVG(ppa.predicted_points) AS ppa
+	FROM game AS g
+		LEFT JOIN drive AS d ON g.id = d.game_id AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
+		LEFT JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.defense_id
+		LEFT JOIN team AS t ON d.defense_id = t.id
+		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+		LEFT JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'away' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'home' AND d.start_yardline = ppa.yard_line))
+	WHERE g.id = $1
+	GROUP BY t.id
+)
+SELECT 	t.school,
+		ROUND(o.drive_start, 1) AS avg_start_off,
+		ROUND((o.ppa), 2) AS avg_predicted_points_off,
+		ROUND((d.drive_start), 1) AS avg_start_def,
+		ROUND((-d.ppa), 2) AS avg_predicted_points_def
+FROM team AS t
+	INNER JOIN offensive_drives AS o ON o.team_id = t.id
+	INNER JOIN defensive_drives AS d ON t.id = d.team_id
         `, [id]);
 
         const results = await Promise.all([
