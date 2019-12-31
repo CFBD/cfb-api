@@ -222,12 +222,18 @@ module.exports = (db) => {
                 AVG(p.ppa) FILTER(WHERE p.offense_id = t.id) AS offense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_offense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_offense_ppa,
+                SUM(p.ppa) FILTER(WHERE p.offense_id = t.id) AS offense_ppa_cum,
+                SUM(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_offense_ppa_cum,
+                SUM(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_offense_ppa_cum,
                 AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.down = 1) AS first_offense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.down = 2) AS second_offense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.offense_id = t.id AND p.down = 3) AS third_offense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id) AS defense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_defense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_defense_ppa,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id) AS defense_ppa_cum,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_defense_ppa_cum,
+                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_defense_ppa_cum,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 1) AS first_defense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 2) AS second_defense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 3) AS third_defense_ppa
@@ -252,7 +258,12 @@ module.exports = (db) => {
                 rushing: r.rushing_offense_ppa,
                 firstDown: r.first_offense_ppa,
                 secondDown: r.second_offense_ppa,
-                thirdDown: r.third_offense_ppa
+                thirdDown: r.third_offense_ppa,
+                cumulative: {
+                    total: r.offense_ppa_cum,
+                    passing: r.passing_offense_ppa_cum,
+                    rushing: r.rushing_offense_ppa_cum
+                }
             },
             defense: {
                 overall: r.defense_ppa,
@@ -260,7 +271,12 @@ module.exports = (db) => {
                 rushing: r.rushing_defense_ppa,
                 firstDown: r.first_defense_ppa,
                 secondDown: r.second_defense_ppa,
-                thirdDown: r.third_defense_ppa
+                thirdDown: r.third_defense_ppa,
+                cumulative: {
+                    total: r.defense_ppa_cum,
+                    passing: r.passing_defense_ppa_cum,
+                    rushing: r.rushing_defense_ppa_cum
+                }
             }
         }));
     }
