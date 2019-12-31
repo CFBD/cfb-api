@@ -648,7 +648,7 @@ module.exports = (db) => {
         }));
     };
 
-    const getPregameWP = async (season, week, team) => {
+    const getPregameWP = async (season, week, team, seasonType) => {
         let filters = [];
         let params = [];
         let index = 1;
@@ -671,10 +671,14 @@ module.exports = (db) => {
             index++;
         }
 
+        seasonType = seasonType || 'regular';
+        filters.push(`g.season_type = $${index}`);
+        params.push(seasonType);
+
         let filter = filters.join(' AND ')
 
         let results = await db.any(`
-            SELECT g.id, g.season, g.week, home.school AS home, away.school AS away, COALESCE(gl.spread, gl2.spread) AS spread
+            SELECT g.id, g.season, g.season_type, g.week, home.school AS home, away.school AS away, COALESCE(gl.spread, gl2.spread) AS spread
             FROM game AS g
                 INNER JOIN game_team AS gt ON gt.game_id = g.id AND gt.home_away = 'home'
                 INNER JOIN team AS home ON gt.team_id = home.id
@@ -689,6 +693,7 @@ module.exports = (db) => {
 
         return results.map(r => ({
             season: r.season,
+            seasonType: r.season_type,
             week: r.week,
             gameId: r.id,
             homeTeam: r.home,

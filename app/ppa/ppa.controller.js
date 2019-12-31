@@ -170,7 +170,7 @@ module.exports = (db) => {
                     error: 'week must be numeric'
                 });
             } else {
-                const results = await service.getPregameWP(req.query.year, req.query.week, req.query.team);
+                const results = await service.getPregameWP(req.query.year, req.query.week, req.query.team, req.query.seasonType);
                 res.send(results);
             }
         } catch (err) {
