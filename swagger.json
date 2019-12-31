@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.20.0",
+    "version": "1.21.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -3999,6 +3999,35 @@
           "type": "string"
         },
         "averagePPA": {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "number"
+            },
+            "pass": {
+              "type": "number"
+            },
+            "rush": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            }
+          }
+        },
+        "totalPPA": {
           "type": "object",
           "properties": {
             "all": {

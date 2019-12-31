@@ -457,7 +457,15 @@ module.exports = (db) => {
                     INNER JOIN position AS po ON a.position_id = po.id
                 ${filter}
             )
-            SELECT "name", position, school, season, week, opponent, ROUND(CAST(AVG(ppa) AS NUMERIC), 3) AS avg_ppa, ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Pass') AS NUMERIC), 3) AS pass_ppa, ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Rush') AS NUMERIC), 3) AS rush_ppa
+            SELECT  "name",
+                    position,
+                    school,
+                    season,
+                    week,
+                    opponent,
+                    ROUND(CAST(AVG(ppa) AS NUMERIC), 3) AS avg_ppa,
+                    ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Pass') AS NUMERIC), 3) AS pass_ppa,
+                    ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Rush') AS NUMERIC), 3) AS rush_ppa
             FROM plays
             WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR')
             GROUP BY "name", position, school, season, week, opponent
@@ -593,7 +601,15 @@ module.exports = (db) => {
               ROUND(CAST(AVG(ppa) FILTER(WHERE down = 2) AS NUMERIC), 3) AS second_down_ppa,
               ROUND(CAST(AVG(ppa) FILTER(WHERE down = 3) AS NUMERIC), 3) AS third_down_ppa,
               ROUND(CAST(AVG(ppa) FILTER(WHERE down_type = 'standard') AS NUMERIC), 3) AS standard_down_ppa,
-              ROUND(CAST(AVG(ppa) FILTER(WHERE down_type = 'passing') AS NUMERIC), 3) AS passing_down_ppa
+              ROUND(CAST(AVG(ppa) FILTER(WHERE down_type = 'passing') AS NUMERIC), 3) AS passing_down_ppa,
+              ROUND(CAST(SUM(ppa) AS NUMERIC), 3) AS total_ppa,
+              ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Pass') AS NUMERIC), 3) AS total_pass_ppa,
+              ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush') AS NUMERIC), 3) AS total_rush_ppa,
+              ROUND(CAST(SUM(ppa) FILTER(WHERE down = 1) AS NUMERIC), 3) AS total_first_down_ppa,
+              ROUND(CAST(SUM(ppa) FILTER(WHERE down = 2) AS NUMERIC), 3) AS total_second_down_ppa,
+              ROUND(CAST(SUM(ppa) FILTER(WHERE down = 3) AS NUMERIC), 3) AS total_third_down_ppa,
+              ROUND(CAST(SUM(ppa) FILTER(WHERE down_type = 'standard') AS NUMERIC), 3) AS total_standard_down_ppa,
+              ROUND(CAST(SUM(ppa) FILTER(WHERE down_type = 'passing') AS NUMERIC), 3) AS total_passing_down_ppa
         FROM plays
         WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR')
         GROUP BY season, id, "name", position, school, conference
@@ -618,6 +634,16 @@ module.exports = (db) => {
                 thirdDown: r.third_down_ppa ? parseFloat(r.third_down_ppa) : null,
                 standardDowns: r.standard_down_ppa ? parseFloat(r.standard_down_ppa) : null,
                 passingDowns: r.passing_down_ppa ? parseFloat(r.passing_down_ppa) : null
+            },
+            totalPPA: {
+                all: parseFloat(r.total_ppa),
+                pass: r.pass_ppa ? parseFloat(r.total_pass_ppa) : null,
+                rush: r.rush_ppa ? parseFloat(r.total_rush_ppa) : null,
+                firstDown: r.first_down_ppa ? parseFloat(r.total_first_down_ppa) : null,
+                secondDown: r.second_down_ppa ? parseFloat(r.total_second_down_ppa) : null,
+                thirdDown: r.third_down_ppa ? parseFloat(r.total_third_down_ppa) : null,
+                standardDowns: r.standard_down_ppa ? parseFloat(r.total_standard_down_ppa) : null,
+                passingDowns: r.passing_down_ppa ? parseFloat(r.total_passing_down_ppa) : null
             }
         }));
     };
