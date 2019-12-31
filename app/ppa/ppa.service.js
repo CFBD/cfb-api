@@ -231,9 +231,9 @@ module.exports = (db) => {
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id) AS defense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_defense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_defense_ppa,
-                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id) AS defense_ppa_cum,
-                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_defense_ppa_cum,
-                AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_defense_ppa_cum,
+                SUM(p.ppa) FILTER(WHERE p.defense_id = t.id) AS defense_ppa_cum,
+                SUM(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS passing_defense_ppa_cum,
+                SUM(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.play_type_id IN (5,9,29,39,68)) AS rushing_defense_ppa_cum,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 1) AS first_defense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 2) AS second_defense_ppa,
                 AVG(p.ppa) FILTER(WHERE p.defense_id = t.id AND p.down = 3) AS third_defense_ppa
