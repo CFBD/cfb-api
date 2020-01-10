@@ -430,7 +430,7 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
                         openFieldYards: parseFloat(offense.open_field_yards),
                         openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
-                        pointsPerOpportunity: parseFloat(scoringOppO.points),
+                        pointsPerOpportunity: parseFloat(scoringOppO ? scoringOppO.points : 0),
                         fieldPosition: {
                             averageStart: parseFloat(fieldPosition.avg_start_off),
                             averagePredictedPoints: parseFloat(fieldPosition.avg_predicted_points_off)
@@ -474,7 +474,7 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
                         openFieldYards: parseFloat(defense.open_field_yards),
                         openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
-                        pointsPerOpportunity: parseFloat(scoringOppD.points),
+                        pointsPerOpportunity: parseFloat(scoringOppD ? scoringOppD.points : 0),
                         fieldPosition: {
                             averageStart: parseFloat(fieldPosition.avg_start_def),
                             averagePredictedPoints: parseFloat(fieldPosition.avg_predicted_points_def)
