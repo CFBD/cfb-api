@@ -82,8 +82,12 @@ module.exports = (db) => {
                 res.status(400).send({
                     error: 'week must be numeric'
                 });
+            } else if (req.query.seasonType && req.query.seasonType.toLowerCase() != 'both' && req.query.seasonType.toLowerCase() != 'regular' && req.query.seasonType.toLowerCase() != 'postseason') {
+                res.status(400).send({
+                    error: 'invalid seasonType'
+                });
             } else {
-                const results = await service.getAdvancedGameStats(req.query.year, req.query.team, req.query.week, req.query.opponent, req.query.excludeGarbageTime);
+                const results = await service.getAdvancedGameStats(req.query.year, req.query.team, req.query.week, req.query.opponent, req.query.excludeGarbageTime, req.query.seasonType);
                 res.send(results);
             }
         } catch (err) {

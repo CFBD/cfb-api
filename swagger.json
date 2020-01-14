@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.21.3",
+    "version": "1.21.4",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -1968,6 +1968,13 @@
             "in": "query",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular, postseason, or both)",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "responses": {
@@ -3477,6 +3484,9 @@
             "ppa": {
               "type": "number"
             },
+            "totalPPA": {
+              "type": "number"
+            },
             "successRate": {
               "type": "number"
             },
@@ -3564,6 +3574,9 @@
                 "ppa": {
                   "type": "number"
                 },
+                "totalPPA": {
+                  "type": "number"
+                },
                 "successRate": {
                   "type": "number"
                 },
@@ -3579,6 +3592,9 @@
                   "type": "number"
                 },
                 "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
                   "type": "number"
                 },
                 "successRate": {
@@ -3601,6 +3617,9 @@
               "type": "integer"
             },
             "ppa": {
+              "type": "number"
+            },
+            "totalPPA": {
               "type": "number"
             },
             "successRate": {
@@ -3704,6 +3723,9 @@
                 "ppa": {
                   "type": "number"
                 },
+                "totalPPA": {
+                  "type": "number"
+                },
                 "successRate": {
                   "type": "number"
                 },
@@ -3719,6 +3741,9 @@
                   "type": "number"
                 },
                 "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
                   "type": "number"
                 },
                 "successRate": {
@@ -3763,6 +3788,9 @@
             "ppa": {
               "type": "number"
             },
+            "totalPPA": {
+              "type": "number"
+            },
             "successRate": {
               "type": "number"
             },
@@ -3827,6 +3855,9 @@
                 "ppa": {
                   "type": "number"
                 },
+                "totalPPA": {
+                  "type": "number"
+                },
                 "successRate": {
                   "type": "number"
                 },
@@ -3839,6 +3870,9 @@
               "type": "object",
               "properties": {
                 "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
                   "type": "number"
                 },
                 "successRate": {
@@ -3863,6 +3897,9 @@
             "ppa": {
               "type": "number"
             },
+            "totalPPA": {
+              "type": "number"
+            },
             "successRate": {
               "type": "number"
             },
@@ -3927,6 +3964,9 @@
                 "ppa": {
                   "type": "number"
                 },
+                "totalPPA": {
+                  "type": "number"
+                },
                 "successRate": {
                   "type": "number"
                 },
@@ -3939,6 +3979,9 @@
               "type": "object",
               "properties": {
                 "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
                   "type": "number"
                 },
                 "successRate": {

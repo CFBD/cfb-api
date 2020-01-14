@@ -23,13 +23,13 @@ module.exports = (db) => {
         }
 
         if (startWeek) {
-            filter += ` AND g.week >= $${index}`;
+            filter += ` AND (g.week >= $${index} OR g.season_type = 'postseason')`;
             params.push(startWeek);
             index++;
         }
 
         if (endWeek) {
-            filter += ` AND g.week <= $${index}`;
+            filter += ` AND g.week <= $${index} AND g.season_type <> 'postseason'`;
             params.push(endWeek);
             index++;
         }
@@ -156,13 +156,13 @@ module.exports = (db) => {
         }
 
         if (startWeek) {
-            filter += ` AND g.week >= $${index}`;
+            filter += ` AND (g.week >= $${index} OR g.season_type = 'postseason')`;
             params.push(startWeek);
             index++;
         }
 
         if (endWeek) {
-            filter += ` AND g.week <= $${index}`;
+            filter += ` AND g.week <= $${index} AND g.season_type <> 'postseason'`;
             params.push(endWeek);
             index++;
         }
@@ -228,6 +228,9 @@ module.exports = (db) => {
                 AVG(ppa) FILTER(WHERE down_type = 'passing') AS passing_down_ppa,
                 AVG(ppa) FILTER(WHERE play_type = 'Pass') AS passing_ppa,
                 AVG(ppa) FILTER(WHERE play_type = 'Rush') AS rushing_ppa,
+                SUM(ppa) AS total_ppa,
+                SUM(ppa) FILTER(WHERE play_type = 'Pass') AS total_passing_ppa,
+                SUM(ppa) FILTER(WHERE play_type = 'Rush') AS total_rushing_ppa,
                 CAST(COUNT(*) FILTER(WHERE down_type = 'standard') AS NUMERIC) / COUNT(*) AS standard_down_rate,
                 CAST(COUNT(*) FILTER(WHERE down_type = 'passing') AS NUMERIC) / COUNT(*) AS passing_down_rate,
                 CAST(COUNT(*) FILTER(WHERE play_type = 'Pass') AS NUMERIC) / COUNT(*) AS passing_rate,
@@ -420,6 +423,7 @@ module.exports = (db) => {
                         plays: parseInt(offense.plays),
                         drives: parseInt(offense.drives),
                         ppa: parseFloat(offense.ppa),
+                        totalPPA: parseFloat(offense.total_ppa),
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
                         powerSuccess: parseFloat(offense.power_success),
@@ -450,12 +454,14 @@ module.exports = (db) => {
                         rushingPlays: {
                             rate: parseFloat(offense.rush_rate),
                             ppa: parseFloat(offense.rushing_ppa),
+                            totalPPA: parseFloat(offense.total_rushing_ppa),
                             successRate: parseFloat(offense.rush_success_rate),
                             explosiveness: parseFloat(offense.rush_explosiveness)
                         },
                         passingPlays: {
                             rate: parseFloat(offense.passing_rate),
                             ppa: parseFloat(offense.passing_ppa),
+                            totalPPA: parseFloat(offense.total_passing_ppa),
                             successRate: parseFloat(offense.pass_success_rate),
                             explosiveness: parseFloat(offense.pass_explosiveness)
                         }
@@ -464,6 +470,7 @@ module.exports = (db) => {
                         plays: parseInt(defense.plays),
                         drives: parseInt(defense.drives),
                         ppa: parseFloat(defense.ppa),
+                        totalPPA: parseFloat(defense.total_ppa),
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
                         powerSuccess: parseFloat(defense.power_success),
@@ -493,12 +500,14 @@ module.exports = (db) => {
                         passingDowns: {
                             rate: parseFloat(defense.passing_down_rate),
                             ppa: parseFloat(defense.passing_down_ppa),
+                            totalPPA: parseFloat(defense.total_passing_ppa),
                             successRate: parseFloat(defense.passing_down_success_rate),
                             explosiveness: parseFloat(defense.passing_down_explosiveness)
                         },
                         rushingPlays: {
                             rate: parseFloat(defense.rush_rate),
                             ppa: parseFloat(defense.rushing_ppa),
+                            totalPPA: parseFloat(defense.total_rushing_ppa),
                             successRate: parseFloat(defense.rush_success_rate),
                             explosiveness: parseFloat(defense.rush_explosiveness)
                         },
@@ -521,7 +530,7 @@ module.exports = (db) => {
         return stats;
     };
 
-    const getAdvancedGameStats = async (year, team, week, opponent, excludeGarbageTime) => {
+    const getAdvancedGameStats = async (year, team, week, opponent, excludeGarbageTime, seasonType) => {
         let filter = 'WHERE ';
         let params = [];
         let index = 1;
@@ -547,6 +556,12 @@ module.exports = (db) => {
         if (week) {
             filter += ` ${params.length ? 'AND ' : ''}g.week = $${index}`;
             params.push(week);
+            index++;
+        }
+
+        if (g.seasonType && g.seasonType.toLowerCase() !== 'both') {
+            filter += ` ${params.length ? 'AND ' : ''}g.season_type = $${index}`;
+            params.push(seasonType);
             index++;
         }
 
@@ -610,10 +625,13 @@ module.exports = (db) => {
                 COUNT(ppa) AS plays,
                 COUNT(DISTINCT(drive_id)) AS drives,
                 AVG(ppa) AS ppa,
+                SUM(ppa) AS total_ppa,
                 AVG(ppa) FILTER(WHERE down_type = 'standard') AS standard_down_ppa,
                 AVG(ppa) FILTER(WHERE down_type = 'passing') AS passing_down_ppa,
                 AVG(ppa) FILTER(WHERE play_type = 'Pass') AS passing_ppa,
                 AVG(ppa) FILTER(WHERE play_type = 'Rush') AS rushing_ppa,
+                SUM(ppa) FILTER(WHERE play_type = 'Pass') AS total_passing_ppa,
+                SUM(ppa) FILTER(WHERE play_type = 'Rush') AS total_rushing_ppa,
                 CAST((COUNT(*) FILTER(WHERE success = true)) AS NUMERIC) / COUNT(*) AS success_rate,
                 AVG(ppa) FILTER(WHERE success = true) AS explosiveness,
                 CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'standard')) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE down_type = 'standard'), 0), 1) AS standard_down_success_rate,
@@ -661,6 +679,7 @@ module.exports = (db) => {
                         plays: parseInt(offense.plays),
                         drives: parseInt(offense.drives),
                         ppa: parseFloat(offense.ppa),
+                        totalPPA: parseFloat(offense.total_ppa),
                         successRate: parseFloat(offense.success_rate),
                         explosiveness: parseFloat(offense.explosiveness),
                         powerSuccess: parseFloat(offense.power_success),
@@ -683,11 +702,13 @@ module.exports = (db) => {
                         },
                         rushingPlays: {
                             ppa: parseFloat(offense.rushing_ppa),
+                            totalPPA: parseFloat(offense.total_rushing_ppa),
                             successRate: parseFloat(offense.rush_success_rate),
                             explosiveness: parseFloat(offense.rush_explosiveness)
                         },
                         passingPlays: {
                             ppa: parseFloat(offense.passing_ppa),
+                            totalPPA: parseFloat(offense.total_passing_ppa),
                             successRate: parseFloat(offense.pass_success_rate),
                             explosiveness: parseFloat(offense.pass_explosiveness)
                         }
@@ -696,6 +717,7 @@ module.exports = (db) => {
                         plays: parseInt(defense.plays),
                         drives: parseInt(defense.drives),
                         ppa: parseFloat(defense.ppa),
+                        totalPPA: parseFloat(defense.total_ppa),
                         successRate: parseFloat(defense.success_rate),
                         explosiveness: parseFloat(defense.explosiveness),
                         powerSuccess: parseFloat(defense.power_success),
@@ -718,11 +740,13 @@ module.exports = (db) => {
                         },
                         rushingPlays: {
                             ppa: parseFloat(defense.rushing_ppa),
+                            totalPPA: parseFloat(defense.total_rushing_ppa),
                             successRate: parseFloat(defense.rush_success_rate),
                             explosiveness: parseFloat(defense.rush_explosiveness)
                         },
                         passingPlays: {
                             ppa: parseFloat(defense.passing_ppa),
+                            totalPPA: parseFloat(defense.total_passing_ppa),
                             successRate: parseFloat(defense.pass_success_rate),
                             explosiveness: parseFloat(defense.pass_explosiveness)
                         }
