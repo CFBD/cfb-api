@@ -57,15 +57,33 @@ module.exports = (db) => {
                     });
                     return;
                 }
+                
+                let filter = 'WHERE LOWER(t.school) = LOWER($1)';
+                let params = [req.query.team];
+
+                if (req.query.year) {
+                    if (!parseInt(req.query.year)) {
+                        res.status(400).send({
+                            error: 'year must be numeric.'
+                        });
+                        return;
+                    }
+
+                    filter += ' AND att.start_year <= $2 AND att.end_year >= $2';
+                    params.push(req.query.year);
+                } else {
+                    filter += ' AND a.active = true';
+                }
 
                 let roster = await db.any(`
                     SELECT a.id, a.first_name, a.last_name, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country
                     FROM team t
-                        INNER JOIN athlete a ON t.id = a.team_id AND a.active = true
-                        INNER JOIN hometown h ON a.hometown_id = h.id
-                        INNER JOIN position p ON a.position_id = p.id
-                    WHERE LOWER(t.school) = LOWER($1)
-                `, [req.query.team]);
+                        INNER JOIN athlete_team AS att ON t.id = att.team_id
+                        INNER JOIN athlete a ON att.athlete_id = a.id
+                        LEFT JOIN hometown h ON a.hometown_id = h.id
+                        LEFT JOIN position p ON a.position_id = p.id
+                    ${filter}
+                `, params);
 
                 res.send(roster);
 
