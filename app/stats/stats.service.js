@@ -559,7 +559,7 @@ module.exports = (db) => {
             index++;
         }
 
-        if (g.seasonType && g.seasonType.toLowerCase() !== 'both') {
+        if (seasonType && seasonType.toLowerCase() !== 'both') {
             filter += ` ${params.length ? 'AND ' : ''}g.season_type = $${index}`;
             params.push(seasonType);
             index++;
