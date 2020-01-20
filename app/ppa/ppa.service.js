@@ -599,7 +599,8 @@ module.exports = (db) => {
                 INNER JOIN drive AS d ON g.id = d.game_id
                 INNER JOIN play AS p ON d.id = p.drive_id AND p.offense_id = t.id AND p.ppa IS NOT NULL
                 INNER JOIN play_stat AS ps ON p.id = ps.play_id
-                INNER JOIN athlete AS a ON ps.athlete_id = a.id AND a.team_id = t.id
+                INNER JOIN athlete_team AS att ON ps.athlete_id = att.athlete_id AND att.team_id = t.id AND att.end_year >= g.season AND att.start_year <= g.season
+                INNER JOIN athlete AS a ON att.athlete_id = a.id
                 INNER JOIN position AS po ON a.position_id = po.id
             ${filter}
         )
