@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.21.4",
+    "version": "1.22.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -2209,6 +2209,9 @@
         },
         "away_post_win_prob": {
           "type": "number"
+        },
+        "excitement_index": {
+          "type": "number"
         }
       }
     },
@@ -2356,6 +2359,9 @@
         "start_yardline": {
           "type": "integer"
         },
+        "start_yards_to_goal": {
+          "type": "integer"
+        },
         "start_time": {
           "type": "object",
           "properties": {
@@ -2371,6 +2377,9 @@
           "type": "integer"
         },
         "end_yardline": {
+          "type": "integer"
+        },
+        "end_yards_to_goal": {
           "type": "integer"
         },
         "end_time": {
@@ -2443,6 +2452,9 @@
           }
         },
         "yard_line": {
+          "type": "integer"
+        },
+        "yards_to_goal": {
           "type": "integer"
         },
         "down": {

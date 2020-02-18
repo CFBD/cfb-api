@@ -178,8 +178,26 @@ module.exports = (db) => {
                 }
 
                 let drives = await db.any(`
-                            SELECT offense.school as offense, oc.name as offense_conference, defense.school as defense, dc.name as defense_conference, g.id as game_id, d.id, d.scoring, d.start_period, d.start_yardline, d.start_time, d.end_period, d.end_yardline, d.end_time, d.elapsed, d.plays, d.yards, dr.name as drive_result
+                            SELECT  offense.school as offense,
+                                    oc.name as offense_conference,
+                                    defense.school as defense,
+                                    dc.name as defense_conference,
+                                    g.id as game_id,
+                                    d.id, d.scoring,
+                                    d.start_period,
+                                    d.start_yardline,
+                                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.start_yardline) ELSE d.start_yardline END AS start_yards_to_goal,
+                                    d.start_time,
+                                    d.end_period,
+                                    d.end_yardline,
+                                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.end_yardline) ELSE d.end_yardline END AS end_yards_to_goal,
+                                    d.end_time,
+                                    d.elapsed,
+                                    d.plays,
+                                    d.yards,
+                                    dr.name as drive_result
                             FROM game g
+                                INNER JOIN game_team AS hgt ON g.id = hgt.game_id AND hgt.home_away = 'home'
                                 INNER JOIN drive d ON g.id = d.game_id
                                 INNER JOIN team offense ON d.offense_id = offense.id
                                 LEFT JOIN conference_team oct ON offense.id = oct.team_id AND oct.start_year <= g.season AND (oct.end_year >= g.season OR oct.end_year IS NULL)
