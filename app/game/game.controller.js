@@ -75,7 +75,7 @@ module.exports = (db) => {
                 }
 
                 let games = await db.any(`
-                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.neutral_site, g.conference_game, g.attendance, v.id as venue_id, v.name as venue, home.school as home_team, hc.name as home_conference, gt.points as home_points, gt.line_scores as home_line_scores, gt.win_prob AS home_post_win_prob, away.school as away_team, ac.name as away_conference, gt2.points as away_points, gt2.line_scores as away_line_scores, gt2.win_prob AS away_post_win_prob
+                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.neutral_site, g.conference_game, g.attendance, v.id as venue_id, v.name as venue, home.school as home_team, hc.name as home_conference, gt.points as home_points, gt.line_scores as home_line_scores, gt.win_prob AS home_post_win_prob, away.school as away_team, ac.name as away_conference, gt2.points as away_points, gt2.line_scores as away_line_scores, gt2.win_prob AS away_post_win_prob, g.excitement as excitement_index
                     FROM game g
                         INNER JOIN game_team gt ON g.id = gt.game_id AND gt.home_away = 'home'
                         INNER JOIN team home ON gt.team_id = home.id
