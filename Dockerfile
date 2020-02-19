@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 COPY --chown=node:node . .
 
-RUN npm run build
+RUN npm start
 
 USER node
 
