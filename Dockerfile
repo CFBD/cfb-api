@@ -18,4 +18,4 @@ USER node
 
 EXPOSE 8080
 
-CMD [ "pm2-runtime", "index.js" ]
+CMD [ "pm2-runtime", "server.js" ]
