@@ -83,5 +83,5 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         script: |
           cd /docker/cfb
-          docker pull docker.pkg.github.com/bluescar/cfb-api/$IMAGE_NAME
+          docker pull docker.pkg.github.com/bluescar/cfb-api/cfb-api
           docker-compose up -d
