@@ -1387,7 +1387,7 @@
         ],
         "summary": "Get SRS historical rating data (requires either a year or team specified)",
         "description": "SRS rating data",
-        "operationId": "getSPRatings",
+        "operationId": "getSRSRatings",
         "produces": [
           "application/json"
         ],
