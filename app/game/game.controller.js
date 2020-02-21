@@ -573,7 +573,7 @@ module.exports = (db) => {
                 }
 
                 if (req.query.conference) {
-                    filter += ` AND LOWER(c.name) = LOWER($${index})`;
+                    filter += ` AND LOWER(c.abbreviation) = LOWER($${index})`;
                     params.push(req.query.conference);
                     index++;
                 }

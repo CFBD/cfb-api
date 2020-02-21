@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 1.23.0
+  version: 1.24.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -911,8 +911,8 @@ paths:
     get:
       tags:
         - ratings
-      summary: Get S&P+ historical rating data (requires either a year or team specified)
-      description: S&P+ rating data
+      summary: Get SP+ historical rating data (requires either a year or team specified)
+      description: SP+ rating data
       operationId: getSPRatings
       produces:
         - application/json
@@ -936,12 +936,46 @@ paths:
               $ref: '#/definitions/TeamSPRating'
         '400':
           description: error
+  /ratings/srs:
+    get:
+      tags:
+        - ratings
+      summary: Get SRS historical rating data (requires either a year or team specified)
+      description: SRS rating data
+      operationId: getSPRatings
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Season filter (required if team not specified)
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter (required if year not specified)
+          in: query
+          required: false
+          type: string
+        - name: team
+          description: Conference filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamSRSRating'
+        '400':
+          description: error
   /ratings/sp/conferences:
     get:
       tags:
         - ratings
-      summary: Get average S&P+ historical rating data by conference
-      description: Conference average S&P+ ratings by year
+      summary: Get average SP+ historical rating data by conference
+      description: Conference average SP+ ratings by year
       operationId: getConferenceSPRatings
       produces:
         - application/json
@@ -2061,6 +2095,19 @@ definitions:
       commits:
         type: number
       averageStars:
+        type: number
+  TeamSRSRating:
+    type: object
+    properties:
+      year:
+        type: integer
+      team:
+        type: string
+      conference:
+        type: string
+      division:
+        type: string
+      rating:
         type: number
   TeamSPRating:
     type: object

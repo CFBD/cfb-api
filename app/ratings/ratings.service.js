@@ -187,8 +187,46 @@ module.exports = (db) => {
         }));
     }
 
+    const getSRS = async (year, team, conference) => {
+        let filters = [];
+        let params = [];
+        let index = 1;
+
+        if (year) {
+            filters.push(`s.year = $${index}`);
+            params.push(year);
+            index++;
+        }
+
+        if (team) {
+            filters.push(`LOWER(t.school) = LOWER($${index})`);
+            params.push(team);
+            index++
+        }
+
+        if (conference) {
+            filters.push(`LOWER(c.abbreviation) = LOWER($${index})`);
+            params.push(conference);
+            index++;
+        }
+
+        filter = 'WHERE ' + filters.join(' AND ');
+
+        const results = await db.any(`
+            SELECT s.year, t.school AS team, c.name AS conference, ct.division, s.rating
+            FROM srs AS s
+                INNER JOIN team AS t ON s.team_id = t.id
+                LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= s.year AND (ct.end_year >= s.year OR ct.end_year IS NULL)
+                LEFT JOIN conference AS c ON ct.conference_id = c.id
+            ${filter}
+        `, params);
+
+        return results;
+    }
+
     return {
         getSP,
-        getConferenceSP
+        getConferenceSP,
+        getSRS
     };
 };
