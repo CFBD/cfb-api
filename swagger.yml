@@ -956,7 +956,7 @@ paths:
           in: query
           required: false
           type: string
-        - name: team
+        - name: conference
           description: Conference filter
           in: query
           required: false
