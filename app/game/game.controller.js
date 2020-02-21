@@ -537,6 +537,114 @@ module.exports = (db) => {
                     error: 'Something went wrong.'
                 });
             }
+        },
+        getRecords: async (req, res) => {
+            try {
+                if (!req.query.year && !req.query.team) {
+                    res.status(400).send({
+                        error: 'Must specify either a year or team query param'
+                    });
+
+                    return;
+                }
+
+                if (req.query.year && !parseInt(req.query.year)) {
+                    res.status(400).send({
+                        error: 'Year must be an integer'
+                    });
+
+                    return;
+                }
+
+                let filter = 'WHERE gt.points IS NOT NULL';
+                let params = [];
+                let index = 1;
+
+                if (req.query.year) {
+                    filter += ` AND g.season = $${index}`;
+                    params.push(req.query.year);
+                    index++;
+                }
+
+                if (req.query.team) {
+                    filter += ` AND LOWER(t.school) = LOWER($${index})`;
+                    params.push(req.query.team);
+                    index++;
+                }
+
+                if (req.query.conference) {
+                    filter += ` AND LOWER(c.name) = LOWER($${index})`;
+                    params.push(req.query.conference);
+                    index++;
+                }
+
+                const results = await db.any(`
+                SELECT 	g.season,
+                        t.school AS team,
+                        c.name AS conference,
+                        ct.division,
+                        COUNT(*) AS games,
+                        COUNT(*) FILTER(WHERE gt.winner = true) AS wins,
+                        COUNT(*) FILTER(WHERE gt2.winner = true) AS losses,
+                        COUNT(*) FILTER(WHERE gt.winner <> true AND gt2.winner <> true) AS "ties",
+                        COUNT(*) FILTER(WHERE g.conference_game = true) AS conference_games,
+                        COUNT(*) FILTER(WHERE gt.winner = true AND g.conference_game = true) AS conference_wins,
+                        COUNT(*) FILTER(WHERE gt2.winner = true AND g.conference_game = true) AS conference_losses,
+                        COUNT(*) FILTER(WHERE gt.winner <> true AND gt2.winner <> true AND g.conference_game = true) AS conference_ties,
+                        COUNT(*) FILTER(WHERE gt.home_away = 'home' AND g.neutral_site <> true) AS home_games,
+                        COUNT(*) FILTER(WHERE gt.winner = true AND gt.home_away = 'home' AND g.neutral_site <> true) AS home_wins,
+                        COUNT(*) FILTER(WHERE gt2.winner = true AND gt.home_away = 'home' AND g.neutral_site <> true) AS home_losses,
+                        COUNT(*) FILTER(WHERE gt.winner <> true AND gt2.winner <> true AND gt.home_away = 'home' AND g.neutral_site <> true) AS home_ties,
+                        COUNT(*) FILTER(WHERE gt.home_away = 'away' AND g.neutral_site <> true) AS away_games,
+                        COUNT(*) FILTER(WHERE gt.winner = true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_wins,
+                        COUNT(*) FILTER(WHERE gt2.winner = true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_losses,
+                        COUNT(*) FILTER(WHERE gt.winner <> true AND gt2.winner <> true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_ties
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id
+                    INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
+                    INNER JOIN team AS t ON gt.team_id = t.id
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
+                    INNER JOIN conference AS c ON ct.conference_id = c.id
+                ${filter}
+                GROUP BY g.season, t.school, c.name, ct.division
+                `, params);
+
+                res.send(results.map(r => ({
+                    year: r.season,
+                    team: r.team,
+                    conference: r.conference,
+                    division: r.division || '',
+                    total: {
+                        games: parseInt(r.games),
+                        wins: parseInt(r.wins),
+                        losses: parseInt(r.losses),
+                        ties: parseInt(r.ties)
+                    },
+                    conferenceGames: {
+                        games: parseInt(r.conference_games),
+                        wins: parseInt(r.conference_wins),
+                        losses: parseInt(r.conference_losses),
+                        ties: parseInt(r.conference_ties)
+                    },
+                    homeGames: {
+                        games: parseInt(r.home_games),
+                        wins: parseInt(r.home_wins),
+                        losses: parseInt(r.home_losses),
+                        ties: parseInt(r.home_ties)
+                    },
+                    awayGames: {
+                        games: parseInt(r.away_games),
+                        wins: parseInt(r.away_wins),
+                        losses: parseInt(r.away_losses),
+                        ties: parseInt(r.away_ties)
+                    }
+                })));
+            } catch (err) {
+                console.error(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
         }
     }
 }

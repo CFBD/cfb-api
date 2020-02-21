@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 1.22.0
+  version: 1.23.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -97,6 +97,40 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Game'
+        '400':
+          description: error
+  /records:
+    get:
+      tags:
+        - games
+      summary: Get records by year
+      description: Team records by year
+      operationId: getTeamRecords
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TeamRecord'
         '400':
           description: error
   /games/players:
@@ -1507,6 +1541,61 @@ definitions:
         type: number
       excitement_index:
         type: number
+  TeamRecord:
+    type: object
+    properties:
+      year:
+        type: integer
+      team:
+        type: string
+      conference:
+        type: string
+      division:
+        type: string
+      total:
+        type: object
+        properties:
+          games:
+            type: integer
+          wins:
+            type: integer
+          losses:
+            type: integer
+          ties:
+            type: integer
+      conferenceGames:
+        type: object
+        properties:
+          games:
+            type: integer
+          wins:
+            type: integer
+          losses:
+            type: integer
+          ties:
+            type: integer
+      homeGames:
+        type: object
+        properties:
+          games:
+            type: integer
+          wins:
+            type: integer
+          losses:
+            type: integer
+          ties:
+            type: integer
+      awayGames:
+        type: object
+        properties:
+          games:
+            type: integer
+          wins:
+            type: integer
+          losses:
+            type: integer
+          ties:
+            type: integer
   PlayerGame:
     type: object
     properties:
