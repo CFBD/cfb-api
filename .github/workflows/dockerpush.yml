@@ -97,6 +97,10 @@ jobs:
           sudo apt install unzip -y
           sudo apt install jq -y
           sudo apt install curl -y
+      - name: Git config
+        run: |
+          git config --global user.email "radjewwj@gmail.com"
+          git config --global user.name "BlueSCar"
       - name: Generate library
         id: lib
         run: |
