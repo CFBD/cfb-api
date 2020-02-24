@@ -85,3 +85,26 @@ jobs:
           cd /docker/cfb
           docker pull docker.pkg.github.com/bluescar/cfb-api/cfb-api
           docker-compose up -d
+  publish-js:
+    needs: deploy
+    runs-on: ubuntu-latest
+    env:
+      GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+    steps:
+      - name: Install dependencies
+        run: |
+          apt install wget -y
+          apt install unzip -y
+          apt install jq -y
+          apt install curl -y
+      - name: Generate library
+        run: |
+          code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": {"projectName": "cfb.js", "moduleName": "cfb", "licenseName": "MIT", "usePromises": "true", "useES6": "true"}}' https://generator.swagger.io/api/gen/clients/javascript | jq '. | .code')
+          code=${code%\"}
+          code=${code#\"}
+      - name: Extract and push
+        run: |
+          wget https://generator.swagger.io/api/gen/download/$code
+          unzip $code
+          cd javascript-client
+          /bin/sh ./git_push.sh bluescar cfb.js "{{ github.event.commits[0].message }}"
