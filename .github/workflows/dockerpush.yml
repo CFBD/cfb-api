@@ -88,8 +88,6 @@ jobs:
   publish-js:
     needs: deploy
     runs-on: ubuntu-latest
-    env:
-      GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
     steps:
       - name: Install dependencies
         run: |
@@ -113,4 +111,9 @@ jobs:
           wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
           unzip ${{ steps.lib.outputs.code }}
           cd javascript-client
-          /bin/sh ./git_push.sh bluescar cfb.js "{{ github.event.commits[0].message }}"
+          git init
+          git add .
+          git commit -am "${{ github.event.commits[0].message }}"
+          git remote add origin https://BlueSCar:${{ secrets.GIT_TOKEN }}@github.com/bluescar/cfb.js.git
+          git pull origin master
+          git push origin master 2>&1 | grep -v 'To https'
