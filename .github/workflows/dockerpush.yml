@@ -118,6 +118,7 @@ jobs:
           git pull origin master
           echo "Adding changes..."
           git add .
+          echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
           git push origin master 2>&1 | grep -v 'To https'
