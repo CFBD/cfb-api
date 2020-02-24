@@ -113,7 +113,7 @@ jobs:
           cd javascript-client
           git init
           echo "Adding remote repo..."
-          git remote add origin https://BlueSCar:${{ secrets.GIT_TOKEN }}@github.com/bluescar/cfb.js.git
+          git remote add origin https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/cfb.js.git
           echo "Pulling latest changes..."
           git pull origin master
           echo "Adding changes..."
