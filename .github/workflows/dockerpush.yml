@@ -115,5 +115,5 @@ jobs:
           git add .
           git commit -am "${{ github.event.commits[0].message }}"
           git remote add origin https://BlueSCar:${{ secrets.GIT_TOKEN }}@github.com/bluescar/cfb.js.git
-          git pull origin master
+          git pull origin master 
           git push origin master 2>&1 | grep -v 'To https'
