@@ -98,13 +98,15 @@ jobs:
           sudo apt install jq -y
           sudo apt install curl -y
       - name: Generate library
+        id: lib
         run: |
           code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": {"projectName": "cfb.js", "moduleName": "cfb", "licenseName": "MIT", "usePromises": "true", "useES6": "true"}}' https://generator.swagger.io/api/gen/clients/javascript | jq '. | .code')
           code=${code%\"}
           code=${code#\"}
+          echo "::set-output name=code::$code"
       - name: Extract and push
         run: |
-          wget https://generator.swagger.io/api/gen/download/$code
-          unzip $code
+          wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
+          unzip ${{ steps.lib.outputs.code }}
           cd javascript-client
           /bin/sh ./git_push.sh bluescar cfb.js "{{ github.event.commits[0].message }}"
