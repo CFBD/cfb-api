@@ -93,10 +93,10 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          apt install wget -y
-          apt install unzip -y
-          apt install jq -y
-          apt install curl -y
+          sudo apt install wget -y
+          sudo apt install unzip -y
+          sudo apt install jq -y
+          sudo apt install curl -y
       - name: Generate library
         run: |
           code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": {"projectName": "cfb.js", "moduleName": "cfb", "licenseName": "MIT", "usePromises": "true", "useES6": "true"}}' https://generator.swagger.io/api/gen/clients/javascript | jq '. | .code')
