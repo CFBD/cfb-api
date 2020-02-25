@@ -118,7 +118,7 @@ jobs:
           git add .
           echo "Pulling latest changes..."
           git stash
-          git pull origin master
+          git pull
           git stash pop
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
@@ -157,7 +157,7 @@ jobs:
           git add .
           echo "Pulling latest changes..."
           git stash
-          git pull origin master
+          git pull
           git stash pop
           echo Updating files
           sed -i '26s/.*/Add the package using the dotnet CLI:\r\n```powershell\r\ndotnet add package CFB.Sharp\r\n```/' README.md
