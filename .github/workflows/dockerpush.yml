@@ -147,7 +147,7 @@ jobs:
         run: |
           wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
           unzip ${{ steps.lib.outputs.code }}
-          cd javascript-client
+          cd csharp-client
           git init
           echo "Adding remote repo..."
           git remote add origin https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/CFBSharp.git
