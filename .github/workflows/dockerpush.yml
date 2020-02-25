@@ -159,6 +159,14 @@ jobs:
           git stash
           git pull --rebase origin master
           git stash pop
+          echo Updating files
+          sed -i '26s/.*/Add the package using the dotnet CLI:\r\n```powershell\r\ndotnet add package CFB.Sharp\r\n```/' README.md
+          sed -i '31s/.*/Then use the relevant namespaces:/' README.md
+          match=$(grep -E 'API version: [0-9]+\.[0-9]+\.[0-9]+' README.md)
+          api_version=$(echo $match | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          sed -i '8s/.*/- SDK version: '"$api_version"'/' README.md
+          sed -i '17s/.*/    <Version>'"$api_version"'<\/Version>/' ./src/CFB.Sharp/CFB.Sharp.csproj
+          sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>' ./src/CFB.Sharp/CFB.Sharp.csproj
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
