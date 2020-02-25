@@ -114,6 +114,7 @@ module.exports = (db) => {
         const types = await db.any(`
             SELECT id, text, abbreviation
             FROM play_type
+            ORDER BY "sequence"
         `);
 
         return types;
