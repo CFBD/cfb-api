@@ -122,3 +122,40 @@ jobs:
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
           git push origin master 2>&1 | grep -v 'To https'
+  publish-csharp:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt install wget -y
+          sudo apt install unzip -y
+          sudo apt install jq -y
+          sudo apt install curl -y
+      - name: Git config
+        run: |
+          git config --global user.email "radjewwj@gmail.com"
+          git config --global user.name "BlueSCar"
+      - name: Generate library
+        id: lib
+        run: |
+          code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": { "packageName": "CFBSharp", "targetFramework": "v5.0", "returnICollection": "true", "netCoreProjectFile": "true", "validatable": "true"}}' https://generator.swagger.io/api/gen/clients/csharp | jq '. | .code')
+          code=${code%\"}
+          code=${code#\"}
+          echo "::set-output name=code::$code"
+      - name: Extract and push
+        run: |
+          wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
+          unzip ${{ steps.lib.outputs.code }}
+          cd javascript-client
+          git init
+          echo "Adding remote repo..."
+          git remote add origin https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/CFBSharp.git
+          echo "Adding changes..."
+          git add .
+          echo "Pulling latest changes..."
+          git pull origin master
+          echo "Committing changes ..."
+          git commit -am "${{ github.event.commits[0].message }}"
+          echo "Pushing to remote..."
+          git push origin master 2>&1 | grep -v 'To https'
