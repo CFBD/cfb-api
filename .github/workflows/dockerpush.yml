@@ -117,7 +117,9 @@ jobs:
           echo "Adding changes..."
           git add .
           echo "Pulling latest changes..."
-          git pull origin master
+          git stash
+          git pull --rebase origin master
+          git stash pop
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
@@ -154,7 +156,9 @@ jobs:
           echo "Adding changes..."
           git add .
           echo "Pulling latest changes..."
-          git pull origin master
+          git stash
+          git pull --rebase origin master
+          git stash pop
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
