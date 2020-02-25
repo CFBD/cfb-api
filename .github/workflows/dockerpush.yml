@@ -108,18 +108,15 @@ jobs:
           echo "::set-output name=code::$code"
       - name: Extract and push
         run: |
+          echo extracting codebase...
           wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
           unzip ${{ steps.lib.outputs.code }}
-          cd javascript-client
-          git init
-          echo "Adding remote repo..."
-          git remote add origin https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/cfb.js.git
+          echo cloning codebase...
+          git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/cfb.js.git
+          sudo yes | cp -a ./javascript-client/. cfb.js 
+          cd cfb.js
           echo "Adding changes..."
           git add .
-          echo "Pulling latest changes..."
-          git stash
-          git pull
-          git stash pop
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
@@ -147,18 +144,15 @@ jobs:
           echo "::set-output name=code::$code"
       - name: Extract and push
         run: |
+          echo Extracting new codebase...
           wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
           unzip ${{ steps.lib.outputs.code }}
-          cd csharp-client
-          git init
-          echo "Adding remote repo..."
-          git remote add origin https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/CFBSharp.git
-          echo "Adding changes..."
+          echo cloning existing codebase....
+          git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/CFBSharp.git
+          echo copying changes....
+          sudo yes | cp -a ./csharp-client/. CFBSharp 
+          cd CFBSharp
           git add .
-          echo "Pulling latest changes..."
-          git stash
-          git pull
-          git stash pop
           echo Updating files
           sed -i '26s/.*/Add the package using the dotnet CLI:\r\n```powershell\r\ndotnet add package CFB.Sharp\r\n```/' README.md
           sed -i '31s/.*/Then use the relevant namespaces:/' README.md
@@ -167,6 +161,8 @@ jobs:
           sed -i '8s/.*/- SDK version: '"$api_version"'/' README.md
           sed -i '17s/.*/    <Version>'"$api_version"'<\/Version>/' ./src/CFB.Sharp/CFB.Sharp.csproj
           sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>' ./src/CFB.Sharp/CFB.Sharp.csproj
+          echo "Adding remote repo..."
+          git remote add origin https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/CFBSharp.git
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
