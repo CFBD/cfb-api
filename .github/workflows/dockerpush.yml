@@ -161,8 +161,6 @@ jobs:
           sed -i '8s/.*/- SDK version: '"$api_version"'/' README.md
           sed -i '17s/.*/    <Version>'"$api_version"'<\/Version>/' ./src/CFBSharp/CFBSharp.csproj
           sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>/' ./src/CFBSharp/CFBSharp.csproj
-          echo "Adding remote repo..."
-          git remote add origin https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/CFBSharp.git
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
