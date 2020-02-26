@@ -154,13 +154,13 @@ jobs:
           cd CFBSharp
           git add .
           echo Updating files
-          sed -i '26s/.*/Add the package using the dotnet CLI:\r\n```powershell\r\ndotnet add package CFB.Sharp\r\n```/' README.md
+          sed -i '26s/.*/Add the package using the dotnet CLI:\r\n```powershell\r\ndotnet add package CFBSharp\r\n```/' README.md
           sed -i '31s/.*/Then use the relevant namespaces:/' README.md
           match=$(grep -E 'API version: [0-9]+\.[0-9]+\.[0-9]+' README.md)
           api_version=$(echo $match | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
           sed -i '8s/.*/- SDK version: '"$api_version"'/' README.md
-          sed -i '17s/.*/    <Version>'"$api_version"'<\/Version>/' ./src/CFB.Sharp/CFB.Sharp.csproj
-          sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>' ./src/CFB.Sharp/CFB.Sharp.csproj
+          sed -i '17s/.*/    <Version>'"$api_version"'<\/Version>/' ./src/CFBSharp/CFBSharp.csproj
+          sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>' ./src/CFBSharp/CFBSharp.csproj
           echo "Adding remote repo..."
           git remote add origin https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/CFBSharp.git
           echo "Committing changes ..."
