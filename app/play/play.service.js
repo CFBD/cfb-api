@@ -135,7 +135,8 @@ module.exports = (db) => {
         team,
         gameId,
         athleteId,
-        statTypeId
+        statTypeId,
+        seasonType
     ) => {
         let filters = [];
         let params = [];
@@ -174,6 +175,12 @@ module.exports = (db) => {
         if (statTypeId) {
             filters.push(`pst.id = $${index}`);
             params.push(statTypeId);
+            index++;
+        }
+        
+        if (seasonType != 'both') {
+            filters.push(`g.season_type = $${index}`);
+            params.push(seasonType || 'regular');
             index++;
         }
 
