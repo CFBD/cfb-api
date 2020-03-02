@@ -115,6 +115,11 @@ jobs:
           git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/cfb.js.git
           sudo yes | cp -a ./javascript-client/. cfb.js 
           cd cfb.js
+          npm audit --fix
+          sudo npm i -g json
+          json -I -f package.json -e 'this.keywords=["football","cfb","ncaaf","data","statistics"]'
+          json -I -f package.json -e 'this.author="BlueSCar"'
+          json -I -f package.json -e 'this.repository={"type": "git", "url": "https://github.com/BlueSCar/cfb.js.git"}'
           echo "Adding changes..."
           git add .
           echo "Committing changes ..."
@@ -161,6 +166,8 @@ jobs:
           sed -i '8s/.*/- SDK version: '"$api_version"'/' README.md
           sed -i '17s/.*/    <Version>'"$api_version"'<\/Version>/' ./src/CFBSharp/CFBSharp.csproj
           sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>/' ./src/CFBSharp/CFBSharp.csproj
+          sed -i '17a\ \ \ \ <RepositoryUrl>https://github.com/BlueSCar/CFBSharp.git<\/RepositoryUrl>' ./src/CFBSharp/CFBSharp.csproj
+          sed -i '18a\ \ \ \ <RepositoryType>git<\/RepositoryType>' ./src/CFBSharp/CFBSharp.csproj
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
