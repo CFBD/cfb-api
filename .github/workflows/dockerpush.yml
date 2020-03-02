@@ -115,8 +115,9 @@ jobs:
           git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/cfb.js.git
           sudo yes | cp -a ./javascript-client/. cfb.js 
           cd cfb.js
-          npm audit --fix
+          echo installing json module...
           sudo npm i -g json
+          echo updating package.config...
           json -I -f package.json -e 'this.keywords=["football","cfb","ncaaf","data","statistics"]'
           json -I -f package.json -e 'this.author="BlueSCar"'
           json -I -f package.json -e 'this.repository={"type": "git", "url": "https://github.com/BlueSCar/cfb.js.git"}'
