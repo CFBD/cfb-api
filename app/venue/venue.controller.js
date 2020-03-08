@@ -3,7 +3,7 @@ module.exports = (db) => {
         getVenues: async (req, res) => {
             try {
                 let venues = await db.any(`
-                    SELECT id, name, capacity, grass, city, state, zip, country_code, location, elevation, year_constructed, dome
+                    SELECT id, name, capacity, grass, city, state, zip, country_code, location, elevation, year_constructed, dome, timezone
                     FROM venue
                     ORDER BY name
                 `);

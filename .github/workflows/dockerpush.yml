@@ -169,6 +169,9 @@ jobs:
           sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>/' ./src/CFBSharp/CFBSharp.csproj
           sed -i '17a\ \ \ \ <RepositoryUrl>https://github.com/BlueSCar/CFBSharp.git<\/RepositoryUrl>' ./src/CFBSharp/CFBSharp.csproj
           sed -i '18a\ \ \ \ <RepositoryType>git<\/RepositoryType>' ./src/CFBSharp/CFBSharp.csproj
+          sed -i '19a\ \ \ \ <PackageIconUrl>https://cfbd-public.s3.us-east-2.amazonaws.com/package_logo.png<\/PackageIconUrl>' ./src/CFBSharp/CFBSharp.csproj
+          sed -i '20a\ \ \ \ <PackageLicenseExpression>MIT<\/PackageLicenseExpression>' ./src/CFBSharp/CFBSharp.csproj
+          sed -i '21a\ \ \ \ <PackageTags>CFB;NCAAF;NCAA;football<\/PackageTags>' ./src/CFBSharp/CFBSharp.csproj
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
