@@ -1544,6 +1544,8 @@ definitions:
         type: string
       start_date:
         type: string
+      start_time_tbd:
+        type: boolean
       neutral_site:
         type: boolean
       conference_game:
