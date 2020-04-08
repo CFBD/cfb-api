@@ -79,7 +79,7 @@ module.exports = (db) => {
                     WHEN typ.id = 6 THEN 'penaltyYards'
                     WHEN typ.id = 14 THEN 'thirdDowns'
                     WHEN typ.id = 15 THEN 'fourthDowns'
-                END as stat_type, SUM(CAST(split_part(stat.stat, '-', 2) AS INT)) as stat
+                END as stat_type, SUM(CAST(CASE WHEN split_part(stat.stat, '-', 2) = '' THEN '0' ELSE split_part(stat.stat, '-', 2) END AS INT)) as stat
         FROM game AS g
             INNER JOIN game_team AS gt ON g.id = gt.game_id
             INNER JOIN team AS t ON gt.team_id = t.id
