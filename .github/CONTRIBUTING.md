@@ -1,4 +1,4 @@
-## How to contribute tothe CFBD API
+## How to contribute to the CFBD API
 
 #### **Did you find a bug?**
 
@@ -11,8 +11,6 @@
 * Open a new GitHub pull request with the patch.
 
 * Ensure the PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
-
-* Before submitting, please read the [Contributing to Ruby on Rails](https://edgeguides.rubyonrails.org/contributing_to_ruby_on_rails.html) guide to know more about coding conventions and benchmarks.
 
 #### **Did you fix whitespace, format code, or make a purely cosmetic patch?**
 
