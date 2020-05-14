@@ -55,7 +55,7 @@ jobs:
 
       - name: Push image
         run: |
-          IMAGE_ID=docker.pkg.github.com/bluescar/cfb-api/$IMAGE_NAME
+          IMAGE_ID=docker.pkg.github.com/cfbd/cfb-api/$IMAGE_NAME
 
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -83,7 +83,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         script: |
           cd /docker/cfb
-          docker pull docker.pkg.github.com/bluescar/cfb-api/cfb-api
+          docker pull docker.pkg.github.com/cfbd/cfb-api/cfb-api
           docker-compose up -d
   publish-js:
     needs: deploy
@@ -112,7 +112,7 @@ jobs:
           wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
           unzip ${{ steps.lib.outputs.code }}
           echo cloning codebase...
-          git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/cfb.js.git
+          git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/cfbd/cfb.js.git
           sudo yes | cp -a ./javascript-client/. cfb.js 
           cd cfb.js
           echo installing json module...
@@ -120,7 +120,7 @@ jobs:
           echo updating package.config...
           json -I -f package.json -e 'this.keywords=["football","cfb","ncaaf","data","statistics"]'
           json -I -f package.json -e 'this.author="BlueSCar"'
-          json -I -f package.json -e 'this.repository={"type": "git", "url": "https://github.com/BlueSCar/cfb.js.git"}'
+          json -I -f package.json -e 'this.repository={"type": "git", "url": "https://github.com/cfbd/cfb.js.git"}'
           echo "Adding changes..."
           git add .
           echo "Committing changes ..."
