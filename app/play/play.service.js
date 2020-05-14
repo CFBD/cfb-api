@@ -217,7 +217,7 @@ module.exports = (db) => {
                 INNER JOIN game_team AS gt ON t.id = gt.team_id
                 INNER JOIN game_team AS gt2 ON gt2.game_id = gt.game_id AND gt.id <> gt2.id
                 INNER JOIN team AS t2 ON gt2.team_id = t2.id
-                INNER JOIN game AS g ON gt.game_id = g.id AND g.season = 2019
+                INNER JOIN game AS g ON gt.game_id = g.id
                 INNER JOIN drive AS d ON g.id = d.game_id
                 INNER JOIN play AS p ON d.id = p.drive_id
                 INNER JOIN play_stat AS ps ON p.id = ps.play_id
