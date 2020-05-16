@@ -13,6 +13,8 @@ module.exports = () => {
         promiseLib: promise
     });
 
+    console.log(connectionString);
+
     const db = dbCreator(connectionString);
 
     return {
