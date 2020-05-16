@@ -37,7 +37,7 @@
     "morgan": "^1.9.1",
     "objection": "^2.1.3",
     "pg": "^7.11.0",
-    "pg-promise": "^8.7.5",
+    "pg-promise": "^10.5.5",
     "postgraphile": "^4.4.1",
     "swagger-stats": "^0.95.7",
     "swagger-ui-dist": "^3.23.1",
