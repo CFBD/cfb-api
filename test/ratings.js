@@ -1,4 +1,4 @@
-const db = require('../config/database')().db;
+const db = require('./config').db;
 const ratings = require('../app/ratings/ratings.service')(db);
 
 const chai = require('chai');
