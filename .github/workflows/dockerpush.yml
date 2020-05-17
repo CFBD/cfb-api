@@ -85,6 +85,7 @@ jobs:
   publish-js:
     needs: deploy
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Install dependencies
         run: |
@@ -104,6 +105,7 @@ jobs:
           code=${code#\"}
           echo "::set-output name=code::$code"
       - name: Extract and push
+        continue-on-error: true
         run: |
           echo extracting codebase...
           wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
@@ -127,6 +129,7 @@ jobs:
   publish-csharp:
     needs: deploy
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Install dependencies
         run: |
