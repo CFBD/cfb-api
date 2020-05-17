@@ -7,7 +7,7 @@
   },
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --timeout 10000"
   },
   "keywords": [
     "football",
@@ -43,5 +43,9 @@
     "swagger-ui-dist": "^3.23.1",
     "synaptic": "^1.1.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^7.1.2"
+  }
 }
