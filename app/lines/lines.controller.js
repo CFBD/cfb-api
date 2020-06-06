@@ -2,10 +2,6 @@ module.exports = (db) => {
 
     const getLines = async (req, res) => {
         try {
-            if (!(req.query.gameId && !isNaN()) && !)) {
-
-            }
-
             let filter;
             let params;
 
