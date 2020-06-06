@@ -2,61 +2,81 @@ module.exports = (db) => {
 
     const getLines = async (req, res) => {
         try {
-            if (!req.query.year || isNaN(req.query.year)) {
-                res.status(400).send({
-                    error: 'A numeric year parameter must be specified.'
-                });
+            if (!(req.query.gameId && !isNaN()) && !)) {
 
-                return;
             }
 
-            let filter = 'WHERE g.season = $1';
-            let params = [req.query.year];
+            let filter;
+            let params;
 
-            let index = 2;
-
-            if (req.query.seasonType != 'both') {
-                filter += ` AND g.season_type = $${index}`;
-                params.push(req.query.seasonType || 'regular');
-                index++;
-            }
-
-            if (req.query.week) {
-                if (isNaN(req.query.week)) {
+            if (req.query.gameId) {
+                if (isNaN(req.query.gameId)) {
                     res.status(400).send({
-                        error: 'Week parameter must be numeric'
+                        error: 'gameId parameter must be numeric.'
                     });
-
+    
                     return;
                 }
-                
-                filter += ` AND g.week = $${index}`;
-                params.push(req.query.week);
-                index++;
-            }
 
-            if (req.query.team) {
-                filter += ` AND (LOWER(awt.school) = LOWER($${index}) OR LOWER(ht.school) = LOWER($${index}))`;
-                params.push(req.query.team);
-                index++;
-            }
+                filter = 'WHERE g.id = $1';
+                params = [req.query.gameId];
+            } else {
+                if (!req.query.year || isNaN(req.query.year)) {
+                    res.status(400).send({
+                        error: 'A numeric year parameter must be specified.'
+                    });
+    
+                    return;
+                }
 
-            if (req.query.home) {
-                filter += ` AND LOWER(ht.school) = LOWER($${index})`;
-                params.push(req.query.home);
-                index++;
-            }
+                filter = 'WHERE g.season = $1';
+                params = [req.query.year];
 
-            if (req.query.away) {
-                filter += ` AND LOWER(awt.school) = LOWER($${index})`;
-                params.push(req.query.away);
-                index++;
-            }
+                let index = 2;
 
-            if (req.query.conference) {
-                filter += ` AND (LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`;
-                params.push(req.query.conference);
-                index++;
+                if (req.query.seasonType != 'both') {
+                    filter += ` AND g.season_type = $${index}`;
+                    params.push(req.query.seasonType || 'regular');
+                    index++;
+                }
+
+                if (req.query.week) {
+                    if (isNaN(req.query.week)) {
+                        res.status(400).send({
+                            error: 'Week parameter must be numeric'
+                        });
+
+                        return;
+                    }
+
+                    filter += ` AND g.week = $${index}`;
+                    params.push(req.query.week);
+                    index++;
+                }
+
+                if (req.query.team) {
+                    filter += ` AND (LOWER(awt.school) = LOWER($${index}) OR LOWER(ht.school) = LOWER($${index}))`;
+                    params.push(req.query.team);
+                    index++;
+                }
+
+                if (req.query.home) {
+                    filter += ` AND LOWER(ht.school) = LOWER($${index})`;
+                    params.push(req.query.home);
+                    index++;
+                }
+
+                if (req.query.away) {
+                    filter += ` AND LOWER(awt.school) = LOWER($${index})`;
+                    params.push(req.query.away);
+                    index++;
+                }
+
+                if (req.query.conference) {
+                    filter += ` AND (LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`;
+                    params.push(req.query.conference);
+                    index++;
+                }
             }
 
             let games = await db.any(`
@@ -90,13 +110,13 @@ module.exports = (db) => {
 
             let results = games.map(g => {
                 let gameLines = lines
-                                    .filter(l => l.id == g.id)
-                                    .map(l => ({
-                                        provider: l.name,
-                                        spread: l.spread,
-                                        formattedSpread: l.spread < 0 ? `${g.home_team} ${l.spread}` : `${g.away_team} -${l.spread}`,
-                                        overUnder: l.over_under
-                                    }));
+                    .filter(l => l.id == g.id)
+                    .map(l => ({
+                        provider: l.name,
+                        spread: l.spread,
+                        formattedSpread: l.spread < 0 ? `${g.home_team} ${l.spread}` : `${g.away_team} -${l.spread}`,
+                        overUnder: l.over_under
+                    }));
 
                 return {
                     id: g.id,
