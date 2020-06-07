@@ -4,8 +4,8 @@ const service = require('../app/venue/venue.service')(db);
 const chai = require('chai');
 const should = chai.should();
 
-describe('Ratings', () => {
-    it('it should get SP+ ratings by year', async () => {
+describe('Venues', () => {
+    it('it should get a list of venues', async () => {
         const venues = await service.getVenues();
 
         venues.should.be.an('array');

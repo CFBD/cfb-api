@@ -98,5 +98,5 @@ describe('Ratings', () => {
             Array.from(new Set(data.map(d => d.team))).length.should.be.gt(1);
             Array.from(new Set(data.map(d => d.year))).length.should.be.gt(1);
         });
-    })
+    });
 });
