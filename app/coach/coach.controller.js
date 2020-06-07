@@ -1,106 +1,33 @@
+const serviceConstructor = require('./coach.service');
+
 module.exports = (db) => {
+    const service = serviceConstructor(db);
+
     return {
         getCoaches: async (req, res) => {
             try {
-                let filter = '';
-                let params = [];
-                let index = 1;
-
-                if (req.query.firstName) {
-                    filter += `${index == 1 ? 'WHERE' : ' AND'} LOWER(c.first_name) = LOWER($${index})`;
-                    params.push(req.query.firstName);
-                    index++;
-                }
-
-                if (req.query.lastName) {
-                    filter += `${index == 1 ? 'WHERE' : ' AND'} LOWER(c.last_name) = LOWER($${index})`;
-                    params.push(req.query.lastName);
-                    index++;
-                }
-
-                if (req.query.team) {
-                    filter += `${index == 1 ? 'WHERE' : ' AND'} LOWER(t.school) = LOWER($${index})`;
-                    params.push(req.query.team);
-                    index++;
-                }
-
-                if (req.query.year) {
-                    if (isNaN(req.query.year)) {
-                        res.status(400).send({
-                            error: 'Year param must be numeric'
-                        });
-    
-                        return;
-                    }
-
-                    filter += `${index == 1 ? 'WHERE' : ' AND'} cs.year = $${index}`;
-                    params.push(req.query.year);
-                    index++;
-                }
-
-                if (req.query.minYear) {
-                    if (isNaN(req.query.minYear)) {
-                        res.status(400).send({
-                            error: 'minYear param must be numeric.'
-                        });
-    
-                        return;
-                    }
-
-                    filter += `${index == 1 ? 'WHERE' : ' AND'} cs.year >= $${index}`;
-                    params.push(req.query.minYear);
-                    index++;
-                }
-
-
-                if (req.query.maxYear) {
-                    if (isNaN(req.query.maxYear)) {
-                        res.status(400).send({
-                            error: 'maxYear param must be numeric.'
-                        });
-    
-                        return;
-                    }
-                    
-                    filter += `${index == 1 ? 'WHERE' : ' AND'} cs.year <= $${index}`;
-                    params.push(req.query.maxYear);
-                    index++;
-                }
-
-                let results = await db.any(`
-                    SELECT c.id, c.first_name, c.last_name, t.school, cs.year, cs.games, cs.wins, cs.losses, cs.ties, cs.preseason_rank, cs.postseason_rank
-                    FROM coach c
-                        INNER JOIN coach_season cs ON c.id = cs.coach_id
-                        INNER JOIN team t ON cs.team_id = t.id
-                    ${filter}
-                    ORDER BY c.last_name, c.first_name, cs.year
-                `, params);
-
-                let coaches = [];
-                let ids = Array.from(new Set(results.map(r => r.id)));
-                for (let id of ids) {
-                    let coachSeasons = results.filter(r => r.id == id);
-
-                    coaches.push({
-                        first_name: coachSeasons[0].first_name,
-                        last_name: coachSeasons[0].last_name,
-                        seasons: coachSeasons.map(cs => {
-                            return {
-                                school: cs.school,
-                                year: cs.year,
-                                games: cs.games,
-                                wins: cs.wins,
-                                losses: cs.losses,
-                                ties: cs.ties,
-                                preseason_rank: cs.preseason_rank,
-                                postseason_rank: cs.postseason_rank
-                            }
-                        })
+                if (req.query.year && isNaN(req.query.year)) {
+                    res.status(400).send({
+                        error: 'Year param must be numeric'
                     });
-                }
-
-                res.send(coaches);
-
+    
+                    return;
+                } else if (req.query.minYear && isNaN(req.query.minYear)) {
+                    res.status(400).send({
+                        error: 'minYear param must be numeric.'
+                    });
+    
+                    return;
+                } else if (req.query.maxYear && isNaN(req.query.maxYear)) {
+                    res.status(400).send({
+                        error: 'maxYear param must be numeric.'
+                    });
+    
+                    return;
+                } else {
+                    const coaches = await service.getCoaches(req.quer.firstName, req.query.lastName, req.query.team, req.query.year, req.query.minYear, req.query.maxYear);
+                    res.send(coaches);
+                }  
             } catch (err) {
                 console.error(err);
                 res.status(500).send({
