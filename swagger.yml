@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 1.25.2
+  version: 1.25.3
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -2034,11 +2034,21 @@ definitions:
     properties:
       id:
         type: integer
+      season:
+        type: integer
+      week:
+        type: integer
+      seasonType:
+        type: string
       homeTeam:
+        type: string
+      homeConference:
         type: string
       homeScore:
         type: integer
       awayTeam:
+        type: string
+      awayConference:
         type: string
       awayScore:
         type: integer
