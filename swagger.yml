@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 1.25.3
+  version: 1.26.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -1535,6 +1535,40 @@ paths:
               $ref: '#/definitions/PlayerUsage'
         '400':
           description: error
+  /player/returning:
+    get:
+      tags:
+        - players
+      summary: Get returning production metrics
+      description: Returning production metrics
+      operationId: getReturningProduction
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ReturningProduction'
+        '400':
+          description: error
 definitions:
   Game:
     type: object
@@ -2976,6 +3010,39 @@ definitions:
             type: number
           passingDowns:
             type: number
+  ReturningProduction:
+    type: object
+    properties:
+      season:
+        type: intger
+      team:
+        type: string
+      conference:
+        type: string
+      totalPPA:
+        type: number
+      totalPassingPPA:
+        type: number
+      totalReceivingPPA:
+        type: number
+      totalRushingPPA:
+        type: number
+      percentPPA:
+        type: number
+      percentPassingPPA:
+        type: number
+      percentReceivingPPA:
+        type: number
+      percentRushingPPA:
+        type: number
+      usage:
+        type: number
+      passingUsage:
+        type: number
+      receivingUsage:
+        type: number
+      rushingUsage:
+        type: number
   BoxScore:
     type: object
     properties:

@@ -245,9 +245,82 @@ module.exports = (db) => {
         }));
     };
 
+    const getReturningProduction = async (year, team, conference) => {
+        let filters = [];
+        let params = [];
+        let index = 1;
+
+        if (year) {
+            filters.push(`g.season = $${index}`);
+            params.push(year - 1);
+            index ++;
+        }
+
+        if (team) {
+            filters.push(`LOWER(t.school) = LOWER($${index})`);
+            params.push(team);
+            index ++;
+        }
+
+        if (conference) {
+            filters.push(`LOWER(c.abbreviation) = LOWER($${index})`);
+            params.push(conference);
+            index ++;
+        }
+
+        let filter = `WHERE ps.stat_type_id IN (1,2,4,5,7,11,20) AND ${filters.join(' AND ')}`;
+
+        let results = await db.any(`
+        SELECT  g.season + 1 AS season,
+                t.school,
+                c.name AS conference,
+                ROUND(SUM(p.ppa)) AS ppa,
+                ROUND(SUM(p.ppa) FILTER(WHERE att.end_year > g.season), 1) AS returning_ppa,
+                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (1,4,11,20)), 1) AS pass_ppa,
+                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (1,4,11,20) AND att.end_year > g.season), 1) AS returning_pass_ppa,
+                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (2,5)), 1) AS receiving_ppa,
+                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (2,5) AND att.end_year > g.season), 1) AS returning_receiving_ppa,
+                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (7)), 1) AS rush_ppa,
+                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (7) AND att.end_year > g.season), 1) AS returning_rush_ppa,
+                ROUND(AVG(CASE WHEN att.end_year > g.season THEN 1 ELSE 0 END), 3) AS returning_usage,
+                ROUND(AVG(CASE WHEN att.end_year > g.season THEN 1 ELSE 0 END) FILTER(WHERE ps.stat_type_id IN (1,4,11,20)), 3) AS returning_pass_usage,
+                ROUND(AVG(CASE WHEN att.end_year > g.season THEN 1 ELSE 0 END) FILTER(WHERE ps.stat_type_id IN (2,5)), 3) AS returning_receiving_usage,
+                ROUND(AVG(CASE WHEN att.end_year > g.season THEN 1 ELSE 0 END) FILTER(WHERE ps.stat_type_id IN (7)), 3) AS returning_rush_usage
+        FROM game AS g 
+            INNER JOIN drive AS d ON g.id = d.game_id
+            INNER JOIN play AS p ON d.id = p.drive_id
+            INNER JOIN play_stat AS ps ON p.id = ps.play_id
+            INNER JOIN athlete_team AS att ON ps.athlete_id = att.athlete_id
+            INNER JOIN team AS t ON att.team_id = t.id
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
+            INNER JOIN conference AS c ON ct.conference_id = c.id
+        ${filter}
+        GROUP BY g.season, t.school, c.name
+        `, params);
+
+        return results.map((r) => ({
+            season: parseInt(r.season),
+            team: r.school,
+            conference: r.conference,
+            totalPPA: parseFloat(r.returning_ppa),
+            totalPassingPPA: parseFloat(r.returning_pass_ppa),
+            totalReceivingPPA: parseFloat(r.returning_receiving_ppa),
+            totalRushingPPA: parseFloat(r.returning_rush_ppa),
+            percentPPA: Math.round(r.returning_ppa * 1000 / r.ppa) / 1000,
+            percentPassingPPA: Math.round(r.returning_pass_ppa * 1000 / r.pass_ppa) / 1000,
+            percentReceivingPPA: Math.round(r.returning_receiving_ppa * 1000 / r.receiving_ppa) / 1000,
+            percentRushingPPA: Math.round(r.returning_rush_ppa * 1000 / r.rush_ppa) / 1000,
+            usage: parseFloat(r.returning_usage),
+            passingUsage: parseFloat(r.returning_pass_usage),
+            receivingUsage: parseFloat(r.returning_receiving_usage),
+            rushingUsage: parseFloat(r.returning_rush_usage)
+        }));
+    };
+
     return {
         playerSearch,
         getMeanPassingChartData,
-        getPlayerUsage
+        getPlayerUsage,
+        getReturningProduction
     };
 };

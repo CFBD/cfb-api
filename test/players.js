@@ -47,7 +47,7 @@ describe('Players', () => {
         });
 
         it('it should get player usage chart data by team', async () => {
-            const data = await players.getPlayerUsage(2019, null, null, 'Michigan', null, 'false')
+            const data = await players.getPlayerUsage(2019, null, null, 'Michigan', null, 'false');
             
             data.should.be.an('array');
             data.length.should.be.gt(0);
@@ -58,6 +58,32 @@ describe('Players', () => {
             
             data.should.be.an('array');
             data.length.should.be.gt(0);
+        });
+    });
+
+    describe('Returning Production', () => {
+        it('it should get returning production data for the given year', async () => {
+            const data = await players.getReturningProduction(2019, null, null);
+            
+            data.should.be.an('array');
+            data.length.should.be.gt(0);
+            Array.from(new Set(data.map(d => d.season))).length.should.equal(1);
+        });
+
+        it('it should get returning production data for the given team', async () => {
+            const data = await players.getReturningProduction(null, 'michigan', null);
+            
+            data.should.be.an('array');
+            data.length.should.be.gt(0);
+            Array.from(new Set(data.map(d => d.team))).length.should.equal(1);
+        });
+
+        it('it should get returning production data for the given conference', async () => {
+            const data = await players.getReturningProduction(null, null, 'SEC');
+            
+            data.should.be.an('array');
+            data.length.should.be.gt(0);
+            Array.from(new Set(data.map(d => d.conference))).length.should.equal(1);
         });
     });
 });

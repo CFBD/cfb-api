@@ -69,9 +69,32 @@ module.exports = (db) => {
         }
     };
 
+    const getReturningProduction = async (req, res) => {
+        try {
+            if (!req.query.year && !req.query.team) {
+                res.status(400).send({
+                    error: 'year or team must be specific'
+                });
+            } else if (req.query.year && !parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be numeric'
+                });
+            } else {
+                const results = await service.getReturningProduction(req.query.year, req.query.team, req.query.conference);
+                res.send(results);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    };
+
     return {
         playerSearch,
         getMeanPassingPPA,
-        getPlayerUsage
+        getPlayerUsage,
+        getReturningProduction
     };
 };
