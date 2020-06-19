@@ -9,8 +9,12 @@ module.exports = (db) => {
                 res.status(400).send({
                     error: 'searchTerm must be specified'
                 });
-            } else {
-                let results = await service.playerSearch(req.query.active, req.query.team, req.query.position, req.query.searchTerm);
+            } else if (req.query.year && !parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be an integer'
+                });
+            }else {
+                let results = await service.playerSearch(req.query.year, req.query.team, req.query.position, req.query.searchTerm);
                 res.send(results);
             }
         } catch (err) {

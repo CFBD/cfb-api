@@ -7,14 +7,14 @@ const should = chai.should();
 describe('Players', () => {
     describe('Search', () => {
         it('it should search for players named "Smith"', async () => {
-            const data = await players.playerSearch(true, null, null, 'Smith');
+            const data = await players.playerSearch(null, null, null, 'Smith');
             
             data.should.be.an('array');
             data.length.should.be.gt(0);
         });
 
         it('it should search for inactive QBs named "Smith"', async () => {
-            const data = await players.playerSearch(null, null, 'QB', 'Smith');
+            const data = await players.playerSearch(2014, null, 'QB', 'Smith');
 
             data.should.be.an('array');
             data.length.should.be.gt(0);

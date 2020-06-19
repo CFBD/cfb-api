@@ -1,8 +1,8 @@
 module.exports = (db) => {
 
-    const playerSearch = async (active, school, position, searchTerm) => {
-        let filter = 'WHERE a.active = $1';
-        let params = [active == "false" ? false : true];
+    const playerSearch = async (year, school, position, searchTerm) => {
+        let filter = 'WHERE att.start_year <= $1 AND att.end_year >= $1';
+        let params = [year ? year : 2019];
         let index = 2;
 
         if (school) {
@@ -24,7 +24,8 @@ module.exports = (db) => {
         const results = await db.any(`
         SELECT a.id, t.school, a.name, a.first_name, a.last_name, a.weight, a.height, a.jersey, p.abbreviation AS "position", h.city || ', ' || h.state AS hometown, '#' || t.color AS color
         FROM athlete AS a
-            INNER JOIN team AS t ON a.team_id = t.id
+            INNER JOIN athlete_team AS att ON a.id = att.athlete_id
+            INNER JOIN team AS t ON att.team_id = t.id
             INNER JOIN "position" AS p ON a.position_id = p.id
             INNER JOIN hometown AS h ON a.hometown_id = h.id
         ${filter}
