@@ -10,7 +10,7 @@ module.exports = (db) => {
             index++;
         }
 
-        if (seasonType) {
+        if (seasonType && seasonType.toLowerCase() !== 'both') {
             filters.push(`g.season_type = ${seasonType}`);
             params.push(seasonType);
             index++;
