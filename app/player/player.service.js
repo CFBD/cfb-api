@@ -73,7 +73,7 @@ module.exports = (db) => {
             FROM grouped
             GROUP BY row_num
             ORDER BY row_num
-        `, [id]);
+        `, [id, season]);
 
         return results.map(r => ({ playNumber: parseInt(r.row_num), avgPPA: r.avg_ppa }));
     };
