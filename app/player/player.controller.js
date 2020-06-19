@@ -35,8 +35,12 @@ module.exports = (db) => {
                 res.status(400).send({
                     error: 'rollingPlays must be numeric'
                 });
+            } else if (req.query.year && !parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be numeric'
+                });
             } else {
-                let results = await service.getMeanPassingChartData(req.query.id, req.query.rollingPlays);
+                let results = await service.getMeanPassingChartData(req.query.id, req.query.rollingPlays, req.query.year);
                 res.send(results);
             }
         } catch (err) {

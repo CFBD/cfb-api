@@ -48,7 +48,8 @@ module.exports = (db) => {
         }));
     };
 
-    const getMeanPassingChartData = async (id, rollingPlays) => {
+    const getMeanPassingChartData = async (id, rollingPlays, year) => {
+        let season = year ? year : 2019;
         const condition = rollingPlays ? `p2.row_num <= p1.row_num AND (p2.row_num + ${rollingPlays}) > p1.row_num` : 'p2.row_num <= p1.row_num';
 
         const results = await db.any(`
@@ -62,7 +63,7 @@ module.exports = (db) => {
                     INNER JOIN team AS t ON p.offense_id = t.id
                     INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
                     INNER JOIN position AS po ON a.position_id = po.id AND po.abbreviation = 'QB'
-                WHERE g.season = 2019 AND a.id = $1
+                WHERE g.season = $2 AND a.id = $1
             ), grouped AS (
                 SELECT p1.row_num, p2.ppa
                 FROM plays AS p1
