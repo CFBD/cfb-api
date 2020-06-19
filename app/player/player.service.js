@@ -22,7 +22,7 @@ module.exports = (db) => {
         index++;
 
         const results = await db.any(`
-        SELECT a.id, t.school, a.name, a.first_name, a.last_name, a.weight, a.height, a.jersey, p.abbreviation AS "position", h.city || ', ' || h.state AS hometown, '#' || t.color AS color
+        SELECT DISTINCT a.id, t.school, a.name, a.first_name, a.last_name, a.weight, a.height, a.jersey, p.abbreviation AS "position", h.city || ', ' || h.state AS hometown, '#' || t.color AS color
         FROM athlete AS a
             INNER JOIN athlete_team AS att ON a.id = att.athlete_id
             INNER JOIN team AS t ON att.team_id = t.id
