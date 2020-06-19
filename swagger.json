@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "1.26.0",
+    "version": "1.27.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -199,6 +199,77 @@
               "type": "array",
               "items": {
                 "$ref": "#/definitions/TeamRecord"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/games/media": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Get game media information (TV, radio, etc)",
+        "description": "Game media information (TV, radio, etc)",
+        "operationId": "getGameMedia",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "year",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular, postseason, or both)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "mediaType",
+            "description": "Media type filter (tv, radio, web, ppv, or mobile)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GameMedia"
               }
             }
           },
@@ -2470,6 +2541,41 @@
               "type": "integer"
             }
           }
+        }
+      }
+    },
+    "GameMedia": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "homeTeam": {
+          "type": "string"
+        },
+        "homeConference": {
+          "type": "string"
+        },
+        "awayTeam": {
+          "type": "string"
+        },
+        "awayConference": {
+          "type": "string"
+        },
+        "mediaType": {
+          "type": "string"
+        },
+        "outlet": {
+          "type": "string"
         }
       }
     },

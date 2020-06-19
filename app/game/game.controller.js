@@ -1,4 +1,8 @@
+const serviceConstructor = require('./game.service');
+
 module.exports = (db) => {
+    const service = serviceConstructor(db);
+
     return {
         getGames: async (req, res) => {
             try {
@@ -639,6 +643,31 @@ module.exports = (db) => {
                         ties: parseInt(r.away_ties)
                     }
                 })));
+            } catch (err) {
+                console.error(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
+        },
+        getMedia: async (req, res) => {
+            try {
+                if (!req.query.year) {
+                    res.status(400).send({
+                        error: 'Year is required'
+                    });
+                } else if (!parseInt(req.query.year)) {
+                    res.status(400).send({
+                        error: 'Year must be an integer'
+                    });
+                } else if (req.query.week && !parseInt(req.query.week)) {
+                    res.status(400).send({
+                        error: 'Week must be an integer'
+                    });
+                } else {
+                    const results = await service.getMedia(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference, req.query.mediaType);
+                    res.send(results);
+                }
             } catch (err) {
                 console.error(err);
                 res.status(500).send({
