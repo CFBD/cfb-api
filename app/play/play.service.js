@@ -70,6 +70,7 @@ module.exports = (db) => {
                             CASE WHEN ogt.home_away = 'away' THEN offense.school ELSE defense.school END AS away,
                             CASE WHEN ogt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS offense_score,
                             CASE WHEN dgt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS defense_score,
+                            g.id as game_id,
                             d.id as drive_id,
                             d.drive_number,
                             p.play_number,
@@ -96,7 +97,7 @@ module.exports = (db) => {
                         INNER JOIN game_team dgt ON dgt.game_id = g.id AND dgt.team_id = defense.id
                         INNER JOIN play_type pt ON p.play_type_id = pt.id
                     ${filter}
-                    ORDER BY d.id
+                    ORDER BY g.game_id, d.drive_number, p.play_number
             `, params);
 
         for (let play of plays) {

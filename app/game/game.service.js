@@ -85,7 +85,7 @@ module.exports = (db) => {
                                 LEFT JOIN conference dc ON dct.conference_id = dc.id
                                 INNER JOIN drive_result dr ON d.result_id = dr.id
                             ${filter}
-                            ORDER BY d.id
+                            ORDER BY g.id, d.drive_number
                         `, params);
 
         for (let drive of drives) {
