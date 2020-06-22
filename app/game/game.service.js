@@ -1,4 +1,113 @@
 module.exports = (db) => {
+    const getDrives = async (year, seasonType, week, team, offense, defense, offenseConference, defenseConference, conference) => {
+        let filter = 'WHERE g.season = $1';
+        let params = [year];
+
+        let index = 2;
+
+        if (seasonType != 'both') {
+            filter += ` AND g.season_type = $${index}`;
+            params.push(seasonType || 'regular');
+            index++;
+        }
+
+        if (week) {
+            filter += ` AND g.week = $${index}`;
+            params.push(week);
+            index++;
+        }
+
+        if (team) {
+            filter += ` AND (LOWER(offense.school) = LOWER($${index}) OR LOWER(defense.school) = LOWER($${index}))`;
+            params.push(team);
+            index++;
+        }
+
+        if (offense) {
+            filter += ` AND LOWER(offense.school) = LOWER($${index})`;
+            params.push(offense);
+            index++;
+        }
+
+        if (defense) {
+            filter += ` AND LOWER(defense.school) = LOWER($${index})`;
+            params.push(defense);
+            index++;
+        }
+
+        if (offenseConference) {
+            filter += ` AND LOWER(oc.abbreviation) = LOWER($${index})`;
+            params.push(offenseConference);
+            index++;
+        }
+
+        if (defenseConference) {
+            filter += ` AND LOWER(dc.abbreviation) = LOWER($${index})`;
+            params.push(defenseConference);
+            index++;
+        }
+
+        if (conference) {
+            filter += ` AND (LOWER(oc.abbreviation) = LOWER($${index}) OR LOWER(dc.abbreviation) = LOWER($${index}))`;
+            params.push(conference);
+            index++;
+        }
+
+        let drives = await db.any(`
+                            SELECT  offense.school as offense,
+                                    oc.name as offense_conference,
+                                    defense.school as defense,
+                                    dc.name as defense_conference,
+                                    g.id as game_id,
+                                    d.id,
+                                    d.drive_number,
+                                    d.scoring,
+                                    d.start_period,
+                                    d.start_yardline,
+                                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.start_yardline) ELSE d.start_yardline END AS start_yards_to_goal,
+                                    d.start_time,
+                                    d.end_period,
+                                    d.end_yardline,
+                                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.end_yardline) ELSE d.end_yardline END AS end_yards_to_goal,
+                                    d.end_time,
+                                    d.elapsed,
+                                    d.plays,
+                                    d.yards,
+                                    dr.name as drive_result
+                            FROM game g
+                                INNER JOIN game_team AS hgt ON g.id = hgt.game_id AND hgt.home_away = 'home'
+                                INNER JOIN drive d ON g.id = d.game_id
+                                INNER JOIN team offense ON d.offense_id = offense.id
+                                LEFT JOIN conference_team oct ON offense.id = oct.team_id AND oct.start_year <= g.season AND (oct.end_year >= g.season OR oct.end_year IS NULL)
+                                LEFT JOIN conference oc ON oct.conference_id = oc.id
+                                INNER JOIN team defense ON d.defense_id = defense.id
+                                LEFT JOIN conference_team dct ON defense.id = dct.team_id AND dct.start_year <= g.season AND (dct.end_year >= g.season OR dct.end_year IS NULL)
+                                LEFT JOIN conference dc ON dct.conference_id = dc.id
+                                INNER JOIN drive_result dr ON d.result_id = dr.id
+                            ${filter}
+                            ORDER BY d.id
+                        `, params);
+
+        for (let drive of drives) {
+            if (!drive.start_time.minutes) {
+                drive.start_time.minutes = 0;
+            }
+
+            if (!drive.start_time.seconds) {
+                drive.start_time.seconds = 0;
+            }
+            if (!drive.end_time.minutes) {
+                drive.end_time.minutes = 0;
+            }
+
+            if (!drive.end_time.seconds) {
+                drive.end_time.seconds = 0;
+            }
+        }
+
+        return drives;
+    }
+
     const getMedia = async (year, seasonType, week, team, conference, mediaType) => {
         const filters = [];
         const params = [];
@@ -72,6 +181,7 @@ module.exports = (db) => {
     };
 
     return {
+        getDrives,
         getMedia
     };
 };

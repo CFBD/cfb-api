@@ -71,6 +71,8 @@ module.exports = (db) => {
                             CASE WHEN ogt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS offense_score,
                             CASE WHEN dgt.home_away = 'home' THEN p.home_score ELSE p.away_score END AS defense_score,
                             d.id as drive_id,
+                            d.drive_number,
+                            p.play_number,
                             p.period,
                             p.clock,
                             p.yard_line,

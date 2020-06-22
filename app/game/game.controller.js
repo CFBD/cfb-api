@@ -108,130 +108,18 @@ module.exports = (db) => {
                     res.status(400).send({
                         error: 'A numeric year parameter must be specified.'
                     });
-
-                    return;
+                } else if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
+                    res.status(400).send({
+                        error: 'Invalid season type'
+                    });
+                } else if (req.query.week && !parseInt(req.query.week)) {
+                    res.status(400).send({
+                        error: 'Week parameter must be numeric.'
+                    });
+                } else {
+                    const drives = await service.getDrives(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.offense, req.query.defense, req.query.offenseConference, req.query.defenseConference, req.query.conference);
+                    res.send(drives);
                 }
-
-                let filter = 'WHERE g.season = $1';
-                let params = [req.query.year];
-
-                let index = 2;
-
-                if (req.query.seasonType != 'both') {
-                    if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
-                        res.status(400).send({
-                            error: 'Invalid season type'
-                        });
-
-                        return;
-                    }
-
-                    filter += ` AND g.season_type = $${index}`;
-                    params.push(req.query.seasonType || 'regular');
-                    index++;
-                }
-
-                if (req.query.week) {
-                    if (isNaN(req.query.week)) {
-                        res.status(400).send({
-                            error: 'Week parameter must be numeric.'
-                        });
-
-                        return;
-                    }
-
-                    filter += ` AND g.week = $${index}`;
-                    params.push(req.query.week);
-                    index++;
-                }
-
-                if (req.query.team) {
-                    filter += ` AND (LOWER(offense.school) = LOWER($${index}) OR LOWER(defense.school) = LOWER($${index}))`;
-                    params.push(req.query.team);
-                    index++;
-                }
-
-                if (req.query.offense) {
-                    filter += ` AND LOWER(offense.school) = LOWER($${index})`;
-                    params.push(req.query.offense);
-                    index++;
-                }
-
-                if (req.query.defense) {
-                    filter += ` AND LOWER(defense.school) = LOWER($${index})`;
-                    params.push(req.query.defense);
-                    index++;
-                }
-
-                if (req.query.offenseConference) {
-                    filter += ` AND LOWER(oc.abbreviation) = LOWER($${index})`;
-                    params.push(req.query.offenseConference);
-                    index++;
-                }
-
-                if (req.query.defenseConference) {
-                    filter += ` AND LOWER(dc.abbreviation) = LOWER($${index})`;
-                    params.push(req.query.defenseConference);
-                    index++;
-                }
-
-                if (req.query.conference) {
-                    filter += ` AND (LOWER(oc.abbreviation) = LOWER($${index}) OR LOWER(dc.abbreviation) = LOWER($${index}))`;
-                    params.push(req.query.conference);
-                    index++;
-                }
-
-                let drives = await db.any(`
-                            SELECT  offense.school as offense,
-                                    oc.name as offense_conference,
-                                    defense.school as defense,
-                                    dc.name as defense_conference,
-                                    g.id as game_id,
-                                    d.id, d.scoring,
-                                    d.start_period,
-                                    d.start_yardline,
-                                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.start_yardline) ELSE d.start_yardline END AS start_yards_to_goal,
-                                    d.start_time,
-                                    d.end_period,
-                                    d.end_yardline,
-                                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.end_yardline) ELSE d.end_yardline END AS end_yards_to_goal,
-                                    d.end_time,
-                                    d.elapsed,
-                                    d.plays,
-                                    d.yards,
-                                    dr.name as drive_result
-                            FROM game g
-                                INNER JOIN game_team AS hgt ON g.id = hgt.game_id AND hgt.home_away = 'home'
-                                INNER JOIN drive d ON g.id = d.game_id
-                                INNER JOIN team offense ON d.offense_id = offense.id
-                                LEFT JOIN conference_team oct ON offense.id = oct.team_id AND oct.start_year <= g.season AND (oct.end_year >= g.season OR oct.end_year IS NULL)
-                                LEFT JOIN conference oc ON oct.conference_id = oc.id
-                                INNER JOIN team defense ON d.defense_id = defense.id
-                                LEFT JOIN conference_team dct ON defense.id = dct.team_id AND dct.start_year <= g.season AND (dct.end_year >= g.season OR dct.end_year IS NULL)
-                                LEFT JOIN conference dc ON dct.conference_id = dc.id
-                                INNER JOIN drive_result dr ON d.result_id = dr.id
-                            ${filter}
-                            ORDER BY d.id
-                        `, params);
-
-                for (let drive of drives) {
-                    if (!drive.start_time.minutes) {
-                        drive.start_time.minutes = 0;
-                    }
-
-                    if (!drive.start_time.seconds) {
-                        drive.start_time.seconds = 0;
-                    }
-                    if (!drive.end_time.minutes) {
-                        drive.end_time.minutes = 0;
-                    }
-
-                    if (!drive.end_time.seconds) {
-                        drive.end_time.seconds = 0;
-                    }
-                }
-
-                res.send(drives);
             } catch (err) {
                 console.error(err);
                 res.status(500).send({
