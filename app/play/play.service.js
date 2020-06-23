@@ -97,7 +97,7 @@ module.exports = (db) => {
                         INNER JOIN game_team dgt ON dgt.game_id = g.id AND dgt.team_id = defense.id
                         INNER JOIN play_type pt ON p.play_type_id = pt.id
                     ${filter}
-                    ORDER BY g.game_id, d.drive_number, p.play_number
+                    ORDER BY g.id, d.drive_number, p.play_number
             `, params);
 
         for (let play of plays) {
