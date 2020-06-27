@@ -201,7 +201,7 @@ jobs:
         id: lib
         run: |
           api_version=$(curl https://api.collegefootballdata.com/api-docs.json | jq .info.version)
-          code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": { "packageName": "cfbd", "projectName": "cfbd", "packageUrl": "https://github.com/CFBD/cfbd-python", "packageVersion": ''"$api_version"''}}' https://generator.swagger.io/api/gen/clients/python | jq '. | .code')
+          code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": { "packageName": "cfbd", "projectName": "cfbd", "packageUrl": "https://github.com/CFBD/cfbd-python", "packageVersion": '"${api_version}"'}}' https://generator.swagger.io/api/gen/clients/python | jq '. | .code')
           code=${code%\"}
           code=${code#\"}
           echo "::set-output name=code::$code"
