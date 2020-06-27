@@ -160,7 +160,7 @@ jobs:
           wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
           unzip ${{ steps.lib.outputs.code }}
           echo cloning existing codebase....
-          git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/bluescar/CFBSharp.git
+          git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/cfbd/CFBSharp.git
           echo copying changes....
           sudo yes | cp -a ./csharp-client/. CFBSharp 
           cd CFBSharp
@@ -173,11 +173,52 @@ jobs:
           sed -i '8s/.*/- SDK version: '"$api_version"'/' README.md
           sed -i '17s/.*/    <Version>'"$api_version"'<\/Version>/' ./src/CFBSharp/CFBSharp.csproj
           sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>/' ./src/CFBSharp/CFBSharp.csproj
-          sed -i '17a\ \ \ \ <RepositoryUrl>https://github.com/BlueSCar/CFBSharp.git<\/RepositoryUrl>' ./src/CFBSharp/CFBSharp.csproj
+          sed -i '17a\ \ \ \ <RepositoryUrl>https://github.com/cfbd/CFBSharp.git<\/RepositoryUrl>' ./src/CFBSharp/CFBSharp.csproj
           sed -i '18a\ \ \ \ <RepositoryType>git<\/RepositoryType>' ./src/CFBSharp/CFBSharp.csproj
           sed -i '19a\ \ \ \ <PackageIconUrl>https://cfbd-public.s3.us-east-2.amazonaws.com/package_logo.png<\/PackageIconUrl>' ./src/CFBSharp/CFBSharp.csproj
           sed -i '20a\ \ \ \ <PackageLicenseExpression>MIT<\/PackageLicenseExpression>' ./src/CFBSharp/CFBSharp.csproj
           sed -i '21a\ \ \ \ <PackageTags>CFB;NCAAF;NCAA;football<\/PackageTags>' ./src/CFBSharp/CFBSharp.csproj
+          echo "Committing changes ..."
+          git commit -am "${{ github.event.commits[0].message }}"
+          echo "Pushing to remote..."
+          git push origin master 2>&1 | grep -v 'To https'
+  publish-python:
+    needs: deploy
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt install wget -y
+          sudo apt install unzip -y
+          sudo apt install jq -y
+          sudo apt install curl -y
+      - name: Git config
+        run: |
+          git config --global user.email "radjewwj@gmail.com"
+          git config --global user.name "BlueSCar"
+      - name: Generate library
+        id: lib
+        run: |
+          api_version=$(curl https://api.collegefootballdata.com/api-docs.json | jq .info.version)
+          code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": { "packageName": "cfbd", "projectName": "cfbd", "packageUrl": "https://github.com/CFBD/cfbd-python", "packageVersion": ''"$api_version"''}}' https://generator.swagger.io/api/gen/clients/python | jq '. | .code')
+          code=${code%\"}
+          code=${code#\"}
+          echo "::set-output name=code::$code"
+      - name: Extract and push
+        run: |
+          echo Extracting new codebase...
+          wget https://generator.swagger.io/api/gen/download/${{ steps.lib.outputs.code }}
+          unzip ${{ steps.lib.outputs.code }}
+          echo cloning existing codebase....
+          git clone https://BlueSCar:${{ secrets.ACCESS_TOKEN }}@github.com/cfbd/cfbd-python.git
+          echo copying changes....
+          sudo yes | cp -a ./python-client/. cfbd-python 
+          cd cfbd-python
+          git add .
+          echo Updating files
+          sed -i '16,17d' README.md
+          sed -i -e 's/git+https:\/\/github.com\/\/.git/cfbd/g' README.md
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
           echo "Pushing to remote..."
