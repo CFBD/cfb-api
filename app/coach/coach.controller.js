@@ -25,7 +25,7 @@ module.exports = (db) => {
     
                     return;
                 } else {
-                    const coaches = await service.getCoaches(req.quer.firstName, req.query.lastName, req.query.team, req.query.year, req.query.minYear, req.query.maxYear);
+                    const coaches = await service.getCoaches(req.query.firstName, req.query.lastName, req.query.team, req.query.year, req.query.minYear, req.query.maxYear);
                     res.send(coaches);
                 }  
             } catch (err) {
