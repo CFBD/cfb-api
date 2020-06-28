@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 2.0.1
+  version: 2.0.2
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -54,11 +54,14 @@ paths:
           in: query
           required: true
           type: integer
+          minimum: 1869
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minimum: 1
+          maximum: 16
         - name: seasonType
           description: Season type filter (regular or postseason)
           default: regular
@@ -114,6 +117,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 1869
         - name: team
           description: Team filter
           in: query
@@ -148,16 +152,19 @@ paths:
           in: query
           required: true
           type: integer
+          minimum: 2001
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: seasonType
           description: Season type filter (regular, postseason, or both)
           in: query
           required: false
-          type: integer
+          type: string
         - name: team
           description: Team filter
           in: query
@@ -197,11 +204,14 @@ paths:
           in: query
           required: true
           type: integer
+          minumum: 2001
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: seasonType
           description: Season type filter (regular or postseason)
           default: regular
@@ -252,11 +262,14 @@ paths:
           in: query
           required: true
           type: integer
+          minimum: 2001
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minimum: 1
+          maximum: 16
         - name: seasonType
           description: Season type filter (regular or postseason)
           default: regular
@@ -330,11 +343,14 @@ paths:
           in: query
           required: true
           type: integer
+          minimum: 2001
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: team
           description: Team filter
           in: query
@@ -393,11 +409,14 @@ paths:
           in: query
           required: true
           type: integer
+          minimum: 2001
         - name: week
           description: 'Week filter (required if team, offense, or defense, not specified)'
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: team
           description: Team filter
           in: query
@@ -471,11 +490,14 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2013
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: team
           description: Team filter
           in: query
@@ -585,6 +607,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 1869
       responses:
         '200':
           description: successful operation
@@ -614,6 +637,7 @@ paths:
           in: query
           required: false
           type: integer
+          minumum: 2009
       responses:
         '200':
           description: successful operation
@@ -638,6 +662,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2015
       responses:
         '200':
           description: successful operation
@@ -672,11 +697,13 @@ paths:
           in: query
           required: false
           type: integer
+          minumum: 1869
         - name: maxYear
           description: Maximum year
           in: query
           required: false
           type: integer
+          minimum: 1869
       responses:
         '200':
           description: successful operation
@@ -734,16 +761,19 @@ paths:
           in: query
           required: false
           type: integer
+          minumum: 1869
         - name: minYear
           description: Minimum year filter (inclusive)
           in: query
           required: false
           type: integer
+          minimum: 1869
         - name: maxYear
           description: Maximum year filter (inclusive)
           in: query
           required: false
           type: integer
+          minimum: 1869
       responses:
         '200':
           description: successful operation
@@ -773,11 +803,14 @@ paths:
           in: query
           required: true
           type: integer
+          minimum: 1936
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: seasonType
           description: Season type filter (regular or postseason)
           default: regular
@@ -813,11 +846,14 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2013
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: seasonType
           description: Season type filter (regular or postseason)
           default: regular
@@ -868,6 +904,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2000
         - name: classification
           description: 'Type of recruit (HighSchool, JUCO, PrepSchool)'
           default: HighSchool
@@ -913,6 +950,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2000
         - name: team
           description: Team filter
           in: query
@@ -942,11 +980,13 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2000
         - name: endYear
           description: Ending year
           in: query
           required: false
           type: integer
+          minimum: 2000
         - name: team
           description: Team filter
           in: query
@@ -981,6 +1021,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 1970
         - name: team
           description: Team filter (required if year not specified)
           in: query
@@ -1010,6 +1051,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 1897
         - name: team
           description: Team filter (required if year not specified)
           in: query
@@ -1044,6 +1086,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 1970
         - name: conference
           description: Conference abbreviation filter
           in: query
@@ -1073,11 +1116,15 @@ paths:
           in: query
           required: true
           type: integer
+          minimum: 1
+          maximum: 4
         - name: distance
           description: Distance filter
           in: query
           required: true
           type: integer
+          minimum: 1
+          maximum: 99
       responses:
         '200':
           description: successful operation
@@ -1102,6 +1149,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2001
         - name: team
           description: Team filter (required if year not specified)
           in: query
@@ -1141,11 +1189,14 @@ paths:
           in: query
           required: true
           type: integer
+          minimum: 2001
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: team
           description: Team filter
           in: query
@@ -1185,11 +1236,14 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2013
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: team
           description: Team filter
           in: query
@@ -1239,6 +1293,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2013
         - name: team
           description: Team filter
           in: query
@@ -1323,11 +1378,14 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2001
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: team
           description: Team filter
           in: query
@@ -1362,6 +1420,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2001
         - name: team
           description: Team filter (required if no year specified)
           in: query
@@ -1377,11 +1436,15 @@ paths:
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: endWeek
           description: Starting week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
       responses:
         '200':
           description: successful operation
@@ -1406,6 +1469,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2001
         - name: team
           description: Team filter (required if no year specified)
           in: query
@@ -1421,11 +1485,15 @@ paths:
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: endWeek
           description: Starting week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
       responses:
         '200':
           description: successful operation
@@ -1450,11 +1518,14 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2001
         - name: week
           description: Week filter
           in: query
           required: false
           type: integer
+          minumum: 1
+          maximum: 16
         - name: team
           description: Team filter (required if no year specified)
           in: query
@@ -1530,6 +1601,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2001
       responses:
         '200':
           description: successful operation
@@ -1555,6 +1627,7 @@ paths:
           required: true
           default: 2019
           type: integer
+          minimum: 2013
         - name: team
           description: Team filter
           in: query
@@ -1604,6 +1677,7 @@ paths:
           in: query
           required: false
           type: integer
+          minimum: 2014
         - name: team
           description: Team filter
           in: query
