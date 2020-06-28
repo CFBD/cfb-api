@@ -205,7 +205,7 @@ module.exports = (db) => {
                     d.id AS drive_id,
                     p.id AS play_id,
                     p.period,
-                    EXTRACT(seconds FROM p.clock) AS seconds_remaining,
+                    p.clock,
                     CASE
                         WHEN (gt.home_away = 'home' AND p.offense_id = t.id) OR (gt.home_away = 'away' AND p.defense_id = t.id) THEN 100 - p.yard_line
                         ELSE p.yard_line
@@ -229,6 +229,16 @@ module.exports = (db) => {
             ${filter}
             LIMIT 1000
         `, params);
+
+        for (let play of params) {
+            if (!play.clock.minutes) {
+                play.clock.minutes = 0;
+            }
+
+            if (!play.clock.seconds) {
+                play.clock.seconds = 0;
+            }
+        }
 
         return results.map(r => ({
             gameId: r.game_id,
