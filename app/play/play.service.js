@@ -230,7 +230,7 @@ module.exports = (db) => {
             LIMIT 1000
         `, params);
 
-        for (let play of params) {
+        for (let play of results) {
             if (!play.clock.minutes) {
                 play.clock.minutes = 0;
             }
