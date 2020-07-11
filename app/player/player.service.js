@@ -457,6 +457,7 @@ module.exports = (db) => {
                 cat.name AS category,
                 CASE
                     WHEN cat.name = 'rushing' THEN 'YPC'
+                    WHEN cat.name = 'receiving' THEN 'YPR'
                     WHEN cat.name = 'punting' THEN 'YPP'
                     WHEN cat.name = 'passing' THEN 'YPA'
                     WHEN cat.name IN ('kickReturns','puntReturns','interceptions') THEN 'AVG'
