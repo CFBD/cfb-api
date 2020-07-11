@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 2.1.0
+  version: 2.2.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -1695,6 +1695,60 @@ paths:
             type: array
             items:
               $ref: '#/definitions/ReturningProduction'
+        '400':
+          description: error
+  /stats/player/season:
+    get:
+      tags:
+        - players
+      summary: Get player stats aggregated by season
+      description: Season player stats
+      operationId: getPlayerSeasonStats
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: true
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: startWeek
+          description: Start week filter
+          in: query
+          required: false
+          type: integer
+        - name: endWeek
+          description: Start week filter
+          in: query
+          required: false
+          type: integer
+        - name: seasonType
+          description: Season type filter (regular, postseason, or both)
+          in: query
+          required: false
+          type: string
+        - name: category
+          description: Start category filter (e.g. passing)
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlayerSeasonStat'
         '400':
           description: error
 definitions:
@@ -3456,3 +3510,22 @@ definitions:
                       type: number
                     passing:
                       type: number
+  PlayerSeasonStat:
+    type: object
+    properties:
+      season:
+        type: integer
+      playerId:
+        type: integer
+      player:
+        type: string
+      team:
+        type: string
+      conference:
+        type: string
+      category:
+        type: string
+      statType:
+        type: string
+      stat:
+        type: number

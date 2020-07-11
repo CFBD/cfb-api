@@ -81,7 +81,7 @@ module.exports = (db) => {
         try {
             if (!req.query.year && !req.query.team) {
                 res.status(400).send({
-                    error: 'year or team must be specific'
+                    error: 'year or team must be specified'
                 });
             } else if (req.query.year && !parseInt(req.query.year)) {
                 res.status(400).send({
@@ -99,10 +99,42 @@ module.exports = (db) => {
         }
     };
 
+    const getSeasonStats = async (req, res) => {
+        try {
+            if (!req.query.year) {
+                res.status(400).send({
+                    error: 'year must be specified'
+                });
+            } else if (!parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be an integer'
+                });
+            } else if (req.query.startWeek && !parseInt(req.query.startWeek)) {
+                res.status(400).send({
+                    error: 'startWeek must be an integer'
+                });
+            } else if (req.query.endWeek && !parseInt(req.query.endWeek)) {
+                res.status(400).send({
+                    error: 'endWeek must be an integer'
+                });
+            } else {
+                const data = await service.getSeasonStats(req.query.year, req.query.conference, req.query.team, req.query.startWeek, req.query.endWeek, req.query.seasonType, req.query.category);
+
+                res.send(data);
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    };
+
     return {
         playerSearch,
         getMeanPassingPPA,
         getPlayerUsage,
-        getReturningProduction
+        getReturningProduction,
+        getSeasonStats
     };
 };

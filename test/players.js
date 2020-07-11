@@ -86,4 +86,49 @@ describe('Players', () => {
             Array.from(new Set(data.map(d => d.conference))).length.should.equal(1);
         });
     });
+
+    describe('Season Stats', () => {
+        it('it should get player stats for a given season', async () => {
+            const data = await players.getSeasonStats(2019);
+            
+            data.should.be.an('array');
+            data.length.should.be.gt(0);
+            Array.from(new Set(data.map(d => d.season))).length.should.equal(1);
+        });
+        
+        it('it should get player stats for a given season and conference', async () => {
+            const data = await players.getSeasonStats(2019, 'B1G');
+            
+            data.should.be.an('array');
+            data.length.should.be.gt(0);
+            Array.from(new Set(data.map(d => d.season))).length.should.equal(1);
+            Array.from(new Set(data.map(d => d.conference))).length.should.equal(1);
+        });
+        
+        it('it should get player stats for a given season and team', async () => {
+            const data = await players.getSeasonStats(2019, null, 'Akron');
+            
+            data.should.be.an('array');
+            data.length.should.be.gt(0);
+            Array.from(new Set(data.map(d => d.season))).length.should.equal(1);
+            Array.from(new Set(data.map(d => d.team))).length.should.equal(1);
+        });
+        
+        it('it should get player stats for a given season and category', async () => {
+            const data = await players.getSeasonStats(2019, null, null, null, null, null, 'kicking');
+            
+            data.should.be.an('array');
+            data.length.should.be.gt(0);
+            Array.from(new Set(data.map(d => d.season))).length.should.equal(1);
+            Array.from(new Set(data.map(d => d.category))).length.should.equal(1);
+        });
+        
+        it('it should get player stats for a given season and range of weeks', async () => {
+            const data = await players.getSeasonStats(2019, null, null, 4, 8);
+            
+            data.should.be.an('array');
+            data.length.should.be.gt(0);
+            Array.from(new Set(data.map(d => d.season))).length.should.equal(1);
+        });
+    });
 });

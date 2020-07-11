@@ -319,10 +319,212 @@ module.exports = (db) => {
         }));
     };
 
+    const getSeasonStats = async(year, conference, team, startWeek, endWeek, seasonType, category) => {
+        let filter = 'g.season = $1';
+        let params = [year];
+        let index = 2;
+
+        if (conference) {
+            filter += ` AND LOWER(c.abbreviation) = LOWER($${index})`;
+            params.push(conference);
+            index++;
+        }
+
+        if (team) {
+            filter += ` AND LOWER(t.school) = LOWER($${index})`;
+            params.push(team);
+            index++;
+        }
+
+        if (startWeek) {
+            filter += ` AND g.week >= $${index}`;
+            params.push(startWeek);
+            index++;
+        }
+
+        if (endWeek) {
+            filter += ` AND g.week <= $${index}`;
+            params.push(endWeek);
+            index++;
+        }
+        
+        if (seasonType && seasonType.toLowerCase() !== 'both') {
+            filter += ` AND g.season_type = $${index}`;
+            params.push(seasonType);
+            index++;
+        }
+
+        if (category) {
+            filter += ` AND LOWER(cat.name) = LOWER($${index})`;
+            params.push(category);
+            index++;
+        }
+
+        let results = await db.any(`
+        SELECT 	g.season,
+                a.id AS player_id,
+                a.name AS player,
+                t.school AS team,
+                c.name AS conference,
+                cat.name AS category,
+                typ.name AS stat_type,
+                SUM(CAST(gps.stat AS NUMERIC)) as stat
+        FROM game AS g
+            INNER JOIN game_team AS gt ON g.id = gt.game_id
+            INNER JOIN game_player_stat AS gps ON gt.id = gps.game_team_id
+            INNER JOIN athlete AS a ON gps.athlete_id = a.id
+            INNER JOIN team AS t ON gt.team_id = t.id
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
+            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
+            INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
+        WHERE ${filter} AND (typ.id IN (8,14,22) OR (cat.id = 1 AND typ.id = 11) OR (cat.id = 2 AND typ.id = 5) OR (cat.id = 3 AND typ.id IN (6,21)) OR (cat.id = 6 AND typ.id = 18) OR (cat.id = 7) OR (cat.id = 8 AND typ.id = 9) OR (cat.id = 9 AND typ.id = 18) OR cat.id = 10)
+        GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name, typ.name
+        UNION
+        SELECT 	g.season,
+                a.id AS player_id,
+                a.name AS player,
+                t.school AS team,
+                c.name AS conference,
+                cat.name AS category,
+                typ.name AS stat_type,
+                MAX(CAST(gps.stat AS INT)) as stat
+        FROM game AS g
+            INNER JOIN game_team AS gt ON g.id = gt.game_id
+            INNER JOIN game_player_stat AS gps ON gt.id = gps.game_team_id
+            INNER JOIN athlete AS a ON gps.athlete_id = a.id
+            INNER JOIN team AS t ON gt.team_id = t.id
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
+            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
+            INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
+        WHERE ${filter} AND (typ.id = 15)
+        GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name, typ.name
+        UNION
+        SELECT 	g.season,
+                a.id AS player_id,
+                a.name AS player,
+                t.school AS team,
+                c.name AS conference,
+                cat.name AS category,
+                CASE
+                    WHEN cat.name = 'kicking' AND typ.name = 'FG' THEN 'FGM'
+                    WHEN cat.name = 'kicking' AND typ.name = 'XP' THEN 'XPM'
+                    WHEN cat.name = 'passing' AND typ.name = 'C/ATT' THEN 'COMPLETIONS'
+                END AS stat_type,
+                SUM(CAST(split_part(gps.stat, '/', 1) AS INT)) as stat
+        FROM game AS g
+            INNER JOIN game_team AS gt ON g.id = gt.game_id
+            INNER JOIN game_player_stat AS gps ON gt.id = gps.game_team_id
+            INNER JOIN athlete AS a ON gps.athlete_id = a.id
+            INNER JOIN team AS t ON gt.team_id = t.id
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
+            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
+            INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
+        WHERE ${filter} AND ((cat.id = 2 AND typ.id IN (2, 10)) OR (cat.id = 9 AND typ.id = 3))
+        GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name, typ.name
+        UNION
+        SELECT 	g.season,
+                a.id AS player_id,
+                a.name AS player,
+                t.school AS team,
+                c.name AS conference,
+                cat.name AS category,
+                CASE
+                    WHEN cat.name = 'kicking' AND typ.name = 'FG' THEN 'FGA'
+                    WHEN cat.name = 'kicking' AND typ.name = 'XP' THEN 'XPA'
+                    WHEN cat.name = 'passing' AND typ.name = 'C/ATT' THEN 'ATT'
+                END AS stat_type,
+                SUM(CAST(split_part(gps.stat, '/', 2) AS INT)) as stat
+        FROM game AS g
+            INNER JOIN game_team AS gt ON g.id = gt.game_id
+            INNER JOIN game_player_stat AS gps ON gt.id = gps.game_team_id
+            INNER JOIN athlete AS a ON gps.athlete_id = a.id
+            INNER JOIN team AS t ON gt.team_id = t.id
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
+            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
+            INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
+        WHERE ${filter} AND ((cat.id = 2 AND typ.id IN (2, 10)) OR (cat.id = 9 AND typ.id = 3))
+        GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name, typ.name
+        UNION
+        SELECT 	g.season,
+                a.id AS player_id,
+                a.name AS player,
+                t.school AS team,
+                c.name AS conference,
+                cat.name AS category,
+                CASE
+                    WHEN cat.name = 'rushing' THEN 'YPC'
+                    WHEN cat.name = 'punting' THEN 'YPP'
+                    WHEN cat.name = 'passing' THEN 'YPA'
+                    WHEN cat.name IN ('kickReturns','puntReturns','interceptions') THEN 'AVG'
+                END AS stat_type,
+                CASE
+                    WHEN cat.name IN ('rushing', 'punting', 'kickReturns', 'puntReturns','interceptions','receiving') AND SUM(CAST(gps.stat AS INT)) FILTER(WHERE typ.name IN ('CAR', 'NO', 'INT', 'REC')) = 0 THEN 0
+                    WHEN cat.name IN ('rushing', 'punting', 'kickReturns', 'puntReturns','interceptions','receiving') THEN ROUND(COALESCE(SUM(CAST(gps.stat AS INT)) FILTER(WHERE typ.name = 'YDS'), 0) / SUM(CAST(gps.stat AS NUMERIC)) FILTER(WHERE typ.name IN ('CAR', 'NO', 'INT', 'REC')), 1)
+                    WHEN cat.name = 'passing' AND SUM(CAST(split_part(gps.stat, '/', 2) AS INT)) FILTER(WHERE typ.id = 3) = 0 THEN 0
+                    WHEN cat.name = 'passing' THEN ROUND(SUM(CAST(gps.stat AS INT)) FILTER(WHERE typ.id = 8) / SUM(CAST(split_part(gps.stat, '/', 2) AS NUMERIC)) FILTER(WHERE typ.id = 3), 1)
+                END AS stat
+        FROM game AS g
+            INNER JOIN game_team AS gt ON g.id = gt.game_id
+            INNER JOIN game_player_stat AS gps ON gt.id = gps.game_team_id
+            INNER JOIN athlete AS a ON gps.athlete_id = a.id
+            INNER JOIN team AS t ON gt.team_id = t.id
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
+            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
+            INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
+        WHERE ${filter} AND (cat.id IN (1,3,4,5,6,8,9))
+        GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name
+        UNION
+        SELECT 	g.season,
+                a.id AS player_id,
+                a.name AS player,
+                t.school AS team,
+                c.name AS conference,
+                cat.name AS category,
+                CASE
+                    WHEN cat.name = 'kicking' THEN 'PCT'
+                    WHEN cat.name = 'passing' THEN 'PCT'
+                END AS stat_type,
+                CASE
+                    WHEN cat.name = 'passing' AND SUM(CAST(split_part(gps.stat, '/', 2) AS INT)) FILTER(WHERE typ.id = 3) = 0 THEN 0
+                    WHEN cat.name = 'passing' THEN ROUND(SUM(CAST(split_part(gps.stat, '/', 1) AS INT)) FILTER(WHERE typ.id = 3) / SUM(CAST(split_part(gps.stat, '/', 2) AS NUMERIC)) FILTER(WHERE typ.id = 3), 3)
+                    WHEN cat.name = 'kicking' AND SUM(CAST(split_part(gps.stat, '/', 2) AS INT)) FILTER(WHERE typ.id = 2) = 0 THEN 0
+                    WHEN cat.name = 'kicking' THEN ROUND(SUM(CAST(split_part(gps.stat, '/', 1) AS INT)) FILTER(WHERE typ.id = 2) / SUM(CAST(split_part(gps.stat, '/', 2) AS NUMERIC)) FILTER(WHERE typ.id = 2), 3)
+                END AS stat
+        FROM game AS g
+            INNER JOIN game_team AS gt ON g.id = gt.game_id
+            INNER JOIN game_player_stat AS gps ON gt.id = gps.game_team_id
+            INNER JOIN athlete AS a ON gps.athlete_id = a.id
+            INNER JOIN team AS t ON gt.team_id = t.id
+            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
+            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
+            INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
+        WHERE ${filter} AND (cat.id IN (2,9))
+        GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name
+        `, params);
+
+        return results.map((r) => ({
+            season: r.year,
+            playerId: r.player_id,
+            player: r.player,
+            team: r.team,
+            conference: r.conference,
+            category: r.category,
+            statType: r.stat_type,
+            stat: r.stat
+        }));
+    };
+
     return {
         playerSearch,
         getMeanPassingChartData,
         getPlayerUsage,
-        getReturningProduction
+        getReturningProduction,
+        getSeasonStats
     };
 };
