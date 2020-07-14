@@ -1,5 +1,5 @@
-module.exports = (app, db, cors) => {
-    const controller = require('./venue.controller')(db);
+module.exports = (app, db, cors, Sentry) => {
+    const controller = require('./venue.controller')(db, Sentry);
 
     app.route('/venues').get(cors, controller.getVenues);
 }

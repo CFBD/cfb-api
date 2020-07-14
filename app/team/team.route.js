@@ -1,5 +1,5 @@
-module.exports = (app, db, cors) => {
-    const controller = require('./team.controller')(db);
+module.exports = (app, db, cors, Sentry) => {
+    const controller = require('./team.controller')(db, Sentry);
 
     app.route('/teams').get(cors, controller.getTeams);
     app.route('/teams/fbs').get(cors, controller.getFBSTeams);

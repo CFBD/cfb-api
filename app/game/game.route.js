@@ -1,5 +1,5 @@
-module.exports = (app, db, cors, speedLimiter) => {
-    const controller = require('./game.controller')(db);
+module.exports = (app, db, cors, speedLimiter, Sentry) => {
+    const controller = require('./game.controller')(db, Sentry);
 
     app.route('/games').get(cors, controller.getGames);
     app.route('/games/teams').get(cors, controller.getTeamStats);

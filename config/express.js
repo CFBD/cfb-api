@@ -79,18 +79,18 @@ module.exports = async () => {
     }));
 
     let corsConfig = cors(corsOptions);
-    require('../app/coach/coach.route')(app, dbInfo.db, corsConfig);
-    require('../app/game/game.route')(app, dbInfo.db, corsConfig, speedLimiter);
-    require('../app/play/play.route')(app, dbInfo.db, corsConfig);
-    require('../app/team/team.route')(app, dbInfo.db, corsConfig);
-    require('../app/venue/venue.route')(app, dbInfo.db, corsConfig);
-    require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig);
-    require('../app/lines/lines.route')(app, dbInfo.db, corsConfig);
-    require('../app/recruiting/recruiting.route')(app, dbInfo.db, corsConfig);
-    require('../app/ratings/ratings.route')(app, dbInfo.db, corsConfig);
-    require('../app/ppa/ppa.routes')(app, dbInfo.db, corsConfig);
-    require('../app/stats/stats.routes')(app, dbInfo.db, corsConfig);
-    require('../app/player/player.routes')(app, dbInfo.db, corsConfig);
+    require('../app/coach/coach.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/game/game.route')(app, dbInfo.db, corsConfig, speedLimiter, Sentry);
+    require('../app/play/play.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/team/team.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/venue/venue.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/lines/lines.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/recruiting/recruiting.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/ratings/ratings.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/ppa/ppa.routes')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/stats/stats.routes')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/player/player.routes')(app, dbInfo.db, corsConfig, Sentry);
 
     const consumers = await require('./consumers')();
     await require('../app/events/events.route')(app, consumers, expressWsObj);

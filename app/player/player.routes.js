@@ -1,7 +1,7 @@
 const playerController = require('./player.controller');
 
-module.exports = (app, db, cors) => {
-    const controller = playerController(db);
+module.exports = (app, db, cors, Sentry) => {
+    const controller = playerController(db, Sentry);
 
     app.route('/player/search').get(cors, controller.playerSearch);
     app.route('/player/ppa/passing').get(cors, controller.getMeanPassingPPA);

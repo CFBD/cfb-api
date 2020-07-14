@@ -1,6 +1,6 @@
 const serviceConstructor = require('./play.service');
 
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     const service = serviceConstructor(db);
 
     const getPlayTypes = async (req, res) => {
@@ -8,7 +8,7 @@ module.exports = (db) => {
             let types = await service.getPlayTypes();
             res.send(types);
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -20,7 +20,7 @@ module.exports = (db) => {
             let types = await service.getPlayStatTypes();
             res.send(types);
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -58,7 +58,7 @@ module.exports = (db) => {
                 res.send(plays);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -92,7 +92,7 @@ module.exports = (db) => {
                 res.send(stats);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });

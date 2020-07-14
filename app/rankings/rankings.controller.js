@@ -1,4 +1,4 @@
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     return {
         getRankings: async (req, res) => {
             try {
@@ -93,7 +93,7 @@ module.exports = (db) => {
 
                 res.send(results);
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });

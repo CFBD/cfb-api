@@ -1,4 +1,4 @@
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     return {
         getTeams: async (req, res) => {
             try {
@@ -16,7 +16,7 @@ module.exports = (db) => {
 
                 res.send(teams);
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });
@@ -43,7 +43,7 @@ module.exports = (db) => {
 
                 res.send(teams);
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });
@@ -88,7 +88,7 @@ module.exports = (db) => {
                 res.send(roster);
 
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(400).send({
                     error: 'Something went wrong.'
                 });
@@ -104,7 +104,7 @@ module.exports = (db) => {
 
                 res.send(conferences);
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(400).send({
                     error: 'Something went wrong.'
                 });
@@ -133,7 +133,7 @@ module.exports = (db) => {
 
                 res.send(talent);
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(400).send({
                     error: 'Something went wrong.'
                 });
@@ -213,7 +213,7 @@ module.exports = (db) => {
 
                 res.send(data);
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(400).send({
                     error: 'Something went wrong.'
                 });

@@ -1,7 +1,7 @@
 const controllerConstructor = require('./ppa.controller');
 
-module.exports = (app, db, cors) => {
-    const controller = controllerConstructor(db);
+module.exports = (app, db, cors, Sentry) => {
+    const controller = controllerConstructor(db, Sentry);
 
     app.route('/ppa/predicted').get(cors, controller.getPP);
     app.route('/ppa/teams').get(cors, controller.getPPAByTeam);

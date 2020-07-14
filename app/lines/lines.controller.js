@@ -1,6 +1,6 @@
 const serviceConstructor = require('./lines.service');
 
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     const service = serviceConstructor(db);
 
     const getLines = async (req, res) => {
@@ -28,7 +28,7 @@ module.exports = (db) => {
                 res.send(lines);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });

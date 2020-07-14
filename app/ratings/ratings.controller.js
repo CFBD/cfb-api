@@ -1,6 +1,6 @@
 const serviceConstructor = require('./ratings.service');
 
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     const service = serviceConstructor(db);
 
     const getSP = async (req, res) => {

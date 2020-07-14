@@ -1,6 +1,6 @@
 const serviceConstructor = require('./game.service');
 
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     const service = serviceConstructor(db);
 
     return {
@@ -96,7 +96,7 @@ module.exports = (db) => {
 
                 res.send(games);
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });
@@ -121,7 +121,7 @@ module.exports = (db) => {
                     res.send(drives);
                 }
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });
@@ -257,7 +257,7 @@ module.exports = (db) => {
                 res.send(stats);
 
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });
@@ -424,7 +424,7 @@ module.exports = (db) => {
                 res.send(stats);
 
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });
@@ -532,7 +532,7 @@ module.exports = (db) => {
                     }
                 })));
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });
@@ -557,7 +557,7 @@ module.exports = (db) => {
                     res.send(results);
                 }
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });

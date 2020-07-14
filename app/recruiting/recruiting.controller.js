@@ -1,4 +1,4 @@
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     const getPlayers = async (req, res) => {
         try {
             if (!req.query.year && !req.query.team) {
@@ -78,7 +78,7 @@ module.exports = (db) => {
                 country: r.country
             })));
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -125,7 +125,7 @@ module.exports = (db) => {
             res.send(ranks);
 
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -202,7 +202,7 @@ module.exports = (db) => {
                 })));
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong'
             });

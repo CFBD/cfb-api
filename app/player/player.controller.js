@@ -1,6 +1,6 @@
 const playerService = require('./player.service');
 
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     const service = playerService(db);
 
     const playerSearch = async (req, res) => {
@@ -18,7 +18,7 @@ module.exports = (db) => {
                 res.send(results);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -44,7 +44,7 @@ module.exports = (db) => {
                 res.send(results);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -70,7 +70,7 @@ module.exports = (db) => {
                 res.send(results);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -92,7 +92,7 @@ module.exports = (db) => {
                 res.send(results);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -123,7 +123,7 @@ module.exports = (db) => {
                 res.send(data);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });

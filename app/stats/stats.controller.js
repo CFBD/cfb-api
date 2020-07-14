@@ -1,6 +1,6 @@
 const serviceContructor = require('./stats.service');
 
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     const service = serviceContructor(db);
 
     const getTeamStats = async (req, res) => {
@@ -26,7 +26,7 @@ module.exports = (db) => {
                 res.send(stats);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'
             });
@@ -61,7 +61,7 @@ module.exports = (db) => {
                 res.send(results);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'something went wrong'
             });
@@ -91,7 +91,7 @@ module.exports = (db) => {
                 res.send(results);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'something went wrong'
             });
@@ -113,7 +113,7 @@ module.exports = (db) => {
                 res.send(result);
             }
         } catch (err) {
-            console.error(err);
+            Sentry.captureException(err);
             res.status(500).send({
                 error: 'something went wrong'
             });

@@ -1,6 +1,6 @@
 const serviceConstructor = require('./coach.service');
 
-module.exports = (db) => {
+module.exports = (db, Sentry) => {
     const service = serviceConstructor(db);
 
     return {
@@ -29,7 +29,7 @@ module.exports = (db) => {
                     res.send(coaches);
                 }  
             } catch (err) {
-                console.error(err);
+                Sentry.captureException(err);
                 res.status(500).send({
                     error: 'Something went wrong.'
                 });

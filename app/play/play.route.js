@@ -1,5 +1,5 @@
-module.exports = (app, db, cors) => {
-    const controller = require('./play.controller')(db);
+module.exports = (app, db, cors, Sentry) => {
+    const controller = require('./play.controller')(db, Sentry);
 
     app.route('/plays').get(cors, controller.getPlays);
     app.route('/play/types').get(cors, controller.getPlayTypes);
