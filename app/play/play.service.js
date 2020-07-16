@@ -227,7 +227,7 @@ module.exports = (db) => {
                 INNER JOIN athlete AS a ON a.id = ps.athlete_id AND a.team_id = t.id
                 INNER JOIN play_stat_type AS pst ON ps.stat_type_id = pst.id
             ${filter}
-            LIMIT 1000
+            LIMIT 2000
         `, params);
 
         for (let play of results) {
