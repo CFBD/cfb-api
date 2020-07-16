@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "2.2.1",
+    "version": "2.2.2",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -77,8 +77,8 @@
         "tags": [
           "games"
         ],
-        "summary": "Get game information",
-        "description": "Game results",
+        "summary": "Games and results",
+        "description": "Get game results",
         "operationId": "getGames",
         "produces": [
           "application/json"
@@ -166,8 +166,8 @@
         "tags": [
           "games"
         ],
-        "summary": "Get records by year",
-        "description": "Team records by year",
+        "summary": "Team records",
+        "description": "Get team records by year",
         "operationId": "getTeamRecords",
         "produces": [
           "application/json"
@@ -217,7 +217,7 @@
         "tags": [
           "games"
         ],
-        "summary": "Get game media information (TV, radio, etc)",
+        "summary": "Game media information and schedules",
         "description": "Game media information (TV, radio, etc)",
         "operationId": "getGameMedia",
         "produces": [
@@ -291,8 +291,8 @@
         "tags": [
           "games"
         ],
-        "summary": "Get player statistics by game",
-        "description": "Player game stats",
+        "summary": "Player game stats",
+        "description": "Player stats broken down by game",
         "operationId": "getPlayerGameStats",
         "produces": [
           "application/json"
@@ -373,8 +373,8 @@
         "tags": [
           "games"
         ],
-        "summary": "Get team statistics by game",
-        "description": "Team game stats",
+        "summary": "Team game stats",
+        "description": "Team stats broken down by game",
         "operationId": "getTeamGameStats",
         "produces": [
           "application/json"
@@ -448,8 +448,8 @@
         "tags": [
           "games"
         ],
-        "summary": "Get advanced box score",
-        "description": "Advanced box score",
+        "summary": "Advanced box scores",
+        "description": "Get advanced box score data",
         "operationId": "getAdvancedBoxScore",
         "produces": [
           "application/json"
@@ -481,8 +481,8 @@
         "tags": [
           "drives"
         ],
-        "summary": "Get drive information",
-        "description": "Drive results",
+        "summary": "Drive data and results",
+        "description": "Get game drives",
         "operationId": "getDrvies",
         "produces": [
           "application/json"
@@ -574,8 +574,8 @@
         "tags": [
           "plays"
         ],
-        "summary": "Get play information. Requires either a week or team to be specified.",
-        "description": "Play results",
+        "summary": "Play by play data",
+        "description": "Get play data and results. Requires either a week or team to be specified.",
         "operationId": "getPlays",
         "produces": [
           "application/json"
@@ -674,7 +674,7 @@
         "tags": [
           "plays"
         ],
-        "summary": "Get play type list",
+        "summary": "Play types",
         "description": "Types of plays",
         "operationId": "getPlayTypes",
         "produces": [
@@ -698,7 +698,7 @@
         "tags": [
           "plays"
         ],
-        "summary": "Get play statistics",
+        "summary": "Play stats by play",
         "description": "Gets player stats associated by play (limit 1000)",
         "operationId": "getPlayStats",
         "produces": [
@@ -779,7 +779,7 @@
         "tags": [
           "plays"
         ],
-        "summary": "Get play stat type lists",
+        "summary": "Types of player play stats",
         "description": "Type of play stats",
         "operationId": "getPlayStatTypes",
         "produces": [
@@ -806,8 +806,8 @@
         "tags": [
           "conferences"
         ],
-        "summary": "Get conference list",
-        "description": "Conferences",
+        "summary": "Conferences",
+        "description": "Get conference list",
         "operationId": "getConferences",
         "produces": [
           "application/json"
@@ -833,8 +833,8 @@
         "tags": [
           "teams"
         ],
-        "summary": "Get team information",
-        "description": "Team information",
+        "summary": "Team information",
+        "description": "Get team information",
         "operationId": "getTeams",
         "produces": [
           "application/json"
@@ -869,7 +869,7 @@
         "tags": [
           "teams"
         ],
-        "summary": "Get list of major division teams for a given year",
+        "summary": "FBS team list",
         "description": "Information on major division teams",
         "operationId": "getFbsTeams",
         "produces": [
@@ -906,7 +906,7 @@
         "tags": [
           "teams"
         ],
-        "summary": "Get team roster",
+        "summary": "Team rosters",
         "description": "Roster data",
         "operationId": "getRoster",
         "produces": [
@@ -950,7 +950,7 @@
         "tags": [
           "teams"
         ],
-        "summary": "Get team talent rankings",
+        "summary": "Team talent composite rankings",
         "description": "Team talent composite",
         "operationId": "getTalent",
         "produces": [
@@ -987,7 +987,7 @@
         "tags": [
           "teams"
         ],
-        "summary": "Get matchup history",
+        "summary": "Team matchup history",
         "description": "Matchup history",
         "operationId": "getTeamMatchup",
         "produces": [
@@ -1046,7 +1046,7 @@
         "tags": [
           "venues"
         ],
-        "summary": "Get venue information",
+        "summary": "Arena and venue information",
         "description": "Venues",
         "operationId": "getVenues",
         "produces": [
@@ -1073,7 +1073,7 @@
         "tags": [
           "coaches"
         ],
-        "summary": "Get coach records and school history",
+        "summary": "Coaching records and history",
         "description": "Coaching history",
         "operationId": "getCoaches",
         "produces": [
@@ -1155,7 +1155,7 @@
         "tags": [
           "rankings"
         ],
-        "summary": "Get historical rankings and polls",
+        "summary": "Historical polls and rankings",
         "description": "Poll rankings",
         "operationId": "getRankings",
         "produces": [
@@ -1209,7 +1209,7 @@
         "tags": [
           "betting"
         ],
-        "summary": "Get betting line information",
+        "summary": "Betting lines",
         "description": "Closing betting lines",
         "operationId": "getLines",
         "produces": [
@@ -1298,8 +1298,8 @@
         "tags": [
           "recruiting"
         ],
-        "summary": "Get player recruiting rankings and data. Requires either a year or team to be specified.",
-        "description": "Player recruiting rankings",
+        "summary": "Player recruiting ratings and rankings",
+        "description": "Get player recruiting rankings and data. Requires either a year or team to be specified.",
         "operationId": "getRecruitingPlayers",
         "produces": [
           "application/json"
@@ -1364,7 +1364,7 @@
         "tags": [
           "recruiting"
         ],
-        "summary": "Get team recruiting rankings",
+        "summary": "Team recruiting rankings and ratings",
         "description": "Team recruiting rankings",
         "operationId": "getRecruitingTeams",
         "produces": [
@@ -1408,7 +1408,7 @@
         "tags": [
           "recruiting"
         ],
-        "summary": "Get position group aggregated ratings",
+        "summary": "Recruit position group ratings",
         "description": "Gets a list of aggregated statistics by team and position grouping",
         "operationId": "getRecruitingGroups",
         "produces": [
@@ -1467,7 +1467,7 @@
         "tags": [
           "ratings"
         ],
-        "summary": "Get SP+ historical rating data (requires either a year or team specified)",
+        "summary": "Historical SP+ ratings",
         "description": "SP+ rating data",
         "operationId": "getSPRatings",
         "produces": [
@@ -1511,8 +1511,8 @@
         "tags": [
           "ratings"
         ],
-        "summary": "Get SRS historical rating data (requires either a year or team specified)",
-        "description": "SRS rating data",
+        "summary": "Historical SRS ratings",
+        "description": "SRS rating data (requires either a year or team specified)",
         "operationId": "getSRSRatings",
         "produces": [
           "application/json"
@@ -1562,8 +1562,8 @@
         "tags": [
           "ratings"
         ],
-        "summary": "Get average SP+ historical rating data by conference",
-        "description": "Conference average SP+ ratings by year",
+        "summary": "Historical SP+ ratings by conference",
+        "description": "Get average SP+ historical rating data by conference",
         "operationId": "getConferenceSPRatings",
         "produces": [
           "application/json"
@@ -1606,7 +1606,7 @@
         "tags": [
           "metrics"
         ],
-        "summary": "Calculate Predicted Points",
+        "summary": "Predicted Points (i.e. Expected Points or EP)",
         "description": "Predicted Points",
         "operationId": "getPredictedPoints",
         "produces": [
@@ -1653,7 +1653,7 @@
         "tags": [
           "metrics"
         ],
-        "summary": "Get team averages for Predicted Points Added (PPA)",
+        "summary": "Predicted Points Added (PPA/EPA) data by team",
         "description": "Predicted Points Added (PPA)",
         "operationId": "getTeamPPA",
         "produces": [
@@ -1711,7 +1711,7 @@
         "tags": [
           "metrics"
         ],
-        "summary": "Get team game averages for Predicted Points Added (PPA)",
+        "summary": "Team Predicated Points Added (PPA/EPA) by game",
         "description": "Predicted Points Added (PPA) by game",
         "operationId": "getGamePPA",
         "produces": [
@@ -1778,7 +1778,7 @@
         "tags": [
           "metrics"
         ],
-        "summary": "Get player game averages for Predicted Points Added (PPA)",
+        "summary": "Player Predicated Points Added (PPA/EPA) broken down by game",
         "description": "Predicted Points Added (PPA) by player game",
         "operationId": "getPlayerGamePPA",
         "produces": [
@@ -1859,7 +1859,7 @@
         "tags": [
           "metrics"
         ],
-        "summary": "Get player season averages for Predicted Points Added (PPA)",
+        "summary": "Player Predicated Points Added (PPA/EPA) broken down by season",
         "description": "Predicted Points Added (PPA) by player season",
         "operationId": "getPlayerSeasonPPA",
         "produces": [
@@ -1938,7 +1938,7 @@
         "tags": [
           "metrics"
         ],
-        "summary": "Get win probability chart data",
+        "summary": "Win probability chart data",
         "description": "Win probability data",
         "operationId": "getWinProbabilityData",
         "produces": [
@@ -1982,7 +1982,7 @@
         "tags": [
           "metrics"
         ],
-        "summary": "Get pregame win probabilities",
+        "summary": "Pregame win probability data",
         "description": "Pregame win probabilities",
         "operationId": "getPregameWinProbabilities",
         "produces": [
@@ -2042,7 +2042,7 @@
         "tags": [
           "stats"
         ],
-        "summary": "Get season team stats",
+        "summary": "Team statistics by season",
         "description": "Team season stats",
         "operationId": "getTeamSeasonStats",
         "produces": [
@@ -2111,7 +2111,7 @@
         "tags": [
           "stats"
         ],
-        "summary": "Get advanced season team stats",
+        "summary": "Advanced team metrics by season",
         "description": "Advanced team season stats",
         "operationId": "getAdvancedTeamSeasonStats",
         "produces": [
@@ -2180,7 +2180,7 @@
         "tags": [
           "stats"
         ],
-        "summary": "Get advanced game team stats",
+        "summary": "Advanced team metrics by game",
         "description": "Advanced team game stats",
         "operationId": "getAdvancedTeamGameStats",
         "produces": [
@@ -2254,7 +2254,7 @@
         "tags": [
           "stats"
         ],
-        "summary": "Get stat category list",
+        "summary": "Team stat categories",
         "description": "Stat category list",
         "operationId": "getStatCategories",
         "produces": [
@@ -2278,7 +2278,7 @@
         "tags": [
           "players"
         ],
-        "summary": "Search for players",
+        "summary": "Search for player information",
         "description": "Search for players",
         "operationId": "playerSearch",
         "produces": [
@@ -2336,7 +2336,7 @@
         "tags": [
           "players"
         ],
-        "summary": "Get player usage metrics for the season",
+        "summary": "Player usage metrics broken down by season",
         "description": "Player usage metrics by season",
         "operationId": "getPlayerUsage",
         "produces": [
@@ -2409,7 +2409,7 @@
         "tags": [
           "players"
         ],
-        "summary": "Get returning production metrics",
+        "summary": "Team returning production metrics",
         "description": "Returning production metrics",
         "operationId": "getReturningProduction",
         "produces": [
@@ -2460,7 +2460,7 @@
         "tags": [
           "players"
         ],
-        "summary": "Get player stats aggregated by season",
+        "summary": "Player stats by season",
         "description": "Season player stats",
         "operationId": "getPlayerSeasonStats",
         "produces": [
