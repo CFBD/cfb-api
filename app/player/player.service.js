@@ -22,7 +22,7 @@ module.exports = (db) => {
         index++;
 
         const results = await db.any(`
-        SELECT DISTINCT a.id, t.school, a.name, a.first_name, a.last_name, a.weight, a.height, a.jersey, p.abbreviation AS "position", h.city || ', ' || h.state AS hometown, '#' || t.color AS color
+        SELECT DISTINCT a.id, t.school, a.name, a.first_name, a.last_name, a.weight, a.height, a.jersey, p.abbreviation AS "position", h.city || ', ' || h.state AS hometown, '#' || t.color AS color, '#' || t.alt_color AS alt_color
         FROM athlete AS a
             INNER JOIN athlete_team AS att ON a.id = att.athlete_id
             INNER JOIN team AS t ON att.team_id = t.id
@@ -44,7 +44,8 @@ module.exports = (db) => {
             jersey: r.jersey,
             position: r.position,
             hometown: r.hometown,
-            teamColor: r.color
+            teamColor: r.color,
+            teamColorSecondary: r.alt_color
         }));
     };
 
