@@ -77,6 +77,8 @@ module.exports = (db) => {
                             p.play_number,
                             p.period,
                             p.clock,
+                            CASE WHEN ogt.home_away = 'home' THEN p.home_timeouts ELSE p.away_timeouts END AS offense_timeouts,
+                            CASE WHEN dgt.home_away = 'home' THEN p.home_timeouts ELSE p.away_timeouts END AS defense_timeouts,
                             p.yard_line,
                             CASE WHEN ogt.home_away = 'home' THEN (100 - p.yard_line) ELSE p.yard_line END AS yards_to_goal,
                             p.down,
