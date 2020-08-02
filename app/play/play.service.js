@@ -83,6 +83,7 @@ module.exports = (db) => {
                             CASE WHEN ogt.home_away = 'home' THEN (100 - p.yard_line) ELSE p.yard_line END AS yards_to_goal,
                             p.down,
                             p.distance,
+                            p.scoring,
                             p.yards_gained,
                             pt.text as play_type,
                             p.play_text,
