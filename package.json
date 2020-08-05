@@ -22,6 +22,7 @@
   "dependencies": {
     "@sentry/node": "^5.20.0",
     "amqplib": "^0.6.0",
+    "axios": "^0.19.2",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
@@ -40,8 +41,7 @@
     "pg-promise": "^10.5.8",
     "postgraphile": "^4.4.1",
     "swagger-stats": "^0.95.17",
-    "swagger-ui-dist": "^3.30.2",
-    "synaptic": "^1.1.4"
+    "swagger-ui-dist": "^3.30.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
