@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "2.2.8",
+    "version": "2.2.9",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -1951,14 +1951,6 @@
             "in": "query",
             "required": true,
             "type": "integer"
-          },
-          {
-            "name": "adjustForSpread",
-            "description": "Toggles pregame spread adjustments",
-            "in": "query",
-            "required": false,
-            "type": "boolean",
-            "default": true
           }
         ],
         "responses": {
@@ -3905,6 +3897,9 @@
     "PlayWP": {
       "type": "object",
       "properties": {
+        "gamesId": {
+          "type": "integer"
+        },
         "playId": {
           "type": "integer"
         },
@@ -3946,9 +3941,6 @@
         },
         "distance": {
           "type": "integer"
-        },
-        "homeWinner": {
-          "type": "boolean"
         },
         "homeWinProb": {
           "type": "number"
