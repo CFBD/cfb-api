@@ -120,7 +120,7 @@ module.exports = (db) => {
         }
 
         if (seasonType && seasonType.toLowerCase() !== 'both') {
-            filters.push(`g.season_type = ${seasonType}`);
+            filters.push(`g.season_type = '${seasonType}'`);
             params.push(seasonType);
             index++;
         }
@@ -152,7 +152,7 @@ module.exports = (db) => {
         const filter = 'WHERE ' + filters.join(' AND ');
 
         const results = await db.any(`
-            SELECT g.id, g.season, g.week, g.season_type, home.school AS home_school, hc.name AS home_conference, away.school AS away_school, ac.name AS away_conference, gm.media_type, gm.name AS outlet
+            SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.start_time_tbd, home.school AS home_school, hc.name AS home_conference, away.school AS away_school, ac.name AS away_conference, gm.media_type, gm.name AS outlet
             FROM game AS g
                 INNER JOIN game_media AS gm ON g.id = gm.game_id
                 INNER JOIN game_team AS home_team ON g.id = home_team.game_id AND home_team.home_away = 'home'
@@ -171,6 +171,8 @@ module.exports = (db) => {
             season: r.season,
             week: r.week,
             seasonType: r.season_type,
+            startTime: r.start_date,
+            isStartTimeTBD: r.start_time_tbd,
             homeTeam: r.home_school,
             homeConference: r.home_conference,
             awayTeam: r.away_school,
