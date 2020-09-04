@@ -1130,18 +1130,21 @@
           "200": {
             "description": "successful operation",
             "schema": {
-              "type": "object",
-              "properties": {
-                "first_name": {
-                  "type": "string"
-                },
-                "last_name": {
-                  "type": "string"
-                },
-                "seasons": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/TeamSeason"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "seasons": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/TeamSeason"
+                    }
                   }
                 }
               }
