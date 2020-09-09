@@ -14,7 +14,7 @@ module.exports = async () => {
     const slowDown = require('express-slow-down');
     const speedLimiter = slowDown({
         windowMs: 60 * 1000,
-        delayAfter: 10,
+        delayAfter: 20,
         delayMs: 100,
         skipFailedRequests: true 
     });
@@ -81,7 +81,7 @@ module.exports = async () => {
     let corsConfig = cors(corsOptions);
     require('../app/coach/coach.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/game/game.route')(app, dbInfo.db, corsConfig, speedLimiter, Sentry);
-    require('../app/play/play.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/play/play.route')(app, dbInfo.db, corsConfig, speedLimiter, Sentry);
     require('../app/team/team.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/venue/venue.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig, Sentry);
