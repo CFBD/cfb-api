@@ -33,9 +33,9 @@ module.exports = (db, Sentry) => {
                 res.status(400).send({
                     error: 'A numeric year parameter must be specified.'
                 });
-            } else if (req.query.week && isNaN(req.query.week)) {
+            } else if (!req.query.week || isNaN(req.query.week)) {
                 res.status(400).send({
-                    error: 'Week parameter must be numeric'
+                    error: 'A numeric week parameter must be specified.'
                 });
             } else if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
                 res.status(400).send({
