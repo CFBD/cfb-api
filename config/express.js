@@ -25,10 +25,6 @@ module.exports = async (Sentry) => {
         corsOptions = {};
     // }
 
-    const {
-        postgraphile
-    } = require('postgraphile');
-
     const app = express();
     const expressWsObj = expressWs(app);
 
@@ -63,11 +59,6 @@ module.exports = async (Sentry) => {
         onAuthenticate: (req, username, password) => {
             return username.toLowerCase() == process.env.USERNAME.toLowerCase() && password == process.env.PASSWORD
         }
-    }));
-
-    app.use(postgraphile(dbInfo.connectionString, 'public', {
-        disableDefaultMutations: true,
-        graphiql: true
     }));
 
     let corsConfig = cors(corsOptions);
