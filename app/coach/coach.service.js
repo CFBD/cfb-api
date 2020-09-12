@@ -42,12 +42,28 @@ module.exports = (db) => {
         }
 
         let results = await db.any(`
-            SELECT c.id, c.first_name, c.last_name, t.school, cs.year, cs.games, cs.wins, cs.losses, cs.ties, cs.preseason_rank, cs.postseason_rank
-            FROM coach c
-                INNER JOIN coach_season cs ON c.id = cs.coach_id
-                INNER JOIN team t ON cs.team_id = t.id
-            ${filter}
-            ORDER BY c.last_name, c.first_name, cs.year
+        SELECT 	c.id,
+                c.first_name,
+                c.last_name,
+                t.school,
+                cs.year,
+                cs.games,
+                cs.wins,
+                cs.losses,
+                cs.ties,
+                cs.preseason_rank,
+                cs.postseason_rank,
+                ROUND(srs.rating, 1) AS srs,
+                r.rating AS sp,
+                r.o_rating AS sp_offense,
+                r.d_rating AS sp_defense
+        FROM coach c
+            INNER JOIN coach_season cs ON c.id = cs.coach_id
+            INNER JOIN team t ON cs.team_id = t.id
+            LEFT JOIN srs ON cs.year = srs.year AND t.id = srs.team_id
+            LEFT JOIN ratings AS r ON r.year = srs.year AND r.team_id = srs.team_id
+        ${filter}
+        ORDER BY c.last_name, c.first_name, cs.year
         `, params);
 
         let coaches = [];
@@ -67,7 +83,11 @@ module.exports = (db) => {
                         losses: cs.losses,
                         ties: cs.ties,
                         preseason_rank: cs.preseason_rank,
-                        postseason_rank: cs.postseason_rank
+                        postseason_rank: cs.postseason_rank,
+                        srs: cs.srs,
+                        sp_overall: cs.sp,
+                        sp_offense: cs.sp_offense,
+                        sp_defense: cs.sp_defense
                     }
                 })
             });
