@@ -70,6 +70,7 @@ module.exports = async (Sentry) => {
     }));
 
     let corsConfig = cors(corsOptions);
+    require('../app/auth/auth.route')(app, dbInfo.authDb, corsConfig, Sentry);
     require('../app/coach/coach.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/game/game.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/play/play.route')(app, dbInfo.db, corsConfig, Sentry);
