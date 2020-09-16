@@ -9,6 +9,9 @@ module.exports = async (Sentry) => {
     const cors = require('cors');
     const swStats = require('swagger-stats');
 
+    const passport = require('passport');
+    const passportConfig = require('./passport');
+
     let corsOptions;
 
     // if (process.env.NODE_ENV != 'development') {
@@ -48,6 +51,11 @@ module.exports = async (Sentry) => {
     }));
 
     const dbInfo = require('./database')();
+    passportConfig(passport, dbInfo.authDb);
+
+    const auth = passport.authenticate('bearer', {
+        session: false
+    });
 
     require('./swagger')(app, cors);
     app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
