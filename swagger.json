@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "2.2.12",
+    "version": "2.2.13",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -601,7 +601,7 @@
             "name": "week",
             "description": "Week filter (required if team, offense, or defense, not specified)",
             "in": "query",
-            "required": false,
+            "required": true,
             "type": "integer",
             "minumum": 1,
             "maximum": 16
