@@ -258,7 +258,7 @@ module.exports = (db) => {
         GROUP BY season, school, conference, o_d
         `, params);
 
-        const havocTask = db.any(`
+        const havocTask1 = db.any(`
             WITH havoc_events AS (
                 WITH fumbles AS (
                     SELECT g.season, t.id AS team_id, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0) AS fumbles
@@ -291,6 +291,49 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
                     INNER JOIN team AS t ON p.defense_id = t.id
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                ${filter}
+                GROUP BY g.season, t.id
+            )
+            SELECT p.season AS season, t.school AS team, (h.total_havoc / p.total) AS total_havoc, (h.front_seven_havoc / p.total) AS front_seven_havoc, (h.db_havoc / p.total) AS db_havoc
+            FROM plays AS p
+                INNER JOIN havoc_events AS h ON p.team_id = h.team_id AND h.season = p.season
+                INNER JOIN team AS t ON t.id = p.team_id
+        `, params);
+
+        const havocTask2 = await db.any(`
+            WITH havoc_events AS (
+                WITH fumbles AS (
+                    SELECT g.season, t.id AS team_id, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0) AS fumbles
+                    FROM game AS g
+                        INNER JOIN game_team AS gt ON g.id = gt.game_id
+                        INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+                        INNER JOIN team AS t ON gt.team_id = t.id
+                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                        LEFT JOIN game_player_stat AS s ON s.game_team_id = gt.id AND s.type_id = 4 AND s.category_id = 10
+                    ${filter}
+                    GROUP BY g.season, t.id
+                )
+                SELECT 	g.season,
+                        t.id AS team_id,
+                        COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0.0) + f.fumbles AS total_havoc,
+                        COALESCE(SUM(CAST(s.stat AS NUMERIC)) FILTER (WHERE s.type_id IN (16,24)), 0.0) AS db_havoc,
+                        COALESCE(SUM(CAST(s.stat AS NUMERIC)) FILTER (WHERE s.type_id = 21), 0.0) + f.fumbles AS front_seven_havoc
+                FROM game AS g
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id
+                    INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+                    INNER JOIN team AS t ON gt.team_id = t.id
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN game_team_stat AS s ON s.game_team_id = gt2.id AND s.type_id IN (16,21,24)
+                    LEFT JOIN fumbles AS f ON f.team_id = t.id
+                ${filter}
+                GROUP BY g.season, t.id, f.fumbles
+            ), plays AS (
+                SELECT g.season, t.id AS team_id, COUNT(p.id) AS total
+                FROM game AS g
+                    INNER JOIN drive AS d ON g.id = d.game_id
+                    INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
+                    INNER JOIN team AS t ON p.offense_id = t.id
                     INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
                 ${filter}
                 GROUP BY g.season, t.id
@@ -391,15 +434,17 @@ module.exports = (db) => {
 
         const fullResults = await Promise.all([
             mainTask,
-            havocTask,
+            havocTask1,
+            havocTask2,
             scoringOppTasks,
             fieldPositionTask
         ]);
 
         const results = fullResults[0];
-        const havocResults = fullResults[1];
-        const scoringOppResults = fullResults[2];
-        const fieldPositionResults = fullResults[3];
+        const havocResultsD = fullResults[1];
+        const havocResultsO = fullResults[2];
+        const scoringOppResults = fullResults[3];
+        const fieldPositionResults = fullResults[4];
 
         let stats = [];
         let years = Array.from(new Set(results.map(r => r.season)));
@@ -410,7 +455,8 @@ module.exports = (db) => {
             let yearStats = teams.map(t => {
                 let offense = results.find(r => r.season == year && r.team == t && r.unit == 'offense');
                 let defense = results.find(r => r.season == year && r.team == t && r.unit == 'defense');
-                let havoc = havocResults.find(r => r.season == year && r.team == t);
+                let havocD = havocResultsD.find(r => r.season == year && r.team == t);
+                let havocO = havocResultsO.find(r => r.season == year && r.team == t);
                 let scoringOppO = scoringOppResults.find(r => r.season == year && r.school == t && r.unit == 'offense');
                 let scoringOppD = scoringOppResults.find(r => r.season == year && r.school == t && r.unit == 'defense');
                 let fieldPosition = fieldPositionResults.find(r => r.season == year && r.school == t);
@@ -438,6 +484,11 @@ module.exports = (db) => {
                         fieldPosition: {
                             averageStart: parseFloat(fieldPosition.avg_start_off),
                             averagePredictedPoints: parseFloat(fieldPosition.avg_predicted_points_off)
+                        },
+                        havoc: {
+                            total: havocO ? parseFloat(havocO.total_havoc) : null,
+                            frontSeven: havocO ? parseFloat(havocO.front_seven_havoc) : null,
+                            db: havocO ? parseFloat(havocO.db_havoc) : null
                         },
                         standardDowns: {
                             rate: parseFloat(offense.standard_down_rate),
@@ -487,9 +538,9 @@ module.exports = (db) => {
                             averagePredictedPoints: parseFloat(fieldPosition.avg_predicted_points_def)
                         },
                         havoc: {
-                            total: havoc ? parseFloat(havoc.total_havoc) : null,
-                            frontSeven: havoc ? parseFloat(havoc.front_seven_havoc) : null,
-                            db: havoc ? parseFloat(havoc.db_havoc) : null
+                            total: havocD ? parseFloat(havocD.total_havoc) : null,
+                            frontSeven: havocD ? parseFloat(havocD.front_seven_havoc) : null,
+                            db: havocD ? parseFloat(havocD.db_havoc) : null
                         },
                         standardDowns: {
                             rate: parseFloat(defense.standard_down_rate),
