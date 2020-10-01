@@ -96,12 +96,21 @@ module.exports = (db) => {
             if (!drive.start_time.seconds) {
                 drive.start_time.seconds = 0;
             }
+
             if (!drive.end_time.minutes) {
                 drive.end_time.minutes = 0;
             }
 
             if (!drive.end_time.seconds) {
                 drive.end_time.seconds = 0;
+            }
+            
+            if (!drive.elapsed.minutes) {
+                drive.elapsed.minutes = 0;
+            }
+
+            if (!drive.elapsed.seconds) {
+                drive.elapsed.seconds = 0;
             }
         }
 
