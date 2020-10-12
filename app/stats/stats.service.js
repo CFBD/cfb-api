@@ -49,7 +49,7 @@ module.exports = (db) => {
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
             INNER JOIN conference AS c ON ct.conference_id = c.id
-        WHERE typ.id IN (2,3,4,7,10,11,12,13,24,25,26,31,32,33,34,35,36,37,38) AND ${filter}
+        WHERE typ.id IN (2,3,4,7,10,11,12,13,23,24,25,26,31,32,33,34,35,36,37,38) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
         SELECT 	g.season,
