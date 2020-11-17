@@ -231,7 +231,7 @@ module.exports = (db) => {
         }));
     }
 
-    const getPPAByGame = async (year, team, conference, week, excludeGarbageTime) => {
+    const getPPAByGame = async (year, team, conference, week, excludeGarbageTime, seasonType) => {
         let filter = 'WHERE g.season = $1';
         let params = [year];
         let index = 2;
@@ -265,6 +265,12 @@ module.exports = (db) => {
                     OR (p.period = 4 AND p.scoring = true AND ABS(p.home_score - p.away_score) <= 28)
             )
             `;
+        }
+
+        if (seasonType && (seasonType == 'regular' || seasonType == 'postseason')) {
+            filter += ` AND g.season_type = $${index}`;
+            params.push(seasonType || 'regular');
+            index++;
         }
 
         let results = await db.any(`
@@ -324,7 +330,7 @@ module.exports = (db) => {
         }));
     };
 
-    const getPPAByPlayerGame = async (season, week, position, school, playerId, threshold, excludeGarbageTime) => {
+    const getPPAByPlayerGame = async (season, week, position, school, playerId, threshold, excludeGarbageTime, seasonType) => {
         let filters = [];
         let params = [];
         let index = 1;
@@ -356,6 +362,12 @@ module.exports = (db) => {
         if (playerId) {
             filters.push(`a.id = $${index}`);
             params.push(playerId);
+            index++;
+        }
+
+        if (seasonType && (seasonType == 'regular' || seasonType == 'postseason')) {
+            filter += ` AND g.season_type = $${index}`;
+            params.push(seasonType || 'regular');
             index++;
         }
 

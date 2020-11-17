@@ -83,8 +83,12 @@ module.exports = (db, Sentry) => {
                 res.status(400).send({
                     error: 'week must be numeric'
                 });
+            } else if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
+                res.status(400).send({
+                    error: 'Invalid season type'
+                });
             } else {
-                const results = await service.getPPAByGame(req.query.year, req.query.team, req.query.conference, req.query.week, req.query.excludeGarbageTime);
+                const results = await service.getPPAByGame(req.query.year, req.query.team, req.query.conference, req.query.week, req.query.excludeGarbageTime, req.query.seasonType);
                 res.send(results);
             }
         } catch (err) {
@@ -117,8 +121,12 @@ module.exports = (db, Sentry) => {
                 res.status(400).send({
                     error: 'playerId must be numeric'
                 });
+            } else if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
+                res.status(400).send({
+                    error: 'Invalid season type'
+                });
             } else {
-                const results = await service.getPPAByPlayerGame(req.query.year, req.query.week, req.query.position, req.query.team, req.query.playerId, req.query.threshold, req.query.excludeGarbageTime);
+                const results = await service.getPPAByPlayerGame(req.query.year, req.query.week, req.query.position, req.query.team, req.query.playerId, req.query.threshold, req.query.excludeGarbageTime, req.query.seasonType);
                 res.send(results);
             }
         } catch (err) {
