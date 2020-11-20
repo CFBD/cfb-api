@@ -193,7 +193,7 @@ module.exports = (db) => {
         }
 
         if (conference) {
-            filters.push(`LOWER(c.abbreviation) = ${index}`);
+            filters.push(`LOWER(c.abbreviation) = LOWER($${index})`);
             params.push(conference);
             index++;
         }
@@ -260,6 +260,8 @@ module.exports = (db) => {
             gameId: r.game_id,
             season: r.season,
             week: r.week,
+            team: r.team,
+            conference: r.conference,
             opponent: r.opponent,
             teamScore: r.team_score,
             opponentScore: r.opponent_score,
