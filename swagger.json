@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "2.2.15",
+    "version": "2.2.16",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -753,6 +753,13 @@
           {
             "name": "seasonType",
             "description": "regular, postseason, or both",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "conference abbreviation filter",
             "in": "query",
             "required": false,
             "type": "string"
@@ -4042,6 +4049,12 @@
         },
         "week": {
           "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
         },
         "opponent": {
           "type": "string"

@@ -143,7 +143,8 @@ module.exports = (db) => {
         gameId,
         athleteId,
         statTypeId,
-        seasonType
+        seasonType,
+        conference
     ) => {
         let filters = [];
         let params = [];
@@ -191,12 +192,20 @@ module.exports = (db) => {
             index++;
         }
 
+        if (conference) {
+            filters.push(`LOWER(c.abbreviation) = ${index}`);
+            params.push(conference);
+            index++;
+        }
+
         let filter = `WHERE ${filters.join(' AND ')}`;
 
         const results = await db.any(`
             SELECT 	g.id as game_id,
                     g.season,
                     g.week,
+                    t.school AS team,
+					c.name AS conference,
                     t2.school AS opponent,
                     CASE
                         WHEN gt.home_away = 'home' THEN p.home_score
@@ -231,6 +240,8 @@ module.exports = (db) => {
                 INNER JOIN athlete AS a ON a.id = ps.athlete_id
 				INNER JOIN athlete_team AS att ON a.id = att.athlete_id AND att.start_year <= g.season AND att.end_year >= g.season AND att.team_id = t.id
                 INNER JOIN play_stat_type AS pst ON ps.stat_type_id = pst.id
+                INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
+                INNER JOIN conference AS c ON ct.conference_id = c.id
             ${filter}
             LIMIT 2000
         `, params);

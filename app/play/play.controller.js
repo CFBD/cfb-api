@@ -86,7 +86,9 @@ module.exports = (db, Sentry) => {
                     req.query.team,
                     req.query.gameId,
                     req.query.athleteId,
-                    req.query.statTypeId
+                    req.query.statTypeId,
+                    req.query.seasonType,
+                    req.query.conference
                 );
 
                 res.send(stats);
