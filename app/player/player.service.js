@@ -2,7 +2,7 @@ module.exports = (db) => {
 
     const playerSearch = async (year, school, position, searchTerm) => {
         let filter = 'WHERE att.start_year <= $1 AND att.end_year >= $1';
-        let params = [year ? year : 2019];
+        let params = [year ? year : 2020];
         let index = 2;
 
         if (school) {
@@ -50,7 +50,7 @@ module.exports = (db) => {
     };
 
     const getMeanPassingChartData = async (id, rollingPlays, year) => {
-        let season = year ? year : 2019;
+        let season = year ? year : 2020;
         const condition = rollingPlays ? `p2.row_num <= p1.row_num AND (p2.row_num + ${rollingPlays}) > p1.row_num` : 'p2.row_num <= p1.row_num';
 
         const results = await db.any(`
