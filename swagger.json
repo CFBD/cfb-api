@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "2.2.17",
+    "version": "2.3.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -4925,7 +4925,81 @@
         "teams": {
           "type": "object",
           "properties": {
+            "plays": {
+              "type": "int"
+            },
             "ppa": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "overall": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "passing": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "rushing": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "cumulativePpa": {
               "type": "array",
               "items": {
                 "type": "object",

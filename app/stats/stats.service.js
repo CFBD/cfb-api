@@ -885,6 +885,7 @@ module.exports = (db) => {
                 WHERE g.id = $1
             )
             SELECT 	school AS team,
+                    COUNT(*) AS plays,
                     ROUND(CAST(AVG(ppa) AS NUMERIC), 4) AS ppa,
                     ROUND(CAST(AVG(ppa) FILTER(WHERE period = 1) AS NUMERIC), 3) AS ppa_1,
                     ROUND(CAST(AVG(ppa) FILTER(WHERE period = 2) AS NUMERIC), 3) AS ppa_2,
@@ -900,6 +901,21 @@ module.exports = (db) => {
                     ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Rush' AND period = 2) AS NUMERIC), 3) AS rushing_ppa_2,
                     ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Rush' AND period = 3) AS NUMERIC), 3) AS rushing_ppa_3,
                     COALESCE(ROUND(CAST(AVG(ppa) FILTER(WHERE play_type = 'Rush' AND period = 4) AS NUMERIC), 3), 0) AS rushing_ppa_4,
+                    ROUND(CAST(SUM(ppa) AS NUMERIC), 1) AS cum_ppa,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE period = 1) AS NUMERIC), 1) AS cum_ppa_1,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE period = 2) AS NUMERIC), 1) AS cum_ppa_2,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE period = 3) AS NUMERIC), 1) AS cum_ppa_3,
+                    COALESCE(ROUND(CAST(SUM(ppa) FILTER(WHERE period = 4) AS NUMERIC), 1), 0) AS cum_ppa_4,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Pass') AS NUMERIC), 1) AS cum_passing_ppa,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Pass' AND period = 1) AS NUMERIC), 1) AS cum_passing_ppa_1,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Pass' AND period = 2) AS NUMERIC), 1) AS cum_passing_ppa_2,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Pass' AND period = 3) AS NUMERIC), 1) AS cum_passing_ppa_3,
+                    COALESCE(ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Pass' AND period = 4) AS NUMERIC), 1), 0) AS cum_passing_ppa_4,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush') AS NUMERIC), 1) AS cum_rushing_ppa,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush' AND period = 1) AS NUMERIC), 1) AS cum_rushing_ppa_1,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush' AND period = 2) AS NUMERIC), 1) AS cum_rushing_ppa_2,
+                    ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush' AND period = 3) AS NUMERIC), 1) AS cum_rushing_ppa_3,
+                    COALESCE(ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush' AND period = 4) AS NUMERIC), 1), 0) AS cum_rushing_ppa_4,
 					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END), 3) AS success_rate,
 					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 1), 3) AS success_rate_1,
 					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 2), 3) AS success_rate_2,
@@ -1154,6 +1170,7 @@ FROM team AS t
             teams: {
                 ppa: teamResults.map(t => ({
                     team: t.team,
+                    plays: parseInt(t.plays),
                     overall: {
                         total: parseFloat(t.ppa),
                         quarter1: parseFloat(t.ppa_1),
@@ -1174,6 +1191,30 @@ FROM team AS t
                         quarter2: parseFloat(t.rushing_ppa_2),
                         quarter3: parseFloat(t.rushing_ppa_3),
                         quarter4: parseFloat(t.rushing_ppa_4)
+                    }
+                })),
+                cumulativePpa: teamResults.map(t => ({
+                    team: t.team,
+                    overall: {
+                        total: parseFloat(t.cum_ppa),
+                        quarter1: parseFloat(t.cum_ppa_1),
+                        quarter2: parseFloat(t.cum_ppa_2),
+                        quarter3: parseFloat(t.cum_ppa_3),
+                        quarter4: parseFloat(t.cum_ppa_4)
+                    },
+                    passing: {
+                        total: parseFloat(t.cum_passing_ppa),
+                        quarter1: parseFloat(t.cum_passing_ppa_1),
+                        quarter2: parseFloat(t.cum_passing_ppa_2),
+                        quarter3: parseFloat(t.cum_passing_ppa_3),
+                        quarter4: parseFloat(t.cum_passing_ppa_4)
+                    },
+                    rushing: {
+                        total: parseFloat(t.cum_rushing_ppa),
+                        quarter1: parseFloat(t.cum_rushing_ppa_1),
+                        quarter2: parseFloat(t.cum_rushing_ppa_2),
+                        quarter3: parseFloat(t.cum_rushing_ppa_3),
+                        quarter4: parseFloat(t.cum_rushing_ppa_4)
                     }
                 })),
                 successRates: teamResults.map(t => ({
