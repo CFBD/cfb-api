@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 2.3.1
+  version: 2.3.2
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -3317,8 +3317,6 @@ definitions:
       teams:
         type: object
         properties:
-          plays:
-            type: number
           ppa:
             type: array
             items:
@@ -3326,6 +3324,8 @@ definitions:
               properties: 
                 team:
                   type: string
+                plays:
+                  type: number
                 overall:
                   type: object
                   properties: 
@@ -3372,6 +3372,8 @@ definitions:
               properties: 
                 team:
                   type: string
+                plays:
+                  type: number
                 overall:
                   type: object
                   properties: 

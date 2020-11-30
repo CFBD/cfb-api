@@ -1195,6 +1195,7 @@ FROM team AS t
                 })),
                 cumulativePpa: teamResults.map(t => ({
                     team: t.team,
+                    plays: parseInt(t.plays),
                     overall: {
                         total: parseFloat(t.cum_ppa),
                         quarter1: parseFloat(t.cum_ppa_1),
