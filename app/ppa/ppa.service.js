@@ -366,7 +366,7 @@ module.exports = (db) => {
         }
 
         if (seasonType && (seasonType == 'regular' || seasonType == 'postseason')) {
-            filter += ` AND g.season_type = $${index}`;
+            filters.push(`g.season_type = $${index}`);
             params.push(seasonType || 'regular');
             index++;
         }
