@@ -191,8 +191,27 @@ module.exports = (db) => {
         }));
     };
 
+    const getCalendar = async (year) => {
+        const weeks = await db.any(`
+            SELECT g.week, g.season_type, MIN(g.start_date) AS first_game_start, MAX(g.start_date) AS last_game_start
+            FROM game AS g
+            WHERE g.season = $1
+            GROUP BY g.week, g.season_type
+            ORDER BY g.season_type, g.week
+        `, [year]);
+
+        return weeks.map(w => ({
+            season: year,
+            week: w.week,
+            seasonType: w.season_type,
+            firstGameStart: w.first_game_start,
+            lastGameStart: w.last_game_start
+        }));
+    }
+
     return {
         getDrives,
-        getMedia
+        getMedia,
+        getCalendar
     };
 };

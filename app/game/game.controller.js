@@ -562,6 +562,27 @@ module.exports = (db, Sentry) => {
                     error: 'Something went wrong.'
                 });
             }
+        },
+        getCalendar: async (req, res) => {
+            try {
+                if (!req.query.year) {
+                    res.status(400).send({
+                        error: 'Year is required'
+                    });
+                } else if (!parseInt(req.query.year)) {
+                    res.status(400).send({
+                        error: 'Year must be an integer'
+                    });
+                } else {
+                    const results = await service.getCalendar(req.query.year);
+                    res.send(results);
+                }
+            } catch (err) {
+                Sentry.captureException(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
         }
     }
 }

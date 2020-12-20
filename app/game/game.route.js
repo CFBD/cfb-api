@@ -7,4 +7,5 @@ module.exports = (app, db, cors, speedLimiter, Sentry) => {
     app.route('/games/players').get(cors, controller.getPlayerStats);
     app.route('/records').get(cors, controller.getRecords);
     app.route('/games/media').get(cors, controller.getMedia);
+    app.route('/calendar').get(cors, controller.getCalendar);
 }

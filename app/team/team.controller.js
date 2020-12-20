@@ -51,15 +51,15 @@ module.exports = (db, Sentry) => {
         },
         getRoster: async (req, res) => {
             try {
-                if (!req.query.team) {
-                    res.status(400).send({
-                        error: 'A team must be specified.'
-                    });
-                    return;
+                let filters = [];
+                let params = [];
+                let index = 1;
+
+                if (req.query.team) {
+                    filters.push(`LOWER(t.school) = LOWER($${index})`)
+                    params.push(req.query.team);
+                    index++;
                 }
-                
-                let filter = 'WHERE LOWER(t.school) = LOWER($1)';
-                let params = [req.query.team];
 
                 if (req.query.year) {
                     if (!parseInt(req.query.year)) {
@@ -68,15 +68,16 @@ module.exports = (db, Sentry) => {
                         });
                         return;
                     }
-
-                    filter += ' AND att.start_year <= $2 AND att.end_year >= $2';
-                    params.push(req.query.year);
-                } else {
-                    filter += ' AND a.active = true';
                 }
 
+                let year = req.query.year || 2020;
+                filters.push(`att.start_year <= $${index} AND att.end_year >= $${index}`);
+                params.push(year);
+
+                let filter = `WHERE ${filters.join(' AND ')}`;
+
                 let roster = await db.any(`
-                    SELECT a.id, a.first_name, a.last_name, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country
+                    SELECT a.id, a.first_name, a.last_name, t.school AS team, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country
                     FROM team t
                         INNER JOIN athlete_team AS att ON t.id = att.team_id
                         INNER JOIN athlete a ON att.athlete_id = a.id

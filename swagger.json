@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "2.3.3",
+    "version": "2.3.4",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -203,6 +203,42 @@
               "type": "array",
               "items": {
                 "$ref": "#/definitions/TeamRecord"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/calendar": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Season calendar",
+        "description": "Get calendar of weeks by season",
+        "operationId": "getCalendar",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Week"
               }
             }
           },
@@ -572,7 +608,7 @@
           "plays"
         ],
         "summary": "Play by play data",
-        "description": "Get play data and results. Requires either a week or team to be specified.",
+        "description": "Get play data and results",
         "operationId": "getPlays",
         "produces": [
           "application/json"
@@ -921,7 +957,7 @@
             "name": "team",
             "description": "Team name",
             "in": "query",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
@@ -3127,6 +3163,9 @@
           "type": "string"
         },
         "last_name": {
+          "type": "string"
+        },
+        "team": {
           "type": "string"
         },
         "height": {
@@ -5406,6 +5445,26 @@
         },
         "stat": {
           "type": "number"
+        }
+      }
+    },
+    "Week": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "firstGameStart": {
+          "type": "string"
+        },
+        "lastGameStart": {
+          "type": "string"
         }
       }
     }
