@@ -44,7 +44,9 @@ module.exports = async (Sentry) => {
 
     app.use(Sentry.Handlers.requestHandler());
 
-    app.use(helmet());
+    app.use(helmet({
+        contentSecurityPolicy: false
+    }));
     app.use(session({
         name: 'session',
         secret: process.env.SESSION_SECRET,
