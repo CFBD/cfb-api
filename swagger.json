@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.",
-    "version": "2.3.4",
+    "version": "2.3.5",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -3584,6 +3584,9 @@
         },
         "rating": {
           "type": "number"
+        },
+        "ranking": {
+          "type": "number"
         }
       }
     },
@@ -3602,6 +3605,9 @@
         "rating": {
           "type": "number"
         },
+        "ranking": {
+          "type": "number"
+        },
         "secondOrderWins": {
           "type": "number"
         },
@@ -3611,6 +3617,9 @@
         "offense": {
           "type": "object",
           "properties": {
+            "ranking": {
+              "type": "number"
+            },
             "rating": {
               "type": "number"
             },
@@ -3643,6 +3652,9 @@
         "defense": {
           "type": "object",
           "properties": {
+            "ranking": {
+              "type": "number"
+            },
             "rating": {
               "type": "number"
             },

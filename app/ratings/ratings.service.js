@@ -15,7 +15,7 @@ module.exports = (db) => {
         }
 
         const ratings = await db.any(`
-            SELECT t.school, c.name AS conference, r.*
+            SELECT t.school, c.name AS conference, RANK() OVER(ORDER BY r.rating DESC) AS overall_rank, RANK() OVER(ORDER BY r.o_rating DESC) AS offense_rank, RANK() OVER(ORDER BY r.d_rating) AS defense_rank, r.*
             FROM ratings AS r
                 INNER JOIN team AS t ON r.team_id = t.id
                 INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
@@ -65,9 +65,11 @@ module.exports = (db) => {
             team: r.school,
             conference: r.conference,
             rating: parseFloat(r.rating),
+            ranking: parseInt(r.overall_rank),
             secondOrderWins: parseFloat(r.second_order_wins),
             sos: parseFloat(r.sos),
             offense: {
+                ranking: parseInt(r.offense_rank),
                 rating: parseFloat(r.o_rating),
                 success: parseFloat(r.o_success),
                 explosiveness: parseFloat(r.o_explosiveness),
@@ -79,6 +81,7 @@ module.exports = (db) => {
                 pace: parseFloat(r.o_pace)
             },
             defense: {
+                ranking: parseInt(r.defense_rank),
                 rating: parseFloat(r.d_rating),
                 success: parseFloat(r.d_success),
                 explosiveness: parseFloat(r.d_explosiveness),
@@ -213,7 +216,7 @@ module.exports = (db) => {
         filter = 'WHERE ' + filters.join(' AND ');
 
         const results = await db.any(`
-            SELECT s.year, t.school AS team, c.name AS conference, ct.division, s.rating
+            SELECT s.year, t.school AS team, c.name AS conference, ct.division, s.rating, RANK() OVER(ORDER BY s.rating DESC) AS ranking
             FROM srs AS s
                 INNER JOIN team AS t ON s.team_id = t.id
                 LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= s.year AND (ct.end_year >= s.year OR ct.end_year IS NULL)
