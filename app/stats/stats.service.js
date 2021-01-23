@@ -41,7 +41,7 @@ module.exports = (db) => {
                 t.school,
                 c.name AS conference,
                 typ.name as stat_type,
-                FLOOR(SUM(CAST(stat.stat AS INT))) as stat
+                FLOOR(SUM(CAST(stat.stat AS NUMERIC))) as stat
         FROM game AS g
             INNER JOIN game_team AS gt ON g.id = gt.game_id
             INNER JOIN team AS t ON gt.team_id = t.id
