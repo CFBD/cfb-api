@@ -49,14 +49,12 @@ module.exports = (db, Sentry) => {
             }
 
             let recruits = await db.any(`
-                SELECT r.recruit_type, r.year, r.ranking, r.name, rs.name AS school, pos.position, r.height, r.weight, r.stars, r.rating, t.school AS committed_to, c.name AS city, st.name AS state_province, co.name AS country 
+                SELECT r.recruit_type, r.year, r.ranking, r.name, rs.name AS school, pos.position, r.height, r.weight, r.stars, r.rating, t.school AS committed_to, h.city AS city, h.state AS state_province, h.country AS country
                 FROM recruit AS r
                     LEFT JOIN recruit_school AS rs ON r.recruit_school_id = rs.id
                     LEFT JOIN recruit_position AS pos ON r.recruit_position_id = pos.id
                     LEFT JOIN team AS t ON r.college_id = t.id
-                    LEFT JOIN city AS c ON r.city_id = c.id
-                    LEFT JOIN state_province AS st ON r.state_id = st.id
-                    LEFT JOIN country AS co ON r.country_id = co.id
+                    LEFT JOIN hometown AS h ON r.hometown_id = h.id
                 ${filter}
                 ORDER BY r.ranking
             `, params);
