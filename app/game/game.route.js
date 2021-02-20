@@ -1,11 +1,11 @@
-module.exports = (app, db, cors, Sentry) => {
+module.exports = (app, db, middlewares, Sentry) => {
     const controller = require('./game.controller')(db, Sentry);
 
-    app.route('/games').get(cors, controller.getGames);
-    // app.route('/games/teams').get(cors, controller.getTeamStats);
-    app.route('/drives').get(cors, controller.getDrives);
-    // app.route('/games/players').get(cors, controller.getPlayerStats);
-    app.route('/records').get(cors, controller.getRecords);
-    app.route('/games/media').get(cors, controller.getMedia);
-    app.route('/calendar').get(cors, controller.getCalendar);
+    app.route('/games').get(middlewares, controller.getGames);
+    // app.route('/games/teams').get(middlewares, controller.getTeamStats);
+    app.route('/drives').get(middlewares, controller.getDrives);
+    // app.route('/games/players').get(middlewares, controller.getPlayerStats);
+    app.route('/records').get(middlewares, controller.getRecords);
+    app.route('/games/media').get(middlewares, controller.getMedia);
+    app.route('/calendar').get(middlewares, controller.getCalendar);
 }

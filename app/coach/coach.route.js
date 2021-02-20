@@ -1,5 +1,5 @@
-module.exports = (app, db, cors, Sentry) => {
+module.exports = (app, db, middlewares, Sentry) => {
     const controller = require('./coach.controller')(db, Sentry);
 
-    app.route('/coaches').get(cors, controller.getCoaches);
+    app.route('/coaches').get(middlewares, controller.getCoaches);
 }
