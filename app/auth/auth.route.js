@@ -1,5 +1,5 @@
 module.exports = (app, authDb, cors, Sentry) => {
-    const controller = require('./auth.controller')(authDb, Sentry);
+    const controller = require('./auth.controller')(Sentry);
 
-    app.route('/auth').post(cors, controller.generateKey);
-}
+    app.route('/auth/key').post(cors, controller.generateKey);
+};
