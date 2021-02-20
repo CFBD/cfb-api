@@ -30,6 +30,8 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-brute": "^1.0.1",
+    "express-brute-pg": "^2.0.0",
     "express-ws": "^4.0.0",
     "gaussian": "^1.1.0",
     "helmet": "^4.2.0",
