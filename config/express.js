@@ -9,13 +9,8 @@ module.exports = async (Sentry) => {
     const cors = require('cors');
     const swStats = require('swagger-stats');
 
-    const slowDown = require('express-slow-down');
-    const speedLimiter = slowDown({
-        windowMs: 60 * 1000,
-        delayAfter: 20,
-        delayMs: 100,
-        skipFailedRequests: true 
-    });
+    const passport = require('passport');
+    const passportConfig = require('./passport');
 
     let corsOptions;
 
@@ -32,10 +27,6 @@ module.exports = async (Sentry) => {
     // } else {
         corsOptions = {};
     // }
-
-    const {
-        postgraphile
-    } = require('postgraphile');
 
     const app = express();
     const expressWsObj = expressWs(app);
@@ -60,6 +51,11 @@ module.exports = async (Sentry) => {
     }));
 
     const dbInfo = require('./database')();
+    passportConfig(passport, dbInfo.authDb);
+
+    const auth = passport.authenticate('bearer', {
+        session: false
+    });
 
     require('./swagger')(app, cors);
     app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
@@ -73,15 +69,11 @@ module.exports = async (Sentry) => {
         }
     }));
 
-    app.use(postgraphile(dbInfo.connectionString, 'public', {
-        disableDefaultMutations: true,
-        graphiql: true
-    }));
-
     let corsConfig = cors(corsOptions);
+    require('../app/auth/auth.route')(app, dbInfo.authDb, corsConfig, Sentry);
     require('../app/coach/coach.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/game/game.route')(app, dbInfo.db, corsConfig, speedLimiter, Sentry);
-    require('../app/play/play.route')(app, dbInfo.db, corsConfig, speedLimiter, Sentry);
+    require('../app/game/game.route')(app, dbInfo.db, corsConfig, Sentry);
+    require('../app/play/play.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/team/team.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/venue/venue.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig, Sentry);
