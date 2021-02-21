@@ -12,6 +12,8 @@ module.exports = async (Sentry) => {
     const passport = require('passport');
     const passportConfig = require('./passport');
 
+    const brute = require('./brute')();
+
     let corsOptions;
 
     // if (process.env.NODE_ENV != 'development') {
@@ -70,7 +72,7 @@ module.exports = async (Sentry) => {
     }));
 
     let corsConfig = cors(corsOptions);
-    require('../app/auth/auth.route')(app, corsConfig, Sentry);
+    require('../app/auth/auth.route')(app, corsConfig, Sentry, brute);
     require('../app/coach/coach.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/game/game.route')(app, dbInfo.db, corsConfig, Sentry);
     require('../app/play/play.route')(app, dbInfo.db, corsConfig, Sentry);
