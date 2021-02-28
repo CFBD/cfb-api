@@ -30,7 +30,7 @@ module.exports = async (Sentry) => {
     } else {
         corsOptions = {};
     }
-    let corsConfig = cors(middlewaresOptions);
+    let corsConfig = cors(corsOptions);
 
     const app = express();
     const expressWsObj = expressWs(app);
@@ -81,7 +81,9 @@ module.exports = async (Sentry) => {
         }
     }));
 
-    const middlewares = [corsConfig, passportAuth, originAuth];
+    const limiter = require('../config/slowdown')();
+
+    const middlewares = [corsConfig, passportAuth, originAuth, limiter];
 
     require('../app/auth/auth.route')(app, corsConfig, Sentry);
     require('../app/coach/coach.route')(app, dbInfo.db, middlewares, Sentry);
