@@ -11,6 +11,7 @@ module.exports = async (Sentry) => {
 
     const passport = require('passport');
     const passportConfig = require('./passport');
+    const apmConfig = require('./apm');
 
     const env = process.env.NODE_ENV;
     const corsOrigin = process.env.CORS_ORIGIN;
@@ -56,6 +57,7 @@ module.exports = async (Sentry) => {
 
     const dbInfo = require('./database')();
     passportConfig(passport, dbInfo.authDb);
+    const apm = apmConfig(dbInfo.authDb);
 
     const passportAuth = passport.authenticate('bearer', {
         session: false
@@ -81,9 +83,9 @@ module.exports = async (Sentry) => {
         }
     }));
 
-    const limiter = require('../config/slowdown')();
+    const limiter = require('./slowdown')();
 
-    const middlewares = [corsConfig, passportAuth, originAuth, limiter];
+    const middlewares = [corsConfig, passportAuth, originAuth, apm, limiter];
 
     require('../app/auth/auth.route')(app, corsConfig, Sentry);
     require('../app/coach/coach.route')(app, dbInfo.db, middlewares, Sentry);
