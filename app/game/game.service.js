@@ -54,38 +54,53 @@ module.exports = (db) => {
         }
 
         let drives = await db.any(`
-                            SELECT  offense.school as offense,
-                                    oc.name as offense_conference,
-                                    defense.school as defense,
-                                    dc.name as defense_conference,
-                                    g.id as game_id,
-                                    d.id,
-                                    d.drive_number,
-                                    d.scoring,
-                                    d.start_period,
-                                    d.start_yardline,
-                                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.start_yardline) ELSE d.start_yardline END AS start_yards_to_goal,
-                                    d.start_time,
-                                    d.end_period,
-                                    d.end_yardline,
-                                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.end_yardline) ELSE d.end_yardline END AS end_yards_to_goal,
-                                    d.end_time,
-                                    d.elapsed,
-                                    d.plays,
-                                    d.yards,
-                                    dr.name as drive_result
-                            FROM game g
-                                INNER JOIN game_team AS hgt ON g.id = hgt.game_id AND hgt.home_away = 'home'
-                                INNER JOIN drive d ON g.id = d.game_id
-                                INNER JOIN team offense ON d.offense_id = offense.id
-                                LEFT JOIN conference_team oct ON offense.id = oct.team_id AND oct.start_year <= g.season AND (oct.end_year >= g.season OR oct.end_year IS NULL)
-                                LEFT JOIN conference oc ON oct.conference_id = oc.id
-                                INNER JOIN team defense ON d.defense_id = defense.id
-                                LEFT JOIN conference_team dct ON defense.id = dct.team_id AND dct.start_year <= g.season AND (dct.end_year >= g.season OR dct.end_year IS NULL)
-                                LEFT JOIN conference dc ON dct.conference_id = dc.id
-                                INNER JOIN drive_result dr ON d.result_id = dr.id
-                            ${filter}
-                            ORDER BY g.id, d.drive_number
+        WITH drives AS (
+            SELECT  offense.school as offense,
+                    oc.name as offense_conference,
+                    defense.school as defense,
+                    dc.name as defense_conference,
+                    g.id as game_id,
+                    d.id,
+                    d.drive_number,
+                    d.scoring,
+                    d.start_period,
+                    d.start_yardline,
+                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.start_yardline) ELSE d.start_yardline END AS start_yards_to_goal,
+                    d.start_time,
+                    d.end_period,
+                    d.end_yardline,
+                    CASE WHEN offense.id = hgt.team_id THEN (100 - d.end_yardline) ELSE d.end_yardline END AS end_yards_to_goal,
+                    d.end_time,
+                    d.elapsed,
+                    d.plays,
+                    d.yards,
+                    dr.name as drive_result,
+                    CASE WHEN offense.id = hgt.team_id THEN true ELSE false END AS is_home_offense
+            FROM game g
+                INNER JOIN game_team AS hgt ON g.id = hgt.game_id AND hgt.home_away = 'home'
+                INNER JOIN drive d ON g.id = d.game_id
+                INNER JOIN team offense ON d.offense_id = offense.id
+                LEFT JOIN conference_team oct ON offense.id = oct.team_id AND oct.start_year <= g.season AND (oct.end_year >= g.season OR oct.end_year IS NULL)
+                LEFT JOIN conference oc ON oct.conference_id = oc.id
+                INNER JOIN team defense ON d.defense_id = defense.id
+                LEFT JOIN conference_team dct ON defense.id = dct.team_id AND dct.start_year <= g.season AND (dct.end_year >= g.season OR dct.end_year IS NULL)
+                LEFT JOIN conference dc ON dct.conference_id = dc.id
+                INNER JOIN drive_result dr ON d.result_id = dr.id
+            ${filter}
+            ORDER BY g.id, d.drive_number
+        ), points AS (
+            SELECT d.id, MIN(p.home_score) AS starting_home_score, MIN(p.away_score) AS starting_away_score, MAX(p.home_score) AS ending_home_score, MAX(p.away_score) AS ending_away_score
+            FROM drives AS d
+                INNER JOIN play AS p ON d.id = p.drive_id
+            GROUP BY d.id
+        )
+        SELECT d.*,
+                CASE WHEN d.is_home_offense THEN p.starting_home_score ELSE p.starting_away_score END AS start_offense_score,
+                CASE WHEN d.is_home_offense THEN p.starting_away_score ELSE p.starting_home_score END AS start_defense_score,
+                CASE WHEN d.is_home_offense THEN p.ending_home_score ELSE p.ending_away_score END AS end_offense_score,
+                CASE WHEN d.is_home_offense THEN p.ending_away_score ELSE p.ending_home_score END AS end_defense_score
+        FROM drives AS d
+            INNER JOIN points AS p ON d.id = p.id
                         `, params);
 
         for (let drive of drives) {
