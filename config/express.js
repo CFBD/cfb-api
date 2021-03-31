@@ -16,6 +16,8 @@ module.exports = async (Sentry) => {
     const env = process.env.NODE_ENV;
     const corsOrigin = process.env.CORS_ORIGIN;
 
+    const brute = require('./brute')();
+
     let corsOptions;
 
     if (env != 'development') {

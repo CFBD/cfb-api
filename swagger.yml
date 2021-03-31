@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  It currently has a wide array of data ranging from play by play to player statistics to game scores and more.
-  version: 2.3.5
+  version: 2.4.3
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -38,6 +38,13 @@ tags:
     description: Statistical data
 schemes:
   - https
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: Bearer
+security:
+  - ApiKeyAuth: []
 paths:
   /games:
     get:
@@ -350,7 +357,7 @@ paths:
         - drives
       summary: Drive data and results
       description: Get game drives
-      operationId: getDrvies
+      operationId: getDrives
       produces:
         - application/json
       parameters:
@@ -2048,6 +2055,16 @@ definitions:
         type: integer
       drive_result:
         type: string
+      is_home_offense:
+        type: boolean
+      start_offense_score:
+        type: integer
+      start_defense_score:
+        type: integer
+      end_offense_score:
+        type: integer
+      end_defense_score:
+        type: integer
   Play:
     type: object
     properties:
@@ -2420,7 +2437,7 @@ definitions:
         type: string
       conference:
         type: string
-      positiionGroup:
+      positionGroup:
         type: string
       averageRating:
         type: number
