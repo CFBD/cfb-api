@@ -64,7 +64,7 @@ module.exports = async (Sentry) => {
 
     const originAuth = (req, res, next) => {
         passport.authenticate('bearer', (err, user, info) => {
-            if (user || req.origin == corsOrigin || env == 'development') {
+            if (user || req.get('origin') == corsOrigin || req.get('host') == corsOrigin || env == 'development') {
                 req.user = user;
                 next();
             } else {
