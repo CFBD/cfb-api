@@ -29,7 +29,7 @@ module.exports = () => {
     });
 
     const limiter = (req, res, next) => {
-        let tier = req.user.patronLevel;
+        let tier = req.user ? req.user.patronLevel : null;
 
         if (tier == 2) {
             speedLimiterTier2(req, res, next);

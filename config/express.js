@@ -62,17 +62,16 @@ module.exports = async (Sentry) => {
     passportConfig(passport, dbInfo.authDb);
     const apm = apmConfig(dbInfo.authDb);
 
-    const passportAuth = passport.authenticate('bearer', {
-        session: false
-    });
-
     const originAuth = (req, res, next) => {
-        if (req.isAuthenticated() || req.origin == corsOrigin || env == 'development') {
-            next();
-        } else {
-            Sentry.captureMessage(`origin was ${req.origin}`);
-            res.sendStatus(401);
-        }
+        passport.authenticate('bearer', (err, user, info) => {
+            if (user || req.origin == corsOrigin || env == 'development') {
+                req.user = user;
+                next();
+            } else {
+                Sentry.captureMessage(`origin was ${req.origin}`);
+                res.sendStatus(401);
+            }
+        })(req, res, next);
     };
 
     require('./swagger')(app, cors);
@@ -89,7 +88,7 @@ module.exports = async (Sentry) => {
 
     const limiter = require('./slowdown')();
 
-    const middlewares = [corsConfig, passportAuth, originAuth, apm, limiter];
+    const middlewares = [corsConfig, originAuth, apm, limiter];
 
     require('../app/auth/auth.route')(app, corsConfig, Sentry);
     require('../app/coach/coach.route')(app, dbInfo.db, middlewares, Sentry);
