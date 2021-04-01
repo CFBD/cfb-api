@@ -68,7 +68,6 @@ module.exports = async (Sentry) => {
                 req.user = user;
                 next();
             } else {
-                Sentry.captureMessage(`origin was ${req.origin}`);
                 res.sendStatus(401);
             }
         })(req, res, next);
