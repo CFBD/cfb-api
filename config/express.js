@@ -70,7 +70,7 @@ module.exports = async (Sentry) => {
         if (req.isAuthenticated() || req.origin == corsOrigin || env == 'development') {
             next();
         } else {
-            console.log(`origin was ${req.origin}`);
+            Sentry.captureMessage(`origin was ${req.origin}`);
             res.sendStatus(401);
         }
     };
