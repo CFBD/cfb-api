@@ -126,6 +126,8 @@ jobs:
           json -I -f package.json -e 'this.keywords=["football","cfb","ncaaf","data","statistics"]'
           json -I -f package.json -e 'this.author="BlueSCar"'
           json -I -f package.json -e 'this.repository={"type": "git", "url": "https://github.com/cfbd/cfb.js.git"}'
+          sed -i '78d' README.md
+          sed -i '78s/.*/ApiKeyAuth.apiKeyPrefix["Authorization"] = "Bearer"/' README.md
           echo "Adding changes..."
           git add .
           echo "Committing changes ..."
@@ -171,6 +173,8 @@ jobs:
           match=$(grep -E 'API version: [0-9]+\.[0-9]+\.[0-9]+' README.md)
           api_version=$(echo $match | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
           sed -i '8s/.*/- SDK version: '"$api_version"'/' README.md
+          sed -i '56d' README.md
+          sed -i '56s/.*/            Configuration.Default.ApiKeyPrefix.Add("Authorization", "Bearer");/' README.md
           sed -i '17s/.*/    <Version>'"$api_version"'<\/Version>/' ./src/CFBSharp/CFBSharp.csproj
           sed -i '4s/.*/     <TargetFramework>netstandard2.1<\/TargetFramework>/' ./src/CFBSharp/CFBSharp.csproj
           sed -i '17a\ \ \ \ <RepositoryUrl>https://github.com/cfbd/CFBSharp.git<\/RepositoryUrl>' ./src/CFBSharp/CFBSharp.csproj
@@ -218,6 +222,8 @@ jobs:
           git add .
           echo Updating files
           sed -i '16,17d' README.md
+          sed -i '55d' README.md
+          sed -i '55s/# //' README.md
           sed -i -e 's/git+https:\/\/github.com\/\/.git/cfbd/g' README.md
           echo "Committing changes ..."
           git commit -am "${{ github.event.commits[0].message }}"
