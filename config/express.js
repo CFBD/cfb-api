@@ -11,24 +11,29 @@ module.exports = async (Sentry) => {
 
     const passport = require('passport');
     const passportConfig = require('./passport');
+    const apmConfig = require('./apm');
+
+    const env = process.env.NODE_ENV;
+    const corsOrigin = process.env.CORS_ORIGIN;
 
     const brute = require('./brute')();
 
     let corsOptions;
 
-    // if (process.env.NODE_ENV != 'development') {
-    //     corsOptions = {
-    //         origin: (origin, cb) => {
-    //             if (origin == 'https://collegefootballdata.com' || origin == 'https://www.collegefootballdata.com' || !origin) {
-    //                 cb(null, true);
-    //             } else {
-    //                 cb(new Error(`Not allowed by CORS: ${origin}`));
-    //             }
-    //         }
-    //     };
-    // } else {
+    if (env != 'development') {
+        corsOptions = {
+            origin: (origin, cb) => {
+                if (origin == corsOrigin) {
+                    cb(null, true);
+                } else {
+                    cb(new Error(`Not allowed by CORS: ${origin}`));
+                }
+            }
+        };
+    } else {
         corsOptions = {};
-    // }
+    }
+    let corsConfig = cors(corsOptions);
 
     const app = express();
     const expressWsObj = expressWs(app);
@@ -54,10 +59,19 @@ module.exports = async (Sentry) => {
 
     const dbInfo = require('./database')();
     passportConfig(passport, dbInfo.authDb);
+    const apm = apmConfig(dbInfo.authDb);
 
-    const auth = passport.authenticate('bearer', {
+    const passportAuth = passport.authenticate('bearer', {
         session: false
     });
+
+    const originAuth = (req, res, next) => {
+        if (req.isAuthenticated() || req.origin == corsOrigin || env == 'development') {
+            next();
+        } else {
+            res.sendStatus(401);
+        }
+    };
 
     require('./swagger')(app, cors);
     app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
@@ -71,20 +85,23 @@ module.exports = async (Sentry) => {
         }
     }));
 
-    let corsConfig = cors(corsOptions);
-    require('../app/auth/auth.route')(app, corsConfig, Sentry, brute);
-    require('../app/coach/coach.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/game/game.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/play/play.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/team/team.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/venue/venue.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/rankings/rankings.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/lines/lines.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/recruiting/recruiting.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/ratings/ratings.route')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/ppa/ppa.routes')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/stats/stats.routes')(app, dbInfo.db, corsConfig, Sentry);
-    require('../app/player/player.routes')(app, dbInfo.db, corsConfig, Sentry);
+    const limiter = require('./slowdown')();
+
+    const middlewares = [corsConfig, passportAuth, originAuth, apm, limiter];
+
+    require('../app/auth/auth.route')(app, corsConfig, Sentry);
+    require('../app/coach/coach.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/game/game.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/play/play.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/team/team.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/venue/venue.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/rankings/rankings.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/lines/lines.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/recruiting/recruiting.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/ratings/ratings.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/ppa/ppa.routes')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/stats/stats.routes')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/player/player.routes')(app, dbInfo.db, middlewares, Sentry);
 
     const consumers = await require('./consumers')();
     await require('../app/events/events.route')(app, consumers, expressWsObj);

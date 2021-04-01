@@ -1,9 +1,9 @@
 const controllerConstructor = require('./ratings.controller');
 
-module.exports = (app, db, cors, Sentry) => {
+module.exports = (app, db, middlewares, Sentry) => {
     const controller = controllerConstructor(db, Sentry);
 
-    app.route('/ratings/sp').get(cors, controller.getSP);
-    app.route('/ratings/sp/conferences').get(cors, controller.getConferenceSP);
-    app.route('/ratings/srs').get(cors, controller.getSRS)
+    app.route('/ratings/sp').get(middlewares, controller.getSP);
+    app.route('/ratings/sp/conferences').get(middlewares, controller.getConferenceSP);
+    app.route('/ratings/srs').get(middlewares, controller.getSRS)
 };
