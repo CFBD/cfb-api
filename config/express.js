@@ -16,6 +16,7 @@ module.exports = async (Sentry) => {
 
     let corsOptions;
 
+<<<<<<< Updated upstream
     // if (process.env.NODE_ENV != 'development') {
     //     corsOptions = {
     //         origin: (origin, cb) => {
@@ -27,6 +28,19 @@ module.exports = async (Sentry) => {
     //         }
     //     };
     // } else {
+=======
+    if (env != 'development') {
+        corsOptions = {
+            origin: (origin, cb) => {
+                if (!origin || origin == corsOrigin) {
+                    cb(null, true);
+                } else {
+                    cb(new Error(`Not allowed by CORS: ${origin}`));
+                }
+            }
+        };
+    } else {
+>>>>>>> Stashed changes
         corsOptions = {};
     // }
 
