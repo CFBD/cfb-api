@@ -37,7 +37,7 @@ module.exports = (db, Sentry) => {
             }
 
             if (req.query.state) {
-                filter += ` AND LOWER(st.name) = LOWER($${index})`;
+                filter += ` AND LOWER(h.state) = LOWER($${index})`;
                 params.push(req.query.state);
                 index++;
             }
