@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key").
-  version: 3.0.1
+  version: 3.1.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -2201,6 +2201,12 @@ definitions:
         type: string
       country:
         type: string
+      home_latitude:
+        type: number
+      home_longitude:
+        type: number
+      home_county_fips:
+        type: string
   TeamTalent:
     type: object
     properties:
@@ -2419,6 +2425,15 @@ definitions:
         type: string
       country:
         type: string
+      hometownInfo:
+        type: object
+        properties:
+          latitude:
+            type: number
+          longitude:
+            type: number
+          countyFips:
+            type: string
   TeamRecruitingRank:
     type: object
     properties:

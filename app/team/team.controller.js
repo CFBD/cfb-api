@@ -77,7 +77,7 @@ module.exports = (db, Sentry) => {
                 let filter = `WHERE ${filters.join(' AND ')}`;
 
                 let roster = await db.any(`
-                    SELECT a.id, a.first_name, a.last_name, t.school AS team, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country
+                    SELECT a.id, a.first_name, a.last_name, t.school AS team, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country, h.latitude as home_latitude, h.longitude as home_longitude, h.county_fips as home_county_fips
                     FROM team t
                         INNER JOIN athlete_team AS att ON t.id = att.team_id
                         INNER JOIN athlete a ON att.athlete_id = a.id
