@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\").",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -3210,13 +3210,13 @@
         "position": {
           "type": "string"
         },
-        "city": {
+        "home_city": {
           "type": "string"
         },
-        "state": {
+        "home_state": {
           "type": "string"
         },
-        "country": {
+        "home_country": {
           "type": "string"
         },
         "home_latitude": {
