@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key").
-  version: 3.1.1
+  version: 3.2.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -814,16 +814,7 @@ paths:
           schema:
             type: array
             items:
-              type: object
-              properties:
-                first_name:
-                  type: string
-                last_name:
-                  type: string
-                seasons:
-                  type: array
-                  items:
-                    $ref: '#/definitions/TeamSeason'
+              $ref: '#/definitions/Coach'
   /rankings:
     get:
       tags:
@@ -2174,6 +2165,37 @@ definitions:
         type: array
         items:
           type: string
+      location:
+        type: object
+        properties:
+          venue_id:
+            type: integer
+          name:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          zip:
+            type: string
+          country_code:
+            type: string
+          timezone:
+            type: string
+          latitude:
+            type: number
+          longitude:
+            type: number
+          elevation:
+            type: number
+          capacity:
+            type: number
+          year_constructed:
+            type: number
+          grass:
+            type: boolean
+          dome:
+            type: boolean
   Player:
     type: object
     properties:
@@ -2276,7 +2298,7 @@ definitions:
           'y':
             type: number
       elevation:
-        type: integer
+        type: number
       year:
         type: integer
       dome:
@@ -3708,3 +3730,45 @@ definitions:
         type: string
       lastGameStart:
         type: string
+  Coach:
+    type: object
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      seasons:
+        type: array
+        items:
+          type: object
+          properties:
+            school:
+              type: string
+            year:
+              type: string
+            games:
+              type: integer
+            wins:
+              type: integer
+            losses:
+              type: integer
+            ties:
+              type: integer
+            preseason_rank:
+              type: integer
+              description: Rank in the AP preseason poll
+            postseason_rank:
+              type: integer
+              description: Final ranking in the AP poll
+            srs:
+              type: number
+              description: Final SRS rankings
+            sp_overall:
+              type: number
+              description: Final overall SP+ rating
+            sp_offense:
+              type: number
+              description: Final SP+ offensive rating
+            sp_defense:
+              type: number
+              description: Final SP+ defensive rating
