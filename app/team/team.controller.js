@@ -17,6 +17,7 @@ module.exports = (db, Sentry) => {
 
                 res.send(teams.map(t => ({
                     id: t.id,
+                    school: t.school,
                     mascot: t.mascot,
                     abbreviation: t.abbreviation,
                     alt_name1: t.alt_name1,
@@ -73,6 +74,7 @@ module.exports = (db, Sentry) => {
 
                 res.send(teams.map(t => ({
                     id: t.id,
+                    school: t.school,
                     mascot: t.mascot,
                     abbreviation: t.abbreviation,
                     alt_name1: t.alt_name1,
