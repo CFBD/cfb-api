@@ -7,7 +7,7 @@
   },
   "main": "server.js",
   "scripts": {
-    "test": "mocha --timeout 10000"
+    "test": "mocha --timeout 100000"
   },
   "keywords": [
     "football",

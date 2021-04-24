@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key").
-  version: 3.2.1
+  version: 3.3.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -36,6 +36,8 @@ tags:
     description: Data relating to Predicted Points and other metrics
   - name: stats
     description: Statistical data
+  - name: draft
+    description: NFL Draft data
 schemes:
   - https
 securityDefinitions:
@@ -1782,6 +1784,86 @@ paths:
             type: array
             items:
               $ref: '#/definitions/PlayerSeasonStat'
+        '400':
+          description: error
+  /draft/teams:
+    get:
+      tags:
+        - draft
+      summary: List of NFL teams
+      description: List of NFL teams
+      operationId: getNFLTeams
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DraftTeam'
+        '400':
+          description: error
+  /draft/positions:
+    get:
+      tags:
+        - draft
+      summary: List of NFL positions
+      description: List of NFL positions
+      operationId: getNFLPositions
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DraftPosition'
+        '400':
+          description: error
+  /draft/picks:
+    get:
+      tags:
+        - draft
+      summary: List of NFL Draft picks
+      description: List of NFL Draft picks
+      operationId: getDraftPicks
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: false
+          type: integer
+        - name: nflTeam
+          description: NFL team filter
+          in: query
+          required: false
+          type: string
+        - name: college
+          description: Player college filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: College confrence abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: position
+          description: NFL position filter
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DraftPick'
         '400':
           description: error
 definitions:
@@ -3772,3 +3854,73 @@ definitions:
             sp_defense:
               type: number
               description: Final SP+ defensive rating
+  DraftTeam:
+    type: object
+    properties:
+      location:
+        type: string
+      nickname:
+        type: string
+      displayName:
+        type: string
+      logo:
+        type: string
+  DraftPosition:
+    type: object
+    properties:
+      name:
+        type: string
+      abbreviation:
+        type: string
+  DraftPick:
+    type: object
+    properties:
+      collegeAthleteId:
+        type: integer
+      nflAthleteId:
+        type: integer
+      collegeId:
+        type: integer
+      collegeTeam:
+        type: string
+      collegeConference:
+        type: string
+      nflTeam:
+        type: string
+      year:
+        type: integer
+      overall:
+        type: integer
+      round:
+        type: integer
+      pick:
+        type: integer
+      name:
+        type: string
+      position:
+        type: string
+      height:
+        type: integer
+      weight:
+        type: integer
+      preDraftRanking:
+        type: integer
+      preDraftPositionRanking:
+        type: integer
+      preDraftGrade:
+        type: integer
+      hometownInfo:
+        type: object
+        properties:
+          city:
+            type: string
+          state:
+            type: string
+          country:
+            type: string
+          latitude:
+            type: number
+          longitude:
+            type: number
+          countryFips:
+            type: integer
