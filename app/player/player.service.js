@@ -1,9 +1,19 @@
 module.exports = (db) => {
 
     const playerSearch = async (year, school, position, searchTerm) => {
-        let filter = 'WHERE att.start_year <= $1 AND att.end_year >= $1';
-        let params = [year ? year : 2020];
-        let index = 2;
+        let filter;
+        let params;
+        let index;
+
+        if (year) {
+            filter = 'WHERE att.start_year <= $1 AND att.end_year >= $1';
+            params = [year];
+            index = 2;
+        } else {
+            filter = '';
+            params = [];
+            index = 1;
+        }
 
         if (school) {
             filter += ` AND LOWER(t.school) = LOWER($${index})`;
