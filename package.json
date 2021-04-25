@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "API for accessing data from the college football database (cfbdb)",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=12.0.0"
   },
   "main": "server.js",
   "scripts": {
-    "test": "mocha --timeout 100000"
+    "test": "mocha --parallel --timeout 100000"
   },
   "keywords": [
     "football",

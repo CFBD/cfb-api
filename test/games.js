@@ -2,7 +2,7 @@ const db = require('./config').db;
 const service = require('../app/game/game.service')(db);
 
 const chai = require('chai');
-const should = chai.should;
+const should = chai.should();
 const assert = chai.assert;
 
 describe('Games', () => {

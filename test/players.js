@@ -88,14 +88,6 @@ describe('Players', () => {
     });
 
     describe('Season Stats', () => {
-        it('it should get player stats for a given season', async () => {
-            const data = await players.getSeasonStats(2019);
-            
-            data.should.be.an('array');
-            data.length.should.be.gt(0);
-            Array.from(new Set(data.map(d => d.season))).length.should.equal(1);
-        });
-        
         it('it should get player stats for a given season and conference', async () => {
             const data = await players.getSeasonStats(2019, 'B1G');
             

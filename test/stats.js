@@ -16,22 +16,6 @@ describe('Team Stats', () => {
 
     
     describe('Season', () => {
-        it('Should retrieve team stats from a single season', async () => {
-            const data = await stats.getTeamStats(2019);
-
-            data.should.be.an('array');
-            data.length.should.be.gt(0);
-            Array.from(new Set(data.map(s => s.team))).length.should.be.gt(1);
-        });
-
-        it('Should retrieve team stats from a single team', async () => {
-            const data = await stats.getTeamStats(2019, 'Michigan');
-
-            data.should.be.an('array');
-            data.length.should.be.gt(0);
-            Array.from(new Set(data.map(s => s.team))).length.should.equal(1);
-        });
-
         it('Should retrieve team stats from a single conference', async () => {
             const data = await stats.getTeamStats(2019, null, 'B1G');
 
@@ -40,70 +24,36 @@ describe('Team Stats', () => {
             Array.from(new Set(data.map(s => s.conference))).length.should.equal(1);
         });
 
-        it('Should retrieve stats from a subset of weeks', async () => {
+        it('Should retrieve stats from a subset of weeks for a single team and season', async () => {
             const data = await stats.getTeamStats(2019, 'Michigan', null, 4, 10);
 
             data.should.be.an('array');
             data.length.should.be.gt(0);
+            Array.from(new Set(data.map(s => s.team))).length.should.equal(1);
+            Array.from(new Set(data.map(s => s.season))).length.should.equal(1);
         });
     });
 
     describe('Advanced Season', () => {
-        it('Should retrieve team stats from a single season', async () => {
-            const data = await stats.getAdvancedStats(2019);
-
-            data.should.be.an('array');
-            data.length.should.be.gt(0);
-            Array.from(new Set(data.map(s => s.team))).length.should.be.gt(1);
-        });
-
-        it('Should retrieve team stats from a single team', async () => {
-            const data = await stats.getAdvancedStats(2019, 'Michigan');
-
-            data.should.be.an('array');
-            data.length.should.be.gt(0);
-            Array.from(new Set(data.map(s => s.team))).length.should.equal(1);
-        });
-
-        it('Should retrieve team stats with garbage time excluded', async () => {
-            const data = await stats.getAdvancedStats(2019, 'Texas', true);
-
-            data.should.be.an('array');
-            data.length.should.be.gt(0);
-            Array.from(new Set(data.map(s => s.conference))).length.should.equal(1);
-        });
-
-        it('Should retrieve stats from a subset of weeks', async () => {
+        it('Should retrieve stats from a subset of weeks for a single team and season', async () => {
             const data = await stats.getAdvancedStats(2019, 'Texas', true, 4, 10);
 
             data.should.be.an('array');
             data.length.should.be.gt(0);
+            Array.from(new Set(data.map(s => s.team))).length.should.equal(1);
+            Array.from(new Set(data.map(s => s.season))).length.should.equal(1);
         });
     });
     
     describe('Advanced Game', () => {
-        it('Should retrieve team stats from a single season', async () => {
-            const data = await stats.getAdvancedGameStats(2019);
-
-            data.should.be.an('array');
-            data.length.should.be.gt(0);
-            Array.from(new Set(data.map(s => s.team))).length.should.be.gt(1);
-        });
-
-        it('Should retrieve team stats from a single team', async () => {
-            const data = await stats.getAdvancedGameStats(2019, 'Michigan');
-
-            data.should.be.an('array');
-            data.length.should.be.gt(0);
-            Array.from(new Set(data.map(s => s.team))).length.should.equal(1);
-        });
-
-        it('Should retrieve team stats with garbage time excluded', async () => {
+        it('Should retrieve team stats with garbage time excluded for a single team and season', async () => {
             const data = await stats.getAdvancedGameStats(2019, 'Texas', null, null, true);
 
             data.should.be.an('array');
             data.length.should.be.gt(0);
             Array.from(new Set(data.map(s => s.conference))).length.should.equal(1);
+            Array.from(new Set(data.map(s => s.team))).length.should.equal(1);
+            Array.from(new Set(data.map(s => s.season))).length.should.equal(1);
         });
 
         it('Should retrieve team stats from a single week', async () => {
