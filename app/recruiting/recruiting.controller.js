@@ -49,17 +49,20 @@ module.exports = (db, Sentry) => {
             }
 
             let recruits = await db.any(`
-                SELECT r.recruit_type, r.year, r.ranking, r.name, rs.name AS school, pos.position, r.height, r.weight, r.stars, r.rating, t.school AS committed_to, h.city AS city, h.state AS state_province, h.country AS country, h.latitude, h.longitude, h.county_fips
+                SELECT r.id, r.recruit_type, r.year, r.ranking, r.name, rs.name AS school, pos.position, r.height, r.weight, r.stars, r.rating, t.school AS committed_to, h.city AS city, h.state AS state_province, h.country AS country, h.latitude, h.longitude, h.county_fips, a.id AS athlete_id
                 FROM recruit AS r
                     LEFT JOIN recruit_school AS rs ON r.recruit_school_id = rs.id
                     LEFT JOIN recruit_position AS pos ON r.recruit_position_id = pos.id
                     LEFT JOIN team AS t ON r.college_id = t.id
                     LEFT JOIN hometown AS h ON r.hometown_id = h.id
+                    LEFT JOIN athlete AS a ON r.athlete_id = a.id
                 ${filter}
                 ORDER BY r.ranking
             `, params);
 
             res.send(recruits.map(r => ({
+                id: r.id,
+                athleteId: r.athlete_id,
                 recruitType: r.recruit_type,
                 year: r.year,
                 ranking: r.ranking,
