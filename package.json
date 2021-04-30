@@ -41,7 +41,7 @@
     "pg": "^7.18.2",
     "pg-promise": "^10.9.5",
     "swagger-stats": "^0.95.17",
-    "swagger-ui-dist": "^3.30.2"
+    "swagger-ui-dist": "^3.48.0"
   },
   "devDependencies": {
     "chai": "^4.3.4",
