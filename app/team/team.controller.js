@@ -134,17 +134,25 @@ module.exports = (db, Sentry) => {
                 filters.push(`att.start_year <= $${index} AND att.end_year >= $${index}`);
                 params.push(year);
 
-                let filter = `WHERE ${filters.join(' AND ')}`;
+                let filter = `WHERE a.id > 0 AND ${filters.join(' AND ')}`;
 
                 let roster = await db.any(`
-                    SELECT a.id, a.first_name, a.last_name, t.school AS team, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country, h.latitude as home_latitude, h.longitude as home_longitude, h.county_fips as home_county_fips
+                    SELECT a.id, a.first_name, a.last_name, t.school AS team, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country, h.latitude as home_latitude, h.longitude as home_longitude, h.county_fips as home_county_fips, array_agg(DISTINCT r.id) AS recruit_ids
                     FROM team t
                         INNER JOIN athlete_team AS att ON t.id = att.team_id
                         INNER JOIN athlete a ON att.athlete_id = a.id
                         LEFT JOIN hometown h ON a.hometown_id = h.id
                         LEFT JOIN position p ON a.position_id = p.id
+                        LEFT JOIN recruit AS r ON r.athlete_id = a.id
                     ${filter}
+                    GROUP BY a.id, a.first_name, a.last_name, t.school, a.weight, a.height, a.jersey, a.year, p.abbreviation, h.city, h.state, h.country, h.latitude, h.longitude, h.county_fips
                 `, params);
+
+                for (let r of roster) {
+                    if (r.recruit_ids && r.recruit_ids.length) {
+                        r.recruit_ids = r.recruit_ids.filter(r => r).map(r => parseInt(r));
+                    }
+                }
 
                 res.send(roster);
 
