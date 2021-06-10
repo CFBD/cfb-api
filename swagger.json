@@ -2786,6 +2786,9 @@
         },
         "excitement_index": {
           "type": "number"
+        },
+        "highlights": {
+          "type": "string"
         }
       }
     },
