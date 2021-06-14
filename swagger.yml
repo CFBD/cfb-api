@@ -1922,6 +1922,8 @@ definitions:
         type: number
       excitement_index:
         type: number
+      highlights:
+        type: string
   TeamRecord:
     type: object
     properties:
