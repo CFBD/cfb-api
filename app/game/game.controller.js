@@ -583,6 +583,27 @@ module.exports = (db, Sentry) => {
                     error: 'Something went wrong.'
                 });
             }
+        },
+        getWeather: async (req, res) => {
+            try {
+                if (!req.query.year) {
+                    res.status(400).send({
+                        error: 'Year is required'
+                    });
+                } else if (!parseInt(req.query.year)) {
+                    res.status(400).send({
+                        error: 'Year must be an integer'
+                    });
+                } else {
+                    const results = await service.getWeather(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference);
+                    res.send(results);
+                }
+            } catch (err) {
+                Sentry.captureException(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
         }
     }
 }

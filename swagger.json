@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\").",
-    "version": "3.3.3",
+    "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\"). API keys can be acquired from the CollegeFootballData.com website.",
+    "version": "3.4.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -329,6 +329,73 @@
               "type": "array",
               "items": {
                 "$ref": "#/definitions/GameMedia"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/games/weather": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Game weather information (Patreon only)",
+        "description": "Weather information for the hour of kickoff",
+        "operationId": "getGameWeather",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minumum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular, postseason, or both)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GameWeather"
               }
             }
           },
@@ -2915,6 +2982,74 @@
         },
         "outlet": {
           "type": "string"
+        }
+      }
+    },
+    "GameWeather": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "isStartTimeTBD": {
+          "type": "boolean"
+        },
+        "homeTeam": {
+          "type": "string"
+        },
+        "homeConference": {
+          "type": "string"
+        },
+        "awayTeam": {
+          "type": "string"
+        },
+        "awayConference": {
+          "type": "string"
+        },
+        "venueId": {
+          "type": "integer"
+        },
+        "venue": {
+          "type": "string"
+        },
+        "temperature": {
+          "type": "number"
+        },
+        "dewPoint": {
+          "type": "number"
+        },
+        "humidity": {
+          "type": "number"
+        },
+        "precipitation": {
+          "type": "number"
+        },
+        "snowfall": {
+          "type": "number"
+        },
+        "windDirection": {
+          "type": "number"
+        },
+        "windSpeed": {
+          "type": "number"
+        },
+        "pressure": {
+          "type": "number"
+        },
+        "weatherConditionCode": {
+          "type": "integer"
         }
       }
     },

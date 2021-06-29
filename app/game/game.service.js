@@ -222,11 +222,89 @@ module.exports = (db) => {
             firstGameStart: w.first_game_start,
             lastGameStart: w.last_game_start
         }));
-    }
+    };
+
+    const getWeather = async (year, seasonType, week, team, conference) => {
+        const filters = [];
+        const params = [];
+        let index = 1;
+
+        if (year) {
+            filters.push(`g.season = $${index}`);
+            params.push(year);
+            index++;
+        }
+
+        if (seasonType && seasonType.toLowerCase() !== 'both') {
+            filters.push(`g.season_type = '${seasonType}'`);
+            params.push(seasonType);
+            index++;
+        }
+
+        if (week) {
+            filters.push(`g.week = $${index}`);
+            params.push(week);
+            index++
+        }
+
+        if (team) {
+            filters.push(`(LOWER(home.school) = LOWER($${index}) OR LOWER(away.school) = LOWER($${index}))`);
+            params.push(team);
+            index++;
+        }
+
+        if (conference) {
+            filters.push(`(LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`);
+            params.push(conference);
+            index++;
+        }
+
+        const filter = 'WHERE ' + filters.join(' AND ');
+
+        const results = await db.any(`
+            SELECT g.id, g.season, g.week, g.season_type, g.start_date, home.school AS home_school, hc.name AS home_conference, away.school AS away_school, ac.name AS away_conference, v.id AS venue_id, v.name AS venue, w.temperature, w.dewpoint, w.humidity, w.precipitation, w.snowfall, w.wind_direction, w.wind_speed, w.pressure, w.weather_condition_code
+            FROM game AS g
+                INNER JOIN venue AS v ON g.venue_id = v.id
+                INNER JOIN game_weather AS w ON g.id = w.game_id
+                INNER JOIN game_team AS home_team ON g.id = home_team.game_id AND home_team.home_away = 'home'
+                INNER JOIN team AS home ON home_team.team_id = home.id
+                LEFT JOIN conference_team AS hct ON home.id = hct.team_id AND hct.start_year <= g.season AND (hct.end_year IS NULL OR hct.end_year >= g.season)
+                LEFT JOIN conference AS hc ON hct.conference_id = hc.id
+                INNER JOIN game_team AS away_team ON g.id = away_team.game_id AND away_team.home_away = 'away'
+                INNER JOIN team AS away ON away_team.team_id = away.id
+                LEFT JOIN conference_team AS act ON away.id = act.team_id AND act.start_year <= g.season AND (act.end_year IS NULL OR act.end_year >= g.season)
+                LEFT JOIN conference AS ac ON act.conference_id = ac.id
+            ${filter}
+        `, params);
+
+        return results.map(r => ({
+            id: parseInt(r.id),
+            season: parseInt(r.season),
+            week: parseInt(r.week),
+            seasonType: r.season_type,
+            startTime: r.start_date,
+            homeTeam: r.home_school,
+            homeConference: r.home_conference,
+            awayTeam: r.away_school,
+            awayConference: r.away_conference,
+            venueId: parseInt(r.venue_id),
+            venue: r.venue,
+            temperature: r.temperature ? parseFloat(r.temperature) : null,
+            dewPoint: r.dew_point ? parseFloat(r.dew_point) : null,
+            humidity: r.humidity ? parseFloat(r.humidity) : null,
+            precipitation: parseFloat(r.precipitation),
+            snowfall: parseFloat(r.snowfall),
+            windDirection: r.wind_direction ? parseFloat(r.wind_direction) : null,
+            windSpeed: r.wind_speed ? parseFloat(r.wind_speed) : null,
+            pressure: r.pressure ? parseFloat(r.pressure) : null,
+            weatherConditionCode: r.weather_condition_code ? parseInt(r.weather_condition_code) : null
+        }));
+    };
 
     return {
         getDrives,
         getMedia,
-        getCalendar
+        getCalendar,
+        getWeather
     };
 };
