@@ -106,7 +106,7 @@ jobs:
       - name: Generate library
         id: lib
         run: |
-          code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": {"projectName": "cfb.js", "moduleName": "cfb", "licenseName": "MIT", "usePromises": "true", "useES6": "true"}}' https://generator.swagger.io/api/gen/clients/javascript | jq '. | .code')
+          code=$(curl -X POST -H "content-type:application/json" -d '{"swaggerUrl": "https://api.collegefootballdata.com/api-docs.json", "options": {"projectName": "cfb.js", "moduleName": "cfb", "licenseName": "MIT", "usePromises": "true", "useES6": "false"}}' https://generator.swagger.io/api/gen/clients/javascript | jq '. | .code')
           code=${code%\"}
           code=${code#\"}
           echo "::set-output name=code::$code"
