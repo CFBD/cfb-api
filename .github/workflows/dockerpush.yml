@@ -126,8 +126,9 @@ jobs:
           json -I -f package.json -e 'this.keywords=["football","cfb","ncaaf","data","statistics"]'
           json -I -f package.json -e 'this.author="BlueSCar"'
           json -I -f package.json -e 'this.repository={"type": "git", "url": "https://github.com/cfbd/cfb.js.git"}'
-          sed -i '78d' README.md
-          sed -i '78s/.*/ApiKeyAuth.apiKeyPrefix["Authorization"] = "Bearer"/' README.md
+          sed -i '103,104d' README.md
+          sed -i '102s/.*/ApiKeyAuth.apiKey = "Bearer YOUR_API_KEY";/' README.md
+          sed -i '26,59d' README.md
           echo "Adding changes..."
           git add .
           echo "Committing changes ..."
