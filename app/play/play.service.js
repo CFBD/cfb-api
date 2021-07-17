@@ -87,7 +87,8 @@ module.exports = (db) => {
                             p.yards_gained,
                             pt.text as play_type,
                             p.play_text,
-                            p.ppa
+                            p.ppa,
+                            p.wallclock
                     FROM game g
                         INNER JOIN drive d ON g.id = d.game_id
                         INNER JOIN play p ON d.id = p.drive_id
