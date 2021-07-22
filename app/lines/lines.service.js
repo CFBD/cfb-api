@@ -69,7 +69,7 @@ module.exports = (db) => {
             }
 
             let lines = await db.any(`
-                SELECT g.id, p.name, gl.spread, gl.over_under
+                SELECT g.id, p.name, gl.spread, gl.spread_open, gl.over_under, gl.over_under_open
                 FROM game AS g
                     INNER JOIN game_lines AS gl ON g.id = gl.game_id
                     INNER JOIN lines_provider AS p ON gl.lines_provider_id = p.id
@@ -83,7 +83,9 @@ module.exports = (db) => {
                         provider: l.name,
                         spread: l.spread,
                         formattedSpread: l.spread < 0 ? `${g.home_team} ${l.spread}` : `${g.away_team} -${l.spread}`,
-                        overUnder: l.over_under
+                        spreadOpen: l.spread_open,
+                        overUnder: l.over_under,
+                        overUnderOpen: l.over_under_open
                     }));
 
                 return {
