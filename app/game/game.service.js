@@ -262,7 +262,7 @@ module.exports = (db) => {
         const filter = 'WHERE ' + filters.join(' AND ');
 
         const results = await db.any(`
-            SELECT g.id, g.season, g.week, g.season_type, g.start_date, home.school AS home_school, hc.name AS home_conference, away.school AS away_school, ac.name AS away_conference, v.id AS venue_id, v.name AS venue, w.temperature, w.dewpoint, w.humidity, w.precipitation, w.snowfall, w.wind_direction, w.wind_speed, w.pressure, w.weather_condition_code
+            SELECT g.id, g.season, g.week, g.season_type, g.start_date, home.school AS home_school, hc.name AS home_conference, away.school AS away_school, ac.name AS away_conference, v.id AS venue_id, v.name AS venue, w.temperature, w.dewpoint, w.humidity, w.precipitation, w.snowfall, w.wind_direction, w.wind_speed, w.pressure, w.weather_condition_code, wc.description AS weather_condition
             FROM game AS g
                 INNER JOIN venue AS v ON g.venue_id = v.id
                 INNER JOIN game_weather AS w ON g.id = w.game_id
@@ -274,6 +274,7 @@ module.exports = (db) => {
                 INNER JOIN team AS away ON away_team.team_id = away.id
                 LEFT JOIN conference_team AS act ON away.id = act.team_id AND act.start_year <= g.season AND (act.end_year IS NULL OR act.end_year >= g.season)
                 LEFT JOIN conference AS ac ON act.conference_id = ac.id
+                LEFT JOIN weather_condition AS wc ON w.weather_condition_code = wc.id
             ${filter}
         `, params);
 
@@ -297,7 +298,8 @@ module.exports = (db) => {
             windDirection: r.wind_direction ? parseFloat(r.wind_direction) : null,
             windSpeed: r.wind_speed ? parseFloat(r.wind_speed) : null,
             pressure: r.pressure ? parseFloat(r.pressure) : null,
-            weatherConditionCode: r.weather_condition_code ? parseInt(r.weather_condition_code) : null
+            weatherConditionCode: r.weather_condition_code ? parseInt(r.weather_condition_code) : null,
+            weatherCondition: r.weather_condition
         }));
     };
 
