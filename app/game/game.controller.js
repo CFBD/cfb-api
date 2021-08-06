@@ -296,10 +296,16 @@ module.exports = (db, Sentry) => {
                         return;
                     }
 
-                    filter = 'WHERE g.season_type = $1';
-                    params = [req.query.seasonType || 'regular'];
+                    filter = '';
+                    params = [];
 
-                    let index = 2;
+                    let index = 1;
+
+                    if (req.query.seasonType && req.query.seasonType != 'both') {
+                        filter += ` AND g.sesaon_type = $${index}`;
+                        params.push(req.query.seasonType);
+                        index++;
+                    }
 
                     if (req.query.year) {
                         if (isNaN(req.query.year)) {
@@ -363,7 +369,7 @@ module.exports = (db, Sentry) => {
                                     INNER JOIN player_stat_category cat ON gps.category_id = cat.id
                                     INNER JOIN player_stat_type typ ON gps.type_id = typ.id
                                     INNER JOIN athlete a ON gps.athlete_id = a.id
-                                    ${filter}
+                                    WHERE ${filter.substring(4)}
                             `, params);
 
                 let stats = [];
