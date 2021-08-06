@@ -304,7 +304,7 @@ module.exports = (db) => {
             INNER JOIN drive AS d ON g.id = d.game_id
             INNER JOIN play AS p ON d.id = p.drive_id
             INNER JOIN play_stat AS ps ON p.id = ps.play_id
-            INNER JOIN athlete_team AS att ON ps.athlete_id = att.athlete_id
+            INNER JOIN athlete_team AS att ON ps.athlete_id = att.athlete_id AND att.start_year <= g.season AND att.end_year >= g.season
             INNER JOIN team AS t ON att.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
             INNER JOIN conference AS c ON ct.conference_id = c.id
