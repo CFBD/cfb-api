@@ -302,7 +302,7 @@ module.exports = (db, Sentry) => {
                     let index = 1;
 
                     if (req.query.seasonType && req.query.seasonType != 'both') {
-                        filter += ` AND g.sesaon_type = $${index}`;
+                        filter += ` AND g.season_type = $${index}`;
                         params.push(req.query.seasonType);
                         index++;
                     }
