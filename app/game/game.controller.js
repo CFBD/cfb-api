@@ -285,7 +285,7 @@ module.exports = (db, Sentry) => {
                         return;
                     }
 
-                    filter = 'WHERE g.id = $1';
+                    filter = 'g.id = $1';
                     params = [req.query.gameId];
                 } else {
                     if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
@@ -352,6 +352,8 @@ module.exports = (db, Sentry) => {
                         params.push(req.query.category);
                         index++;
                     }
+
+                    filter = filter.substring(4);
                 }
 
                 let data = await db.any(`
@@ -369,7 +371,7 @@ module.exports = (db, Sentry) => {
                                     INNER JOIN player_stat_category cat ON gps.category_id = cat.id
                                     INNER JOIN player_stat_type typ ON gps.type_id = typ.id
                                     INNER JOIN athlete a ON gps.athlete_id = a.id
-                                    WHERE ${filter.substring(4)}
+                                    WHERE ${filter}
                             `, params);
 
                 let stats = [];
