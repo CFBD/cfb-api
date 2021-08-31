@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\"). API keys can be acquired from the CollegeFootballData.com website.",
-    "version": "4.1.6",
+    "version": "4.1.7",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -5860,6 +5860,9 @@
           "type": "string"
         },
         "last_name": {
+          "type": "string"
+        },
+        "hire_date": {
           "type": "string"
         },
         "seasons": {
