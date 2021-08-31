@@ -46,6 +46,7 @@ module.exports = (db) => {
                 c.first_name,
                 c.last_name,
                 t.school,
+                ct.hire_date,
                 cs.year,
                 cs.games,
                 cs.wins,
@@ -62,6 +63,7 @@ module.exports = (db) => {
             INNER JOIN team t ON cs.team_id = t.id
             LEFT JOIN srs ON cs.year = srs.year AND t.id = srs.team_id
             LEFT JOIN ratings AS r ON r.year = srs.year AND r.team_id = srs.team_id
+            LEFT JOIN coach_team AS ct ON ct.coach_id = c.id AND ct.team_id = t.id AND cs.year >= EXTRACT(year FROM ct.hire_date)
         ${filter}
         ORDER BY c.last_name, c.first_name, cs.year
         `, params);
@@ -74,6 +76,7 @@ module.exports = (db) => {
             coaches.push({
                 first_name: coachSeasons[0].first_name,
                 last_name: coachSeasons[0].last_name,
+                hire_date: coachSeasons[0].hire_date,
                 seasons: coachSeasons.map(cs => {
                     return {
                         school: cs.school,
