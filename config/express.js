@@ -68,7 +68,7 @@ module.exports = async (Sentry) => {
                 req.user = user;
                 next();
             } else {
-                res.status(401).send('Unauthorized. Got to CollegeFootballData.com to register for your free API key.');
+                res.status(401).send('Unauthorized. Did you forget to add "Bearer " before your key? Go to CollegeFootballData.com to register for your free API key. See the CFBD Blog for examples on usage: https://blog.collegefootballdata.com/using-api-keys-with-the-cfbd-api.');
             }
         })(req, res, next);
     };
