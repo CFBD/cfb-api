@@ -303,10 +303,106 @@ module.exports = (db) => {
         }));
     };
 
+    const getScoreboard = async () => {
+        let scoreboard = await db.any(`
+        WITH this_week AS (
+            SELECT DISTINCT season, season_type, week
+            FROM game
+            WHERE start_date > (now() - interval '2d')
+            ORDER BY season, season_type DESC, week
+            LIMIT 1
+        )
+        SELECT g.id,
+            g.start_date AT TIME ZONE 'UTC' AS start_date,
+            g.status,
+            g.neutral_site,
+            g.conference_game,
+            v.name AS venue,
+            v.city,
+            v.state,
+            t.id AS home_id,
+            t.display_name AS home_team,
+            c.name AS home_conference,
+            CASE WHEN g.status = 'completed' THEN gt.points ELSE g.current_home_score END AS home_points,
+            t2.id AS away_id,
+            t2.display_name AS away_team,
+            c2.name AS away_conference,
+            CASE WHEN g.status = 'completed' THEN gt2.points ELSE g.current_away_score END AS away_points,
+            g.current_period,
+            CAST(g.current_clock AS CHARACTER VARYING) AS current_clock,
+            gm.name AS tv,
+            gw.temperature,
+            gw.wind_speed,
+            gw.wind_direction,
+            wc.description AS weather_description,
+            gl.spread,
+            gl.over_under,
+            gl.moneyline_home,
+            gl.moneyline_away
+        FROM game AS g
+            INNER JOIN this_week AS tw ON g.season = tw.season AND g.week = tw.week AND g.season_type = tw.season_type
+            INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.home_away = 'home'
+            INNER JOIN team AS t ON gt.team_id = t.id
+            INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
+            INNER JOIN team AS t2 ON gt2.team_id = t2.id
+            INNER JOIN venue AS v ON g.venue_id = v.id
+            LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+            LEFT JOIN conference AS c ON ct.conference_id = c.id
+            LEFT JOIN conference_team AS ct2 ON t2.id = ct2.team_id AND ct2.end_year IS NULL
+            LEFT JOIN conference AS c2 ON ct2.conference_id = c2.id
+            LEFT JOIN game_media AS gm ON g.id = gm.game_id AND gm.media_type = 'tv'
+            LEFT JOIN game_weather AS gw ON g.id = gw.game_id
+            LEFT JOIN weather_condition AS wc ON gw.weather_condition_code = wc.id
+            LEFT JOIN game_lines AS gl ON g.id = gl.game_id AND gl.lines_provider_id = 999999
+        ORDER BY g.start_date
+        `);
+
+        return scoreboard.map(s => ({
+            id: parseInt(s.id),
+            startDate: s.start_date,
+            tv: s.tv,
+            neutralSite: s.neutral_site,
+            conferenceGame: s.conference_game,
+            status: s.status,
+            period: parseInt(s.current_period),
+            clock: s.current_clock,
+            venue: {
+                name: s.venue,
+                city: s.city,
+                state: s.state
+            },
+            homeTeam: {
+                id: s.home_id,
+                name: s.home_team,
+                conference: s.home_conference,
+                points: s.home_points
+            },
+            awayTeam: {
+                id: s.away_id,
+                name: s.away_team,
+                conference: s.away_conference,
+                points: s.away_points
+            },
+            weather: {
+                temperature: s.temperature,
+                description: s.weather_description,
+                windSpeed: s.wind_speed,
+                windDirection: s.wind_direction
+            },
+            betting: {
+                spread: s.spread,
+                overUnder: s.over_under,
+                homeMoneyline: s.moneyline_home,
+                awayMoneyline: s.moneyline_away
+            }
+        }));
+    };
+
     return {
         getDrives,
         getMedia,
         getCalendar,
-        getWeather
+        getWeather,
+        getScoreboard
     };
 };

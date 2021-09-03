@@ -456,7 +456,7 @@ module.exports = (db, Sentry) => {
                     return;
                 }
 
-                let filter = 'WHERE gt.points IS NOT NULL';
+                let filter = `WHERE gt.status is 'completed'`;
                 let params = [];
                 let index = 1;
 
@@ -606,6 +606,17 @@ module.exports = (db, Sentry) => {
                     const results = await service.getWeather(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference);
                     res.send(results);
                 }
+            } catch (err) {
+                Sentry.captureException(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
+        },
+        getScoreboard: async (req, res) => {
+            try {
+                const scoreboard = await service.getScoreboard();
+                res.send(scoreboard);
             } catch (err) {
                 Sentry.captureException(err);
                 res.status(500).send({

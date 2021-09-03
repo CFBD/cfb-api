@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.1.7
+  version: 4.1.8
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -109,6 +109,24 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Game'
+        '400':
+          description: error
+  /scoreboard:
+    get:
+      tags:
+        - games
+      summary: Live game results (Patreon only)
+      description: Get live game results
+      operationId: getScoreboard
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ScoreboardGame'
         '400':
           description: error
   /records:
@@ -4039,4 +4057,76 @@ definitions:
           longitude:
             type: number
           countryFips:
+            type: integer
+  ScoreboardGame:
+    type: object
+    properties:
+      id:
+        type: integer
+      startDate:
+        type: string
+      tv:
+        type: string
+      neutralSite:
+        type: boolean
+      conferenceGame:
+        type: boolean
+      status:
+        type: string
+      period:
+        type: integer
+      clock:
+        type: string
+      venue:
+        type: object
+        properties:
+          name:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+      homeTeam:
+        type: object
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+          conference:
+            type: string
+          points:
+            type: integer
+      awayTeam:
+        type: object
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+          conference:
+            type: string
+          points:
+            type: integer
+      weather:
+        type: object
+        properties:
+          temperature:
+            type: integer
+          description:
+            type: string
+          windSpeed:
+            type: integer
+          windDirection:
+            type: integer
+      betting:
+        type: object
+        properties:
+          spread:
+            type: integer
+          overUnder:
+            type: integer
+          homeMoneyline:
+            type: integer
+          awayMoneyline:
             type: integer
