@@ -456,7 +456,7 @@ module.exports = (db, Sentry) => {
                     return;
                 }
 
-                let filter = `WHERE gt.status is 'completed'`;
+                let filter = `WHERE g.status = 'completed'`;
                 let params = [];
                 let index = 1;
 
