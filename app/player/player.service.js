@@ -390,7 +390,7 @@ module.exports = (db) => {
             INNER JOIN conference AS c ON ct.conference_id = c.id
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
-        WHERE ${filter} AND (typ.id IN (8,14,22) OR (cat.id = 1 AND typ.id = 11) OR (cat.id = 2 AND typ.id = 5) OR (cat.id = 3 AND typ.id IN (6,21)) OR (cat.id = 6 AND typ.id = 18) OR (cat.id = 7) OR (cat.id = 8 AND typ.id = 9) OR (cat.id = 9 AND typ.id = 18) OR cat.id = 10)
+        WHERE ${filter} AND (typ.id IN (8,14,22) OR (cat.id = 1 AND typ.id = 11) OR (cat.id = 2 AND typ.id = 5) OR (cat.id = 3 AND typ.id IN (6,21)) OR (cat.id = 6 AND typ.id = 18) OR (cat.id = 7) OR (cat.id = 8 AND typ.id = 9) OR (cat.id = 9 AND typ.id = 18) OR cat.id = 10) AND gps.stat <> '--' AND gps.stat NOT LIKE '--/--'
         GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name, typ.name
         UNION
         SELECT 	g.season,
@@ -410,7 +410,7 @@ module.exports = (db) => {
             INNER JOIN conference AS c ON ct.conference_id = c.id
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
-        WHERE ${filter} AND (typ.id = 15)
+        WHERE ${filter} AND (typ.id = 15) AND gps.stat <> '--' AND gps.stat NOT LIKE '--/--'
         GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name, typ.name
         UNION
         SELECT 	g.season,
@@ -434,7 +434,7 @@ module.exports = (db) => {
             INNER JOIN conference AS c ON ct.conference_id = c.id
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
-        WHERE ${filter} AND ((cat.id = 2 AND typ.id IN (2, 10)) OR (cat.id = 9 AND typ.id = 3))
+        WHERE ${filter} AND ((cat.id = 2 AND typ.id IN (2, 10)) OR (cat.id = 9 AND typ.id = 3)) AND gps.stat <> '--' AND gps.stat NOT LIKE '--/--'
         GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name, typ.name
         UNION
         SELECT 	g.season,
@@ -458,7 +458,7 @@ module.exports = (db) => {
             INNER JOIN conference AS c ON ct.conference_id = c.id
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
-        WHERE ${filter} AND ((cat.id = 2 AND typ.id IN (2, 10)) OR (cat.id = 9 AND typ.id = 3))
+        WHERE ${filter} AND ((cat.id = 2 AND typ.id IN (2, 10)) OR (cat.id = 9 AND typ.id = 3)) AND gps.stat <> '--' AND gps.stat NOT LIKE '--/--'
         GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name, typ.name
         UNION
         SELECT 	g.season,
@@ -489,7 +489,7 @@ module.exports = (db) => {
             INNER JOIN conference AS c ON ct.conference_id = c.id
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
-        WHERE ${filter} AND (cat.id IN (1,3,4,5,6,8,9))
+        WHERE ${filter} AND (cat.id IN (1,3,4,5,6,8,9)) AND gps.stat <> '--/--' AND gps.stat <> '--'
         GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name
         UNION
         SELECT 	g.season,
@@ -517,7 +517,7 @@ module.exports = (db) => {
             INNER JOIN conference AS c ON ct.conference_id = c.id
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
-        WHERE ${filter} AND (cat.id IN (2,9))
+        WHERE ${filter} AND (cat.id IN (2,9)) AND gps.stat <> '--' AND gps.stat <> '--/--'
         GROUP BY g.season, a.id, a.name, t.school, c.name, cat.name
         `, params);
 
