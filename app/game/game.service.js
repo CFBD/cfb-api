@@ -308,7 +308,7 @@ module.exports = (db) => {
         WITH this_week AS (
             SELECT DISTINCT season, season_type, week
             FROM game
-            WHERE start_date > (now() - interval '2d')
+            WHERE start_date > (now() - interval '1d')
             ORDER BY season, season_type DESC, week
             LIMIT 1
         )
