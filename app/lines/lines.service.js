@@ -49,7 +49,7 @@ module.exports = (db) => {
         }
 
         let games = await db.any(`
-                SELECT g.id, g.season, g.week, g.season_type, ht.school AS home_team, hc.name AS home_conference, hgt.points AS home_score, awt.school AS away_team, ac.name AS away_conference, agt.points AS away_score
+                SELECT g.id, g.season, g.week, g.season_type, g.start_date, ht.school AS home_team, hc.name AS home_conference, hgt.points AS home_score, awt.school AS away_team, ac.name AS away_conference, agt.points AS away_score
                 FROM game AS g
                     INNER JOIN game_team AS hgt ON hgt.game_id = g.id AND hgt.home_away = 'home'
                     INNER JOIN team AS ht ON hgt.team_id = ht.id
@@ -95,6 +95,7 @@ module.exports = (db) => {
                     season: g.season,
                     seasonType: g.season_type,
                     week: g.week,
+                    startDate: g.startDate,
                     homeTeam: g.home_team,
                     homeConference: g.home_conference,
                     homeScore: g.home_score,
