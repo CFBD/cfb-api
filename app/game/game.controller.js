@@ -594,16 +594,16 @@ module.exports = (db, Sentry) => {
         },
         getWeather: async (req, res) => {
             try {
-                if (!req.query.year) {
+                if (!req.query.gameId && !req.query.year) {
                     res.status(400).send({
                         error: 'Year is required'
                     });
-                } else if (!parseInt(req.query.year)) {
+                } else if (req.query.year && !parseInt(req.query.year)) {
                     res.status(400).send({
                         error: 'Year must be an integer'
                     });
                 } else {
-                    const results = await service.getWeather(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference);
+                    const results = await service.getWeather(req.query.gameId, req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference);
                     res.send(results);
                 }
             } catch (err) {

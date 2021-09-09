@@ -224,45 +224,50 @@ module.exports = (db) => {
         }));
     };
 
-    const getWeather = async (year, seasonType, week, team, conference) => {
+    const getWeather = async (gameId, year, seasonType, week, team, conference) => {
         const filters = [];
         const params = [];
         let index = 1;
 
-        if (year) {
-            filters.push(`g.season = $${index}`);
-            params.push(year);
-            index++;
-        }
+        if (gameId) {
+            filters.push(`g.id = $${index}`);
+            params.push(gameId)
+        } else {
+            if (year) {
+                filters.push(`g.season = $${index}`);
+                params.push(year);
+                index++;
+            }
 
-        if (seasonType && seasonType.toLowerCase() !== 'both') {
-            filters.push(`g.season_type = '${seasonType}'`);
-            params.push(seasonType);
-            index++;
-        }
+            if (seasonType && seasonType.toLowerCase() !== 'both') {
+                filters.push(`g.season_type = '${seasonType}'`);
+                params.push(seasonType);
+                index++;
+            }
 
-        if (week) {
-            filters.push(`g.week = $${index}`);
-            params.push(week);
-            index++
-        }
+            if (week) {
+                filters.push(`g.week = $${index}`);
+                params.push(week);
+                index++
+            }
 
-        if (team) {
-            filters.push(`(LOWER(home.school) = LOWER($${index}) OR LOWER(away.school) = LOWER($${index}))`);
-            params.push(team);
-            index++;
-        }
+            if (team) {
+                filters.push(`(LOWER(home.school) = LOWER($${index}) OR LOWER(away.school) = LOWER($${index}))`);
+                params.push(team);
+                index++;
+            }
 
-        if (conference) {
-            filters.push(`(LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`);
-            params.push(conference);
-            index++;
+            if (conference) {
+                filters.push(`(LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`);
+                params.push(conference);
+                index++;
+            }
         }
 
         const filter = 'WHERE ' + filters.join(' AND ');
 
         const results = await db.any(`
-            SELECT g.id, g.season, g.week, g.season_type, g.start_date, home.school AS home_school, hc.name AS home_conference, away.school AS away_school, ac.name AS away_conference, v.id AS venue_id, v.name AS venue, w.temperature, w.dewpoint, w.humidity, w.precipitation, w.snowfall, w.wind_direction, w.wind_speed, w.pressure, w.weather_condition_code, wc.description AS weather_condition
+            SELECT g.id, g.season, g.week, g.season_type, g.start_date, v.dome, home.school AS home_school, hc.name AS home_conference, away.school AS away_school, ac.name AS away_conference, v.id AS venue_id, v.name AS venue, w.temperature, w.dewpoint, w.humidity, w.precipitation, w.snowfall, w.wind_direction, w.wind_speed, w.pressure, w.weather_condition_code, wc.description AS weather_condition
             FROM game AS g
                 INNER JOIN venue AS v ON g.venue_id = v.id
                 INNER JOIN game_weather AS w ON g.id = w.game_id
@@ -284,6 +289,7 @@ module.exports = (db) => {
             week: parseInt(r.week),
             seasonType: r.season_type,
             startTime: r.start_date,
+            gameIndoors: r.dome,
             homeTeam: r.home_school,
             homeConference: r.home_conference,
             awayTeam: r.away_school,

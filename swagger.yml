@@ -250,10 +250,15 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: year
-          description: Year filter
+        - name: gameId
+          description: Game id filter (required if no year)
           in: query
-          required: true
+          required: false
+          type: integer
+        - name: year
+          description: Year filter (required if no game id)
+          in: query
+          required: false
           type: integer
           minimum: 2001
         - name: week
@@ -2084,7 +2089,7 @@ definitions:
         type: string
       startTime:
         type: string
-      isStartTimeTBD:
+      gameIndoors:
         type: boolean
       homeTeam:
         type: string
