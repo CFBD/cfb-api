@@ -498,7 +498,8 @@ module.exports = (db, Sentry) => {
                         COUNT(*) FILTER(WHERE gt.home_away = 'away' AND g.neutral_site <> true) AS away_games,
                         COUNT(*) FILTER(WHERE gt.winner = true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_wins,
                         COUNT(*) FILTER(WHERE gt2.winner = true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_losses,
-                        COUNT(*) FILTER(WHERE gt.winner <> true AND gt2.winner <> true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_ties
+                        COUNT(*) FILTER(WHERE gt.winner <> true AND gt2.winner <> true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_ties,
+                        SUM(gt.win_prob) AS expected_wins
                 FROM game AS g
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
                     INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
@@ -514,6 +515,7 @@ module.exports = (db, Sentry) => {
                     team: r.team,
                     conference: r.conference,
                     division: r.division || '',
+                    expectedWins: Math.round(parseFloat(r.expected_wins * 10)) / 10,
                     total: {
                         games: parseInt(r.games),
                         wins: parseInt(r.wins),

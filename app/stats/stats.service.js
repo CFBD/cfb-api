@@ -249,9 +249,9 @@ module.exports = (db) => {
                 CAST(AVG(CASE WHEN yards_gained <= 0 THEN 1 ELSE 0 END) FILTER(WHERE play_type = 'Rush') AS NUMERIC) AS stuff_rate,
                 COALESCE(CAST(AVG(CASE WHEN yards_gained <= 0 THEN yards_gained * 1.2 WHEN yards_gained < 5 THEN yards_gained WHEN yards_gained < 11 THEN 4 + (yards_gained - 4) * .5 ELSE 7 END) FILTER (WHERE play_type = 'Rush') AS NUMERIC)) AS line_yards,
                 ROUND(COALESCE(CAST(SUM(CASE WHEN yards_gained <= 0 THEN yards_gained * 1.2 WHEN yards_gained < 5 THEN yards_gained WHEN yards_gained < 11 THEN 4 + (yards_gained - 4) * .5 ELSE 7 END) FILTER (WHERE play_type = 'Rush') AS NUMERIC), 0), 0) AS line_yards_sum,
-                CAST(AVG(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) AS second_level_yards,
+                CAST(AVG(CASE WHEN yards_gained >= 10 THEN 5 WHEN yards_gained > 5 THEN (yards_gained - 5) ELSE 0 END) FILTER(WHERE play_type = 'Rush') AS NUMERIC) AS second_level_yards,
                 CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) AS second_level_yards_sum,
-                CAST(AVG(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards,
+                CAST(AVG(CASE WHEN yards_gained > 10 THEN yards_gained - 10 ELSE 0 END) FILTER(WHERE play_type = 'Rush') AS NUMERIC) AS open_field_yards,
                 CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards_sum
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
@@ -382,7 +382,7 @@ module.exports = (db) => {
                     INNER JOIN drives AS dr ON d.id = dr.drive_id
                 WHERE dr.min_yards <= 40
             )
-            SELECT season, school, unit, AVG(points) AS points 
+            SELECT season, school, unit, COUNT(*) AS opportunities, AVG(points) AS points 
             FROM drive_points
             GROUP BY season, school, unit
         `, params);
@@ -480,6 +480,7 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
                         openFieldYards: parseFloat(offense.open_field_yards),
                         openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
+                        totalOpportunies: parseInt(scoringOppO ? scoringOppO.opportunities : 0),
                         pointsPerOpportunity: parseFloat(scoringOppO ? scoringOppO.points : 0),
                         fieldPosition: {
                             averageStart: parseFloat(fieldPosition.avg_start_off),
@@ -532,6 +533,7 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
                         openFieldYards: parseFloat(defense.open_field_yards),
                         openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
+                        totalOpportunies: parseInt(scoringOppD ? scoringOppD.opportunities : 0),
                         pointsPerOpportunity: parseFloat(scoringOppD ? scoringOppD.points : 0),
                         fieldPosition: {
                             averageStart: parseFloat(fieldPosition.avg_start_def),
