@@ -166,7 +166,7 @@ module.exports = (db, Sentry) => {
         getConferences: async (req, res) => {
             try {
                 let conferences = await db.any(`
-                    SELECT id, name, short_name, abbreviation
+                    SELECT id, name, short_name, abbreviation, division as classification
                     FROM conference
                     ORDER BY id
                 `);
