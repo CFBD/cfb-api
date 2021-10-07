@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.1.12
+  version: 4.1.13
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -1974,6 +1974,10 @@ definitions:
           type: integer
       home_post_win_prob:
         type: number
+      home_pregame_elo:
+        type: integer
+      home_postgame_elo:
+        type: integer
       away_id:
         type: integer
       away_team:
@@ -1988,6 +1992,10 @@ definitions:
           type: integer
       away_post_win_prob:
         type: number
+      away_pregame_elo:
+        type: integer
+      away_postgame_elo:
+        type: integer
       excitement_index:
         type: number
       highlights:
