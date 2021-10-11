@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\"). API keys can be acquired from the CollegeFootballData.com website.",
-    "version": "4.1.13",
+    "version": "4.1.14",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -1735,6 +1735,63 @@
               "type": "array",
               "items": {
                 "$ref": "#/definitions/ConferenceSPRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ratings/elo": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Historical Elo ratings",
+        "description": "Elo rating data",
+        "operationId": "getEloRatings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Season filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Maximum week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamEloRating"
               }
             }
           },
@@ -4014,6 +4071,23 @@
           "type": "number"
         },
         "ranking": {
+          "type": "number"
+        }
+      }
+    },
+    "TeamEloRating": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "elo": {
           "type": "number"
         }
       }
