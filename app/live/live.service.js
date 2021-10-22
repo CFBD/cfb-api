@@ -166,6 +166,36 @@ module.exports = async (db) => {
             let standardDowns = teamPlays.filter(p => p.downType == 'standard');
             let passingDowns = teamPlays.filter(p => p.downType == 'passing');
             let successfulPlays = teamPlays.filter(p => p.success);
+
+            let lineYards = rushingPlays.map(r => {
+                if (r.yardsGained < 0) {
+                    return -1.2 & r.yardsGained;
+                } else if (r.yardsGained <= 4) {
+                    return r.yardsGained;
+                } else if (r.yardsGained <= 10) {
+                    return 4 + (r.yardsGained - 4) / 2;
+                } else {
+                    return 7;
+                }
+            }).reduce((p,v) => p + v, 0);
+
+            let secondLevelYards = rushingPlays.map(r => {
+                if (r.yardsGained <= 5) {
+                    return 0;
+                } else if (r.yardsGained < 10) {
+                    return r.yardsGained - 5;
+                } else {
+                    return 5;
+                }
+            }).reduce((p,v) => p + v, 0);
+
+            let openFieldYards = rushingPlays.map(r => {
+                if (r.yardsGained <= 10) {
+                    return 0;
+                } else {
+                    return r.yardsGained - 10;
+                }
+            }).reduce((p,v) => p + v, 0); 
             
             return {
                 teamId: t.team.id,
@@ -175,14 +205,20 @@ module.exports = async (db) => {
                 points: t.score,
                 drives: teamDrives.length,
                 scoringOpportunities: scoringOpps.length,
-                pointsPerOpportunity: scoringOpps.length ? Math.round((scoringOpps.map(o => o.pointsGained).reduce((p,v) => p + v, 0)) * 10) / 10 / scoringOpps.length : 0,
+                pointsPerOpportunity: scoringOpps.length ? Math.round((scoringOpps.map(o => o.pointsGained).reduce((p,v) => p + v, 0) / scoringOpps.length) * 10) / 10 : 0,
                 plays: teamPlays.length,
+                lineYards,
+                lineYardsPerRush: rushingPlays.length > 0 ? Math.round(lineYards * 10 / rushingPlays.length) / 10 : 0,
+                secondLevelYards,
+                secondLevelYardsPerRush: rushingPlays.length > 0 ? Math.round(secondLevelYards * 10 / rushingPlays.length) / 10 : 0,
+                openFieldYards,
+                openFieldYardsPerRush: rushingPlays.length > 0 ? Math.round(openFieldYards * 10 / rushingPlays.length) / 10 : 0,
                 epaPerPlay: teamPlays.length ? Math.round((teamPlays.map(t => t.epa).reduce((p,v) => p + v, 0) / teamPlays.length) * 1000) / 1000 : 0,
                 totalEpa: Math.round((teamPlays.map(t => t.epa).reduce((p,v) => p + v, 0)) * 10) / 10,
                 passingEpa: Math.round((passingPlays.map(t => t.epa).reduce((p,v) => p + v, 0)) * 10) / 10,
-                passingEpaPerPlay: passingPlays.length ? Math.round((passingPlays.map(t => t.epa).reduce((p,v) => p + v, 0) / passingPlays.length) * 1000) / 1000 : 0,
+                epaPerPass: passingPlays.length ? Math.round((passingPlays.map(t => t.epa).reduce((p,v) => p + v, 0) / passingPlays.length) * 1000) / 1000 : 0,
                 rushingEpa: Math.round((rushingPlays.map(t => t.epa).reduce((p,v) => p + v, 0)) * 10) / 10,
-                rushingEpaPerPlay: rushingPlays.length ? Math.round((rushingPlays.map(t => t.epa).reduce((p,v) => p + v, 0) / rushingPlays.length) * 1000) / 1000 : 0,
+                epaPerRush: rushingPlays.length ? Math.round((rushingPlays.map(t => t.epa).reduce((p,v) => p + v, 0) / rushingPlays.length) * 1000) / 1000 : 0,
                 successRate: teamPlays.length ? Math.round((teamPlays.map(t => t.success ? 1 : 0).reduce((p,v) => p + v, 0) / teamPlays.length) * 1000) / 1000 : 0,
                 standardDownSuccessRate: standardDowns.length ? Math.round((standardDowns.map(t => t.success ? 1 : 0).reduce((p,v) => p + v, 0) / standardDowns.length) * 1000) / 1000 : 0,
                 passingDownSuccessRate: passingDowns.length ? Math.round((passingDowns.map(t => t.success ? 1 : 0).reduce((p,v) => p + v, 0) / passingDowns.length) * 1000) / 1000 : 0,
