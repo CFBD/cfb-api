@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\"). API keys can be acquired from the CollegeFootballData.com website.",
-    "version": "4.1.14",
+    "version": "4.2.0",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -814,6 +814,36 @@
               "items": {
                 "$ref": "#/definitions/Play"
               }
+            }
+          }
+        }
+      }
+    },
+    "/live/plays": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Live metrics and PBP (Patreon Tier 2)",
+        "description": "Get live metrics and PBP",
+        "operationId": "getLivePlays",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Game id",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/LivePlayByPlay"
             }
           }
         }
@@ -6265,6 +6295,195 @@
             },
             "awayMoneyline": {
               "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "LivePlayByPlay": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "teamId": {
+                "type": "integer"
+              },
+              "team": {
+                "type": "string"
+              },
+              "homeAway": {
+                "type": "string"
+              },
+              "points": {
+                "type": "integer"
+              },
+              "drives": {
+                "type": "integer"
+              },
+              "scoringOpportunities": {
+                "type": "integer"
+              },
+              "pointsPerOpportunity": {
+                "type": "number"
+              },
+              "plays": {
+                "type": "integer"
+              },
+              "epaPerPlay": {
+                "type": "number"
+              },
+              "totalEpa": {
+                "type": "number"
+              },
+              "passingEpa": {
+                "type": "number"
+              },
+              "passingEpaPerPlay": {
+                "type": "number"
+              },
+              "rushingEpa": {
+                "type": "number"
+              },
+              "rushingEpaPerPlay": {
+                "type": "number"
+              },
+              "successRate": {
+                "type": "number"
+              },
+              "standardDownSuccessRate": {
+                "type": "number"
+              },
+              "passingDownSuccessRate": {
+                "type": "number"
+              },
+              "explosiveness": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "plays": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "offenseId": {
+                "type": "integer"
+              },
+              "offense": {
+                "type": "string"
+              },
+              "defenseId": {
+                "type": "integer"
+              },
+              "defense": {
+                "type": "string"
+              },
+              "playCount": {
+                "type": "integer"
+              },
+              "yards": {
+                "type": "integer"
+              },
+              "startPeriod": {
+                "type": "integer"
+              },
+              "startClock": {
+                "type": "string"
+              },
+              "startYardsToGoal": {
+                "type": "integer"
+              },
+              "endPeriod": {
+                "type": "integer"
+              },
+              "endClock": {
+                "type": "string"
+              },
+              "endYardsToGoal": {
+                "type": "integer"
+              },
+              "duration": {
+                "type": "string"
+              },
+              "scoringOpportunity": {
+                "type": "boolean"
+              },
+              "plays": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "homeScore": {
+                      "type": "integer"
+                    },
+                    "awayScore": {
+                      "type": "integer"
+                    },
+                    "period": {
+                      "type": "integer"
+                    },
+                    "clock": {
+                      "type": "string"
+                    },
+                    "wallclock": {
+                      "type": "string"
+                    },
+                    "teamId": {
+                      "type": "integer"
+                    },
+                    "team": "string",
+                    "down": {
+                      "type": "integer"
+                    },
+                    "distance": {
+                      "type": "integer"
+                    },
+                    "yardsToGoal": {
+                      "type": "integer"
+                    },
+                    "yardsGained": {
+                      "type": "integer"
+                    },
+                    "playTypeId": {
+                      "type": "integer"
+                    },
+                    "playType": {
+                      "type": "string"
+                    },
+                    "epa": {
+                      "type": "number"
+                    },
+                    "garbageTime": {
+                      "type": "boolean"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "rushPass": {
+                      "type": "string"
+                    },
+                    "downType": {
+                      "type": "string"
+                    },
+                    "playText": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
             }
           }
         }

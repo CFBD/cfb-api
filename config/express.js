@@ -84,6 +84,17 @@ module.exports = async (Sentry) => {
         })(req, res, next);
     };
 
+    const superPatreonAuth = (req, res, next) => {
+        passport.authenticate('bearer', (err, user, info) => {
+            if ((user && user.patronLevel && user.patronLevel > 1) || env == 'development') {
+                req.user = user;
+                next();
+            } else {
+                res.status(401).send('This endpoint is in limited beta and requires a Patreon Tier 2 subscription.');
+            }
+        })(req, res, next);
+    };
+
     require('./swagger')(app, cors);
     app.use('/api/docs', cors(), express.static('./node_modules/swagger-ui-dist'));
 
@@ -99,7 +110,7 @@ module.exports = async (Sentry) => {
     const limiter = require('./slowdown')();
 
     const middlewares = [corsConfig, originAuth, apm, limiter];
-    const patreonMiddlewares = [corsConfig, patreonAuth, apm, limiter]
+    const patreonMiddlewares = [corsConfig, patreonAuth, apm, limiter];
 
     require('../app/auth/auth.route')(app, corsConfig, Sentry);
     require('../app/coach/coach.route')(app, dbInfo.db, middlewares, Sentry);
@@ -115,6 +126,7 @@ module.exports = async (Sentry) => {
     require('../app/stats/stats.routes')(app, dbInfo.db, middlewares, Sentry);
     require('../app/player/player.routes')(app, dbInfo.db, middlewares, Sentry);
     require('../app/draft/draft.route')(app, dbInfo.db, middlewares, Sentry);
+    await require('../app/live/live.route')(app, dbInfo.db, [corsConfig, superPatreonAuth, apm, limiter], Sentry);
 
     const consumers = await require('./consumers')();
     await require('../app/events/events.route')(app, consumers, expressWsObj);

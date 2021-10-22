@@ -2,7 +2,7 @@ const Sentry = require('@sentry/node');
 
 (async() => {
     require('dotenv').config();
-    Sentry.init({ dsn: `https://${process.env.SENTRY_KEY}@sentry.io/${process.env.SENTRY_ID}` });
+    Sentry.init({ dsn: `https://${process.env.SENTRY_KEY}@sentry.io/${process.env.SENTRY_ID}`, debug: process.env.NODE_ENV != 'production' });
 
     const express = require('./config/express');
     const app = await express(Sentry);
