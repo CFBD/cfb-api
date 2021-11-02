@@ -95,7 +95,7 @@ module.exports = (db) => {
                     season: g.season,
                     seasonType: g.season_type,
                     week: g.week,
-                    startDate: g.startDate,
+                    startDate: g.start_date,
                     homeTeam: g.home_team,
                     homeConference: g.home_conference,
                     homeScore: g.home_score,
