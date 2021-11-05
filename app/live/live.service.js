@@ -5,15 +5,17 @@ module.exports = async (db) => {
 
     // const epaTypes = [8,12,13,14,15,16,17,18,21,29,40,41,43,52,53,56,57,59,60,61,62,65,66,67,999,78];
     const epaTypes = [3,4,6,7,24,26,36,51,67,5,9,29,39,68,18,38,40,41,59,60];
-    const passTypes = [3,4,6,7,24,26,36,51,67];
+    const passTypes = [3,4,6,7,24,26,36,37,38,39,51,67];
     const rushTypes = [5,9,29,39,68];
+    const unsuccessfulTypes = [20,26,34,36,37,38,39,63];
     const ppas = await db.any('SELECT yard_line, down, distance, ROUND(predicted_points, 3) AS ppa FROM ppa');
 
     const getPlaySuccess = (play) => {
-        return play.scoringPlay
+        const typeId = parseInt(play.type.id);
+        return !unsuccessfulTypes.includes(typeId) && (play.scoringPlay
             || (play.start.down == 1 && play.statYardage >= (play.start.distance / 2))
             || (play.start.down == 2 && play.statYardage >= (play.start.distance * .7))
-            || (play.start.down > 2 && play.statYardage >= play.start.distance);
+            || (play.start.down > 2 && play.statYardage >= play.start.distance));
     };
 
     const getPlayType = (play) => {

@@ -187,7 +187,8 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.scoring = true AND p.play_type_id NOT IN (26,36,38,39) THEN true
+                        WHEN p.play_type_id IN (20,26,34,36,37,38,39,51,67) THEN false
+                        WHEN p.scoring = true THEN true
                         WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                         WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                         WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
@@ -639,7 +640,8 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.scoring = true AND p.play_type_id NOT IN (26,36,38,39) THEN true
+                        WHEN p.play_type_id IN (20,26,34,36,37,38,39,51,67) THEN false
+                        WHEN p.scoring = true THEN true
                         WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                         WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                         WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
@@ -851,7 +853,8 @@ module.exports = (db) => {
                             ELSE 'standard'
                         END AS down_type,
                         CASE
-                            WHEN p.scoring = true AND p.play_type_id NOT IN (26,36,38,39) THEN true
+                            WHEN p.play_type_id IN (20,26,34,36,37,38,39,51,67) THEN false
+                            WHEN p.scoring = true THEN true
                             WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                             WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                             WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
