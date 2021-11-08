@@ -187,7 +187,7 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.play_type_id IN (20,26,34,36,37,38,39,51,67) THEN false
+                        WHEN p.play_type_id IN (20,26,34,36,37,38,39,63) THEN false
                         WHEN p.scoring = true THEN true
                         WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                         WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
@@ -640,7 +640,7 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.play_type_id IN (20,26,34,36,37,38,39,51,67) THEN false
+                        WHEN p.play_type_id IN (20,26,34,36,37,38,39,63) THEN false
                         WHEN p.scoring = true THEN true
                         WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                         WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
@@ -853,7 +853,7 @@ module.exports = (db) => {
                             ELSE 'standard'
                         END AS down_type,
                         CASE
-                            WHEN p.play_type_id IN (20,26,34,36,37,38,39,51,67) THEN false
+                            WHEN p.play_type_id IN (20,26,34,36,37,38,39,63) THEN false
                             WHEN p.scoring = true THEN true
                             WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                             WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
