@@ -422,12 +422,12 @@ module.exports = (db) => {
                 FROM game AS g
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
                     INNER JOIN team AS t ON gt.team_id = t.id
-                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
-                    INNER JOIN conference AS c ON ct.conference_id = c.id
+                    LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    LEFT JOIN conference AS c ON ct.conference_id = c.id
                     INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                     INNER JOIN team AS t2 ON gt2.team_id = t2.id
-                    INNER JOIN conference_team AS ct2 ON t2.id = ct2.team_id AND ct2.end_year IS NULL
-                    INNER JOIN conference AS c2 ON ct2.conference_id = c2.id
+                    LEFT JOIN conference_team AS ct2 ON t2.id = ct2.team_id AND ct2.end_year IS NULL
+                    LEFT JOIN conference AS c2 ON ct2.conference_id = c2.id
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN play AS p ON d.id = p.drive_id AND p.offense_id = t.id AND p.ppa IS NOT NULL
                     INNER JOIN play_stat AS ps ON p.id = ps.play_id
