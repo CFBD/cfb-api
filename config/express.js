@@ -126,7 +126,7 @@ module.exports = async (Sentry) => {
     require('../app/stats/stats.routes')(app, dbInfo.db, middlewares, Sentry);
     require('../app/player/player.routes')(app, dbInfo.db, middlewares, Sentry);
     require('../app/draft/draft.route')(app, dbInfo.db, middlewares, Sentry);
-    await require('../app/live/live.route')(app, dbInfo.db, [corsConfig, superPatreonAuth, apm, limiter], Sentry);
+    await require('../app/live/live.route')(app, dbInfo.db, patreonMiddlewares, Sentry);
 
     const consumers = await require('./consumers')();
     await require('../app/events/events.route')(app, consumers, expressWsObj);
