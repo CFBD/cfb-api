@@ -228,8 +228,18 @@ module.exports = async (db) => {
             }
         });
 
+        let currentDrive = result.data.gamepackageJSON.drives.current;
+        let currentPlay = currentDrive && currentDrive.plays && currentDrive.plays.length ? currentDrive.plays[currentDrive.plays.length - 1] : null;
+
         return {
             id: result.data.gameId,
+            status: comp.status.type.description,
+            period: comp.status.period,
+            clock: comp.status.displayClock,
+            possession: currentDrive ? teams.find(t => t.team.displayName == currentDrive.team.displayName).team.location : null,
+            down: currentPlay && currentPlay.end ? currentPlay.end.down : null,
+            distance: currentPlay && currentPlay.end ? currentPlay.end.distance : null,
+            yardsToGoal: currentPlay && currentPlay.end ? currentPlay.end.yardsToEndzone : null,
             teams: teamStats,
             drives: drives
         };

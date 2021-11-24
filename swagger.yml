@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.2.3
+  version: 4.3.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -4227,6 +4227,20 @@ definitions:
     type: object
     properties:
       id:
+        type: integer
+      status:
+        type: string
+      period:
+        type: integer
+      clock:
+        type: string
+      possession:
+        type: string
+      down:
+        type: integer
+      distance:
+        type: integer
+      yardsToGoal:
         type: integer
       teams:
         type: array
