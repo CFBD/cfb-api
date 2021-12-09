@@ -502,7 +502,7 @@ module.exports = (db) => {
         `, [year]);
 
         return transfers.map(t => ({
-            id: t.id,
+            // id: t.id,
             season: t.season,
             firstName: t.first_name,
             lastName: t.last_name,
