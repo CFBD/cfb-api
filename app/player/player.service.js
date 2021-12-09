@@ -491,11 +491,37 @@ module.exports = (db) => {
         }));
     };
 
+    const getTransferPortal = async (year) => {
+        let transfers = await db.any(`
+        SELECT t.id, t.season, t.first_name, t.last_name, pos.position AS position, fr.school AS source, tt.school AS destination, t.transfer_date, t.rating, t.stars, t.eligibility
+        FROM transfer AS t
+            INNER JOIN recruit_position AS pos ON t.position_id = pos.id
+            INNER JOIN team AS fr ON t.from_team_id = fr.id
+            LEFT JOIN team AS tt ON t.to_team_id = tt.id
+        WHERE t.season = $1
+        `, [year]);
+
+        return transfers.map(t => ({
+            id: t.id,
+            season: t.season,
+            firstName: t.first_name,
+            lastName: t.last_name,
+            position: t.position,
+            origin: t.source,
+            destination: t.destination,
+            transferDate: t.transfer_date,
+            rating: t.rating,
+            stars: t.stars,
+            eligibility: t.eligibility
+        }));
+    };
+
     return {
         playerSearch,
         getMeanPassingChartData,
         getPlayerUsage,
         getReturningProduction,
-        getSeasonStats
+        getSeasonStats,
+        getTransferPortal
     };
 };

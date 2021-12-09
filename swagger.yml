@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.3.0
+  version: 4.3.1
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -1911,6 +1911,30 @@ paths:
             type: array
             items:
               $ref: '#/definitions/PlayerSeasonStat'
+        '400':
+          description: error
+  /player/portal:
+    get:
+      tags:
+        - players
+      summary: Transfer portal by season
+      description: Transfer portal by season
+      operationId: getTransferPortal
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Year filter
+          in: query
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PortalPlayer'
         '400':
           description: error
   /draft/teams:
@@ -4375,3 +4399,28 @@ definitions:
                     type: string
                   playText:
                     type: string
+  PortalPlayer:
+    type: object
+    properties:
+      id:
+        type: integer
+      season:
+        type: integer
+      firstName:
+        type: string
+      lastName:
+        type: string
+      position:
+        type: string
+      origin:
+        type: string
+      destination:
+        type: string
+      transferDate:
+        type: string
+      rating:
+        type: number
+      stars:
+        type: integer
+      eligibility:
+        type: string
