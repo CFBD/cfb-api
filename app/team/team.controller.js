@@ -66,7 +66,7 @@ module.exports = (db, Sentry) => {
                     SELECT t.id, t.school, t.mascot, t.abbreviation, t.alt_name as alt_name1, t.abbreviation as alt_name2, t.nickname as alt_name3, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos, v.id AS venue_id, v.name AS venue_name, v.capacity, v.grass, v.city, v.state, v.zip, v.country_code, v.location, v.elevation, v.year_constructed, v.dome, v.timezone
                     FROM team t
                         INNER JOIN conference_team ct ON t.id = ct.team_id
-                        INNER JOIN  conference c ON c.id = ct.conference_id
+                        INNER JOIN  conference c ON c.id = ct.conference_id AND c.division = 'fbs'
                         LEFT JOIN venue AS v ON t.venue_id = v.id
                     ${filter}
                     ORDER BY t.active DESC, t.school

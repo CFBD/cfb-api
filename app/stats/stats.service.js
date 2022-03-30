@@ -48,7 +48,7 @@ module.exports = (db) => {
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE typ.id IN (2,3,4,7,10,11,12,13,18,21,23,24,25,26,31,32,33,34,35,36,37,38) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
@@ -67,7 +67,7 @@ module.exports = (db) => {
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE typ.id IN (5,6,14,15) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
@@ -86,7 +86,7 @@ module.exports = (db) => {
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE typ.id IN (5,6,14,15) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
@@ -101,7 +101,7 @@ module.exports = (db) => {
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE typ.id = 8 AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
@@ -114,7 +114,7 @@ module.exports = (db) => {
             INNER JOIN game_team AS gt ON g.id = gt.game_id
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE ${filter}
         GROUP BY g.season, t.school, c.name
         `, params);
@@ -213,7 +213,7 @@ module.exports = (db) => {
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
                 INNER JOIN team AS t ON gt.team_id = t.id
                 INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                 INNER JOIN drive AS d ON g.id = d.game_id
                 INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
             ${filter}
@@ -267,7 +267,7 @@ module.exports = (db) => {
                         INNER JOIN game_team AS gt ON g.id = gt.game_id
                         INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                         INNER JOIN team AS t ON gt2.team_id = t.id
-                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                         LEFT JOIN game_player_stat AS s ON s.game_team_id = gt.id AND s.type_id = 4 AND s.category_id = 10
                     ${filter}
                     GROUP BY g.season, t.id
@@ -281,7 +281,7 @@ module.exports = (db) => {
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
                     INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                     INNER JOIN team AS t ON gt.team_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN game_team_stat AS s ON s.game_team_id = gt.id AND s.type_id IN (16,21,24)
                     LEFT JOIN fumbles AS f ON f.team_id = t.id
                 ${filter}
@@ -292,7 +292,7 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
                     INNER JOIN team AS t ON p.defense_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                 ${filter}
                 GROUP BY g.season, t.id
             )
@@ -310,7 +310,7 @@ module.exports = (db) => {
                         INNER JOIN game_team AS gt ON g.id = gt.game_id
                         INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                         INNER JOIN team AS t ON gt.team_id = t.id
-                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                         LEFT JOIN game_player_stat AS s ON s.game_team_id = gt.id AND s.type_id = 4 AND s.category_id = 10
                     ${filter}
                     GROUP BY g.season, t.id
@@ -324,7 +324,7 @@ module.exports = (db) => {
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
                     INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                     INNER JOIN team AS t ON gt.team_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN game_team_stat AS s ON s.game_team_id = gt2.id AND s.type_id IN (16,21,24)
                     LEFT JOIN fumbles AS f ON f.team_id = t.id
                 ${filter}
@@ -335,7 +335,7 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
                     INNER JOIN team AS t ON p.offense_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                 ${filter}
                 GROUP BY g.season, t.id
             )
@@ -401,7 +401,7 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.offense_id
                     INNER JOIN team AS t ON d.offense_id = t.id
-                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'home' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'away' AND d.start_yardline = ppa.yard_line))
                 ${filter} AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
                 GROUP BY g.season, t.id
@@ -417,7 +417,7 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.defense_id
                     INNER JOIN team AS t ON d.defense_id = t.id
-                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'away' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'home' AND d.start_yardline = ppa.yard_line))
                 ${filter} AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
                 GROUP BY g.season, t.id
@@ -1127,7 +1127,7 @@ WITH offensive_drives AS (
 		LEFT JOIN drive AS d ON g.id = d.game_id AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
 		LEFT JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.offense_id
 		LEFT JOIN team AS t ON d.offense_id = t.id
-		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
 		LEFT JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'home' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'away' AND d.start_yardline = ppa.yard_line))
 	WHERE g.id = $1
 	GROUP BY t.id
@@ -1142,7 +1142,7 @@ WITH offensive_drives AS (
 		LEFT JOIN drive AS d ON g.id = d.game_id AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
 		LEFT JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.defense_id
 		LEFT JOIN team AS t ON d.defense_id = t.id
-		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
 		LEFT JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'away' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'home' AND d.start_yardline = ppa.yard_line))
 	WHERE g.id = $1
 	GROUP BY t.id

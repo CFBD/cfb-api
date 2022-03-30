@@ -72,7 +72,7 @@ module.exports = (db) => {
                     INNER JOIN play_stat AS ps ON p.id = ps.play_id
                     INNER JOIN athlete AS a ON ps.athlete_id = a.id
                     INNER JOIN team AS t ON p.offense_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN position AS po ON a.position_id = po.id AND po.abbreviation = 'QB'
                 WHERE g.season = $2 AND a.id = $1
             ), grouped AS (
@@ -147,7 +147,7 @@ module.exports = (db) => {
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
                 INNER JOIN team AS t ON gt.team_id = t.id
                 INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                 INNER JOIN drive AS d ON g.id = d.game_id
                 INNER JOIN play AS p ON d.id = p.drive_id AND p.offense_id = t.id AND p.ppa IS NOT NULL
                 INNER JOIN play_stat AS ps ON p.id = ps.play_id
@@ -172,7 +172,7 @@ module.exports = (db) => {
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
                 INNER JOIN team AS t ON gt.team_id = t.id
                 INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                 INNER JOIN drive AS d ON g.id = d.game_id
                 INNER JOIN play AS p ON d.id = p.drive_id AND p.offense_id = t.id AND p.ppa IS NOT NULL
             WHERE g.season = $1 ${excludeGarbageTime ? 'AND p.garbage_time = false' : ''}
@@ -265,7 +265,7 @@ module.exports = (db) => {
             INNER JOIN athlete_team AS att ON ps.athlete_id = att.athlete_id AND att.start_year <= g.season AND att.end_year >= g.season
             INNER JOIN team AS t ON att.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         ${filter}
         GROUP BY g.season, t.school, c.name
         `, params);
@@ -345,7 +345,7 @@ module.exports = (db) => {
             INNER JOIN athlete AS a ON gps.athlete_id = a.id
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
         WHERE ${filter} AND (typ.id IN (8,14,22) OR (cat.id = 1 AND typ.id = 11) OR (cat.id = 2 AND typ.id = 5) OR (cat.id = 3 AND typ.id IN (6,21)) OR (cat.id = 6 AND typ.id = 18) OR (cat.id = 7) OR (cat.id = 8 AND typ.id = 9) OR (cat.id = 9 AND typ.id = 18) OR cat.id = 10) AND gps.stat <> '--' AND gps.stat NOT LIKE '--/--'
@@ -365,7 +365,7 @@ module.exports = (db) => {
             INNER JOIN athlete AS a ON gps.athlete_id = a.id
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
         WHERE ${filter} AND (typ.id = 15) AND gps.stat <> '--' AND gps.stat NOT LIKE '--/--'
@@ -389,7 +389,7 @@ module.exports = (db) => {
             INNER JOIN athlete AS a ON gps.athlete_id = a.id
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
         WHERE ${filter} AND ((cat.id = 2 AND typ.id IN (2, 10)) OR (cat.id = 9 AND typ.id = 3)) AND gps.stat <> '--' AND gps.stat NOT LIKE '--/--'
@@ -413,7 +413,7 @@ module.exports = (db) => {
             INNER JOIN athlete AS a ON gps.athlete_id = a.id
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
         WHERE ${filter} AND ((cat.id = 2 AND typ.id IN (2, 10)) OR (cat.id = 9 AND typ.id = 3)) AND gps.stat <> '--' AND gps.stat NOT LIKE '--/--'
@@ -444,7 +444,7 @@ module.exports = (db) => {
             INNER JOIN athlete AS a ON gps.athlete_id = a.id
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
         WHERE ${filter} AND (cat.id IN (1,3,4,5,6,8,9)) AND gps.stat <> '--/--' AND gps.stat <> '--'
@@ -472,7 +472,7 @@ module.exports = (db) => {
             INNER JOIN athlete AS a ON gps.athlete_id = a.id
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             INNER JOIN player_stat_category AS cat ON gps.category_id = cat.id
             INNER JOIN player_stat_type AS typ ON gps.type_id = typ.id
         WHERE ${filter} AND (cat.id IN (2,9)) AND gps.stat <> '--' AND gps.stat <> '--/--'

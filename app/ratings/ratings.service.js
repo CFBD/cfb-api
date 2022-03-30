@@ -19,7 +19,7 @@ module.exports = (db) => {
             FROM ratings AS r
                 INNER JOIN team AS t ON r.team_id = t.id
                 INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             ${filter}
             ORDER BY r.year, r.rating DESC
         `, params);
@@ -147,7 +147,7 @@ module.exports = (db) => {
                     AVG(r.d_db_havoc) AS d_db_havoc
             FROM ratings AS r
                 INNER JOIN conference_team AS ct ON ct.team_id = r.team_id AND ct.start_year <= r.year AND (ct.end_year >= r.year OR ct.end_year IS NULL)
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             ${filter}
             GROUP BY year, c.name
             ORDER BY c.name, year
@@ -268,7 +268,7 @@ module.exports = (db) => {
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
                 INNER JOIN team AS t ON gt.team_id = t.id
                 INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year > g.season)
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             WHERE gt.end_elo IS NOT NULL AND g.status = 'completed' ${filter}
         )
         SELECT season AS year, team, conference, elo

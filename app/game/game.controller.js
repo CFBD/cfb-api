@@ -505,7 +505,7 @@ module.exports = (db, Sentry) => {
                     INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
                     INNER JOIN team AS t ON gt.team_id = t.id
                     INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
-                    INNER JOIN conference AS c ON ct.conference_id = c.id
+                    INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                 ${filter}
                 GROUP BY g.season, t.school, c.name, ct.division
                 `, params);
