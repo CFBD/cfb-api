@@ -174,7 +174,7 @@ module.exports = (db, Sentry) => {
                         INNER JOIN recruit AS r ON p.id = r.recruit_position_id
                         INNER JOIN team AS t ON r.college_id = t.id
                         INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= $1 AND (ct.end_year IS NULL OR ct.end_year >= $1)
-                        INNER JOIN conference AS c ON ct.conference_id = c.id
+                        INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                     ${filter}
                     GROUP BY t.school, p.position_group, c.name
                     ORDER BY t.school, p.position_group
@@ -186,7 +186,7 @@ module.exports = (db, Sentry) => {
                         INNER JOIN recruit AS r ON p.id = r.recruit_position_id
                         INNER JOIN team AS t ON r.college_id = t.id
                         INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= $1 AND (ct.end_year IS NULL OR ct.end_year >= $1)
-                        INNER JOIN conference AS c ON ct.conference_id = c.id
+                        INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                     ${filter}
                     GROUP BY t.school, c.name
                     ORDER BY t.school

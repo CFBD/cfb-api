@@ -66,7 +66,7 @@ module.exports = (db, Sentry) => {
                     SELECT t.id, t.school, t.mascot, t.abbreviation, t.alt_name as alt_name1, t.abbreviation as alt_name2, t.nickname as alt_name3, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos, v.id AS venue_id, v.name AS venue_name, v.capacity, v.grass, v.city, v.state, v.zip, v.country_code, v.location, v.elevation, v.year_constructed, v.dome, v.timezone
                     FROM team t
                         INNER JOIN conference_team ct ON t.id = ct.team_id
-                        INNER JOIN  conference c ON c.id = ct.conference_id
+                        INNER JOIN  conference c ON c.id = ct.conference_id AND c.division = 'fbs'
                         LEFT JOIN venue AS v ON t.venue_id = v.id
                     ${filter}
                     ORDER BY t.active DESC, t.school
@@ -134,17 +134,25 @@ module.exports = (db, Sentry) => {
                 filters.push(`att.start_year <= $${index} AND att.end_year >= $${index}`);
                 params.push(year);
 
-                let filter = `WHERE ${filters.join(' AND ')}`;
+                let filter = `WHERE a.id > 0 AND ${filters.join(' AND ')}`;
 
                 let roster = await db.any(`
-                    SELECT a.id, a.first_name, a.last_name, t.school AS team, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country, h.latitude as home_latitude, h.longitude as home_longitude, h.county_fips as home_county_fips
+                    SELECT a.id, a.first_name, a.last_name, t.school AS team, a.weight, a.height, a.jersey, a.year, p.abbreviation as position, h.city as home_city, h.state as home_state, h.country as home_country, h.latitude as home_latitude, h.longitude as home_longitude, h.county_fips as home_county_fips, array_agg(DISTINCT r.id) AS recruit_ids
                     FROM team t
                         INNER JOIN athlete_team AS att ON t.id = att.team_id
                         INNER JOIN athlete a ON att.athlete_id = a.id
                         LEFT JOIN hometown h ON a.hometown_id = h.id
                         LEFT JOIN position p ON a.position_id = p.id
+                        LEFT JOIN recruit AS r ON r.athlete_id = a.id
                     ${filter}
+                    GROUP BY a.id, a.first_name, a.last_name, t.school, a.weight, a.height, a.jersey, a.year, p.abbreviation, h.city, h.state, h.country, h.latitude, h.longitude, h.county_fips
                 `, params);
+
+                for (let r of roster) {
+                    if (r.recruit_ids && r.recruit_ids.length) {
+                        r.recruit_ids = r.recruit_ids.filter(r => r).map(r => parseInt(r));
+                    }
+                }
 
                 res.send(roster);
 
@@ -158,7 +166,7 @@ module.exports = (db, Sentry) => {
         getConferences: async (req, res) => {
             try {
                 let conferences = await db.any(`
-                    SELECT id, name, short_name, abbreviation
+                    SELECT id, name, short_name, abbreviation, division as classification
                     FROM conference
                     ORDER BY id
                 `);

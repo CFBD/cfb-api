@@ -1,4 +1,4 @@
-module.exports = (app, db, middlewares, Sentry) => {
+module.exports = (app, db, middlewares, Sentry, patreonMiddlewares) => {
     const controller = require('./game.controller')(db, Sentry);
 
     app.route('/games').get(middlewares, controller.getGames);
@@ -8,4 +8,6 @@ module.exports = (app, db, middlewares, Sentry) => {
     app.route('/records').get(middlewares, controller.getRecords);
     app.route('/games/media').get(middlewares, controller.getMedia);
     app.route('/calendar').get(middlewares, controller.getCalendar);
+    app.route('/games/weather').get(patreonMiddlewares, controller.getWeather);
+    app.route('/scoreboard').get(patreonMiddlewares, controller.getScoreboard);
 }

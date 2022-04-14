@@ -28,10 +28,21 @@ module.exports = () => {
         }
     });
 
+    const speedLimiterLive = slowDown({
+        windowMs: 10 * 1000,
+        delayAfter: 10,
+        delayMs: 500,
+        keyGenerator: (req) => {
+            return req.user.username;
+        }
+    });
+
     const limiter = (req, res, next) => {
         let tier = req.user ? req.user.patronLevel : null;
 
-        if (tier == 2) {
+        if (req.sws.api_path == '/live/plays') {
+            speedLimiterLive(req, res, next);
+        } else if (tier == 2) {
             speedLimiterTier2(req, res, next);
         } else if (tier == 1) {
             speedLimiterTier1(req, res, next);

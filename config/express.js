@@ -68,7 +68,29 @@ module.exports = async (Sentry) => {
                 req.user = user;
                 next();
             } else {
-                res.sendStatus(401);
+                res.status(401).send('Unauthorized. Did you forget to add "Bearer " before your key? Go to CollegeFootballData.com to register for your free API key. See the CFBD Blog for examples on usage: https://blog.collegefootballdata.com/using-api-keys-with-the-cfbd-api.');
+            }
+        })(req, res, next);
+    };
+
+    const patreonAuth = (req, res, next) => {
+        passport.authenticate('bearer', (err, user, info) => {
+            if ((user && user.patronLevel && user.patronLevel > 0) || env == 'development') {
+                req.user = user;
+                next();
+            } else {
+                res.status(401).send('This endpoint is in limited beta and requires a Patreon subscription.');
+            }
+        })(req, res, next);
+    };
+
+    const superPatreonAuth = (req, res, next) => {
+        passport.authenticate('bearer', (err, user, info) => {
+            if ((user && user.patronLevel && user.patronLevel > 1) || env == 'development') {
+                req.user = user;
+                next();
+            } else {
+                res.status(401).send('This endpoint is in limited beta and requires a Patreon Tier 2 subscription.');
             }
         })(req, res, next);
     };
@@ -88,10 +110,11 @@ module.exports = async (Sentry) => {
     const limiter = require('./slowdown')();
 
     const middlewares = [corsConfig, originAuth, apm, limiter];
+    const patreonMiddlewares = [corsConfig, patreonAuth, apm, limiter];
 
     require('../app/auth/auth.route')(app, corsConfig, Sentry);
     require('../app/coach/coach.route')(app, dbInfo.db, middlewares, Sentry);
-    require('../app/game/game.route')(app, dbInfo.db, middlewares, Sentry);
+    require('../app/game/game.route')(app, dbInfo.db, middlewares, Sentry, patreonMiddlewares);
     require('../app/play/play.route')(app, dbInfo.db, middlewares, Sentry);
     require('../app/team/team.route')(app, dbInfo.db, middlewares, Sentry);
     require('../app/venue/venue.route')(app, dbInfo.db, middlewares, Sentry);
@@ -103,6 +126,7 @@ module.exports = async (Sentry) => {
     require('../app/stats/stats.routes')(app, dbInfo.db, middlewares, Sentry);
     require('../app/player/player.routes')(app, dbInfo.db, middlewares, Sentry);
     require('../app/draft/draft.route')(app, dbInfo.db, middlewares, Sentry);
+    await require('../app/live/live.route')(app, dbInfo.db, patreonMiddlewares, Sentry);
 
     const consumers = await require('./consumers')();
     await require('../app/events/events.route')(app, consumers, expressWsObj);

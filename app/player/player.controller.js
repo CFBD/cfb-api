@@ -130,11 +130,34 @@ module.exports = (db, Sentry) => {
         }
     };
 
+    const getTransferPortal = async (req, res) => {
+        try {
+            if (!req.query.year) {
+                res.status(400).send({
+                    error: 'year must be specified'
+                });
+            } else if (!parseInt(req.query.year)) {
+                res.status(400).send({
+                    error: 'year must be an integer'
+                });
+            } else {
+                const data = await service.getTransferPortal(req.query.year);
+                res.send(data);
+            }
+        } catch (err) {
+            Sentry.captureException(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    };
+
     return {
         playerSearch,
         getMeanPassingPPA,
         getPlayerUsage,
         getReturningProduction,
-        getSeasonStats
+        getSeasonStats,
+        getTransferPortal
     };
 };

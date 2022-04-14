@@ -87,7 +87,8 @@ module.exports = (db) => {
                             p.yards_gained,
                             pt.text as play_type,
                             p.play_text,
-                            p.ppa
+                            p.ppa,
+                            p.wallclock
                     FROM game g
                         INNER JOIN drive d ON g.id = d.game_id
                         INNER JOIN play p ON d.id = p.drive_id
@@ -241,7 +242,7 @@ module.exports = (db) => {
 				INNER JOIN athlete_team AS att ON a.id = att.athlete_id AND att.start_year <= g.season AND att.end_year >= g.season AND att.team_id = t.id
                 INNER JOIN play_stat_type AS pst ON ps.stat_type_id = pst.id
                 INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             ${filter}
             LIMIT 2000
         `, params);

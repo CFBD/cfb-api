@@ -79,7 +79,7 @@ module.exports = (db, Sentry) => {
                 }
 
                 let games = await db.any(`
-                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.start_time_tbd, g.neutral_site, g.conference_game, g.attendance, v.id as venue_id, v.name as venue, home.id as home_id, home.school as home_team, hc.name as home_conference, gt.points as home_points, gt.line_scores as home_line_scores, gt.win_prob AS home_post_win_prob, away.id AS away_id, away.school as away_team, ac.name as away_conference, gt2.points as away_points, gt2.line_scores as away_line_scores, gt2.win_prob AS away_post_win_prob, g.excitement as excitement_index
+                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.start_time_tbd, g.neutral_site, g.conference_game, g.attendance, v.id as venue_id, v.name as venue, home.id as home_id, home.school as home_team, hc.name as home_conference, gt.points as home_points, gt.line_scores as home_line_scores, gt.win_prob AS home_post_win_prob, gt.start_elo AS home_pregame_elo, gt.end_elo AS home_postgame_elo, away.id AS away_id, away.school as away_team, ac.name as away_conference, gt2.points as away_points, gt2.line_scores as away_line_scores, gt2.win_prob AS away_post_win_prob, gt2.start_elo AS away_pregame_elo, gt2.end_elo AS away_postgame_elo, g.excitement as excitement_index, 'https://www.youtube.com/watch?v=' || g.highlights AS highlights, g.notes
                     FROM game g
                         INNER JOIN game_team gt ON g.id = gt.game_id AND gt.home_away = 'home'
                         INNER JOIN team home ON gt.team_id = home.id
@@ -285,7 +285,7 @@ module.exports = (db, Sentry) => {
                         return;
                     }
 
-                    filter = 'WHERE g.id = $1';
+                    filter = 'g.id = $1';
                     params = [req.query.gameId];
                 } else {
                     if (req.query.seasonType && req.query.seasonType != 'regular' && req.query.seasonType != 'postseason' && req.query.seasonType != 'both') {
@@ -296,10 +296,16 @@ module.exports = (db, Sentry) => {
                         return;
                     }
 
-                    filter = 'WHERE g.season_type = $1';
-                    params = [req.query.seasonType || 'regular'];
+                    filter = '';
+                    params = [];
 
-                    let index = 2;
+                    let index = 1;
+
+                    if (req.query.seasonType && req.query.seasonType != 'both') {
+                        filter += ` AND g.season_type = $${index}`;
+                        params.push(req.query.seasonType);
+                        index++;
+                    }
 
                     if (req.query.year) {
                         if (isNaN(req.query.year)) {
@@ -346,6 +352,8 @@ module.exports = (db, Sentry) => {
                         params.push(req.query.category);
                         index++;
                     }
+
+                    filter = filter.substring(4);
                 }
 
                 let data = await db.any(`
@@ -363,7 +371,7 @@ module.exports = (db, Sentry) => {
                                     INNER JOIN player_stat_category cat ON gps.category_id = cat.id
                                     INNER JOIN player_stat_type typ ON gps.type_id = typ.id
                                     INNER JOIN athlete a ON gps.athlete_id = a.id
-                                    ${filter}
+                                    WHERE ${filter}
                             `, params);
 
                 let stats = [];
@@ -448,7 +456,7 @@ module.exports = (db, Sentry) => {
                     return;
                 }
 
-                let filter = 'WHERE gt.points IS NOT NULL';
+                let filter = `WHERE g.status = 'completed'`;
                 let params = [];
                 let index = 1;
 
@@ -490,13 +498,14 @@ module.exports = (db, Sentry) => {
                         COUNT(*) FILTER(WHERE gt.home_away = 'away' AND g.neutral_site <> true) AS away_games,
                         COUNT(*) FILTER(WHERE gt.winner = true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_wins,
                         COUNT(*) FILTER(WHERE gt2.winner = true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_losses,
-                        COUNT(*) FILTER(WHERE gt.winner <> true AND gt2.winner <> true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_ties
+                        COUNT(*) FILTER(WHERE gt.winner <> true AND gt2.winner <> true AND gt.home_away = 'away' AND g.neutral_site <> true) AS away_ties,
+                        SUM(gt.win_prob) AS expected_wins
                 FROM game AS g
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
                     INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt2.id <> gt.id
                     INNER JOIN team AS t ON gt.team_id = t.id
                     INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
-                    INNER JOIN conference AS c ON ct.conference_id = c.id
+                    INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                 ${filter}
                 GROUP BY g.season, t.school, c.name, ct.division
                 `, params);
@@ -506,6 +515,7 @@ module.exports = (db, Sentry) => {
                     team: r.team,
                     conference: r.conference,
                     division: r.division || '',
+                    expectedWins: Math.round(parseFloat(r.expected_wins * 10)) / 10,
                     total: {
                         games: parseInt(r.games),
                         wins: parseInt(r.wins),
@@ -577,6 +587,38 @@ module.exports = (db, Sentry) => {
                     const results = await service.getCalendar(req.query.year);
                     res.send(results);
                 }
+            } catch (err) {
+                Sentry.captureException(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
+        },
+        getWeather: async (req, res) => {
+            try {
+                if (!req.query.gameId && !req.query.year) {
+                    res.status(400).send({
+                        error: 'Year is required'
+                    });
+                } else if (req.query.year && !parseInt(req.query.year)) {
+                    res.status(400).send({
+                        error: 'Year must be an integer'
+                    });
+                } else {
+                    const results = await service.getWeather(req.query.gameId, req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference);
+                    res.send(results);
+                }
+            } catch (err) {
+                Sentry.captureException(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
+        },
+        getScoreboard: async (req, res) => {
+            try {
+                const scoreboard = await service.getScoreboard();
+                res.send(scoreboard);
             } catch (err) {
                 Sentry.captureException(err);
                 res.status(500).send({

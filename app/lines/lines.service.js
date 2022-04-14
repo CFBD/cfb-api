@@ -49,7 +49,7 @@ module.exports = (db) => {
         }
 
         let games = await db.any(`
-                SELECT g.id, g.season, g.week, g.season_type, ht.school AS home_team, hc.name AS home_conference, hgt.points AS home_score, awt.school AS away_team, ac.name AS away_conference, agt.points AS away_score
+                SELECT g.id, g.season, g.week, g.season_type, g.start_date, ht.school AS home_team, hc.name AS home_conference, hgt.points AS home_score, awt.school AS away_team, ac.name AS away_conference, agt.points AS away_score
                 FROM game AS g
                     INNER JOIN game_team AS hgt ON hgt.game_id = g.id AND hgt.home_away = 'home'
                     INNER JOIN team AS ht ON hgt.team_id = ht.id
@@ -69,7 +69,7 @@ module.exports = (db) => {
             }
 
             let lines = await db.any(`
-                SELECT g.id, p.name, gl.spread, gl.over_under
+                SELECT g.id, p.name, gl.spread, gl.spread_open, gl.over_under, gl.over_under_open, gl.moneyline_home, gl.moneyline_away
                 FROM game AS g
                     INNER JOIN game_lines AS gl ON g.id = gl.game_id
                     INNER JOIN lines_provider AS p ON gl.lines_provider_id = p.id
@@ -83,7 +83,11 @@ module.exports = (db) => {
                         provider: l.name,
                         spread: l.spread,
                         formattedSpread: l.spread < 0 ? `${g.home_team} ${l.spread}` : `${g.away_team} -${l.spread}`,
-                        overUnder: l.over_under
+                        spreadOpen: l.spread_open,
+                        overUnder: l.over_under,
+                        overUnderOpen: l.over_under_open,
+                        homeMoneyline: l.moneyline_home,
+                        awayMoneyline: l.moneyline_away
                     }));
 
                 return {
@@ -91,6 +95,7 @@ module.exports = (db) => {
                     season: g.season,
                     seasonType: g.season_type,
                     week: g.week,
+                    startDate: g.start_date,
                     homeTeam: g.home_team,
                     homeConference: g.home_conference,
                     homeScore: g.home_score,

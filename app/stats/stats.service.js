@@ -48,7 +48,7 @@ module.exports = (db) => {
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE typ.id IN (2,3,4,7,10,11,12,13,18,21,23,24,25,26,31,32,33,34,35,36,37,38) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
@@ -67,7 +67,7 @@ module.exports = (db) => {
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE typ.id IN (5,6,14,15) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
@@ -86,7 +86,7 @@ module.exports = (db) => {
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE typ.id IN (5,6,14,15) AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
@@ -101,7 +101,7 @@ module.exports = (db) => {
             INNER JOIN game_team_stat AS stat ON gt.id = stat.game_team_id
             INNER JOIN team_stat_type AS typ ON stat.type_id = typ.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE typ.id = 8 AND ${filter}
         GROUP BY g.season, t.school, typ.name, typ.id, c.name
         UNION
@@ -114,7 +114,7 @@ module.exports = (db) => {
             INNER JOIN game_team AS gt ON g.id = gt.game_id
             INNER JOIN team AS t ON gt.team_id = t.id
             INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id
+            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE ${filter}
         GROUP BY g.season, t.school, c.name
         `, params);
@@ -187,7 +187,8 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.scoring = true AND p.play_type_id NOT IN (26,36,38,39) THEN true
+                        WHEN p.play_type_id IN (20,26,34,36,37,38,39,63) THEN false
+                        WHEN p.scoring = true THEN true
                         WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                         WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                         WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
@@ -212,7 +213,7 @@ module.exports = (db) => {
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
                 INNER JOIN team AS t ON gt.team_id = t.id
                 INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                 INNER JOIN drive AS d ON g.id = d.game_id
                 INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
             ${filter}
@@ -231,27 +232,27 @@ module.exports = (db) => {
                 SUM(ppa) AS total_ppa,
                 SUM(ppa) FILTER(WHERE play_type = 'Pass') AS total_passing_ppa,
                 SUM(ppa) FILTER(WHERE play_type = 'Rush') AS total_rushing_ppa,
-                CAST(COUNT(*) FILTER(WHERE down_type = 'standard') AS NUMERIC) / COUNT(*) AS standard_down_rate,
-                CAST(COUNT(*) FILTER(WHERE down_type = 'passing') AS NUMERIC) / COUNT(*) AS passing_down_rate,
-                CAST(COUNT(*) FILTER(WHERE play_type = 'Pass') AS NUMERIC) / COUNT(*) AS passing_rate,
-                CAST(COUNT(*) FILTER(WHERE play_type = 'Rush') AS NUMERIC) / COUNT(*) AS rush_rate,
-                CAST((COUNT(*) FILTER(WHERE success = true)) AS NUMERIC) / COUNT(*) AS success_rate,
+                CAST(AVG(CASE WHEN down_type = 'standard' THEN 1 ELSE 0 END) AS NUMERIC) AS standard_down_rate,
+                CAST(AVG(CASE WHEN down_type = 'passing' THEN 1 ELSE 0 END) AS NUMERIC) AS passing_down_rate,
+                CAST(AVG(CASE WHEN play_type = 'Pass' THEN 1 ELSE 0 END) AS NUMERIC) AS passing_rate,
+                CAST(AVG(CASE WHEN play_type = 'Rush' THEN 1 ELSE 0 END) AS NUMERIC) AS rush_rate,
+                CAST((AVG(CASE WHEN success = true THEN 1 ELSE 0 END)) AS NUMERIC) AS success_rate,
                 AVG(ppa) FILTER(WHERE success = true) AS explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'standard')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'standard') AS standard_down_success_rate,
+                CAST((AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE down_type = 'standard')) AS NUMERIC) AS standard_down_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND down_type = 'standard') AS standard_down_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND down_type = 'passing')) AS NUMERIC) / COUNT(*) FILTER(WHERE down_type = 'passing') AS passing_down_success_rate,
+                CAST((AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE down_type = 'passing')) AS NUMERIC) AS passing_down_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND down_type = 'passing') AS passing_down_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Rush')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Rush') AS rush_success_rate,
+                CAST((AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE play_type = 'Rush')) AS NUMERIC) AS rush_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Rush') AS rush_explosiveness,
-                CAST((COUNT(*) FILTER(WHERE success = true AND play_type = 'Pass')) AS NUMERIC) / COUNT(*) FILTER(WHERE play_type = 'Pass') AS pass_success_rate,
+                CAST((AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE play_type = 'Pass')) AS NUMERIC) AS pass_success_rate,
                 AVG(ppa) FILTER(WHERE success = true AND play_type = 'Pass') AS pass_explosiveness,
-                CAST(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush' AND success = true) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE distance <= 2 AND play_type = 'Rush'), 0), 1) AS power_success,
-                CAST(COUNT(*) FILTER(WHERE play_type = 'Rush' AND yards_gained <= 0) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS stuff_rate,
-                COALESCE(CAST(SUM(CASE WHEN yards_gained <= 0 THEN yards_gained * 1.2 WHEN yards_gained < 5 THEN yards_gained WHEN yards_gained < 11 THEN 4 + (yards_gained - 4) * .5 ELSE 7 END) FILTER (WHERE play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1), 0) AS line_yards,
+                CAST(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE distance <= 2 AND play_type = 'Rush') AS NUMERIC) AS power_success,
+                CAST(AVG(CASE WHEN yards_gained <= 0 THEN 1 ELSE 0 END) FILTER(WHERE play_type = 'Rush') AS NUMERIC) AS stuff_rate,
+                COALESCE(CAST(AVG(CASE WHEN yards_gained <= 0 THEN yards_gained * 1.2 WHEN yards_gained < 5 THEN yards_gained WHEN yards_gained < 11 THEN 4 + (yards_gained - 4) * .5 ELSE 7 END) FILTER (WHERE play_type = 'Rush') AS NUMERIC)) AS line_yards,
                 ROUND(COALESCE(CAST(SUM(CASE WHEN yards_gained <= 0 THEN yards_gained * 1.2 WHEN yards_gained < 5 THEN yards_gained WHEN yards_gained < 11 THEN 4 + (yards_gained - 4) * .5 ELSE 7 END) FILTER (WHERE play_type = 'Rush') AS NUMERIC), 0), 0) AS line_yards_sum,
-                CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS second_level_yards,
+                CAST(AVG(CASE WHEN yards_gained >= 10 THEN 5 WHEN yards_gained > 5 THEN (yards_gained - 5) ELSE 0 END) FILTER(WHERE play_type = 'Rush') AS NUMERIC) AS second_level_yards,
                 CAST(SUM(CASE WHEN yards_gained >= 10 THEN 5 ELSE (yards_gained - 5) END) FILTER(WHERE yards_gained >= 5 AND play_type = 'Rush') AS NUMERIC) AS second_level_yards_sum,
-                CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS open_field_yards,
+                CAST(AVG(CASE WHEN yards_gained > 10 THEN yards_gained - 10 ELSE 0 END) FILTER(WHERE play_type = 'Rush') AS NUMERIC) AS open_field_yards,
                 CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards_sum
         FROM plays
         ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
@@ -266,7 +267,7 @@ module.exports = (db) => {
                         INNER JOIN game_team AS gt ON g.id = gt.game_id
                         INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                         INNER JOIN team AS t ON gt2.team_id = t.id
-                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                         LEFT JOIN game_player_stat AS s ON s.game_team_id = gt.id AND s.type_id = 4 AND s.category_id = 10
                     ${filter}
                     GROUP BY g.season, t.id
@@ -280,7 +281,7 @@ module.exports = (db) => {
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
                     INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                     INNER JOIN team AS t ON gt.team_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN game_team_stat AS s ON s.game_team_id = gt.id AND s.type_id IN (16,21,24)
                     LEFT JOIN fumbles AS f ON f.team_id = t.id
                 ${filter}
@@ -291,7 +292,7 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
                     INNER JOIN team AS t ON p.defense_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                 ${filter}
                 GROUP BY g.season, t.id
             )
@@ -309,7 +310,7 @@ module.exports = (db) => {
                         INNER JOIN game_team AS gt ON g.id = gt.game_id
                         INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                         INNER JOIN team AS t ON gt.team_id = t.id
-                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                        INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                         LEFT JOIN game_player_stat AS s ON s.game_team_id = gt.id AND s.type_id = 4 AND s.category_id = 10
                     ${filter}
                     GROUP BY g.season, t.id
@@ -323,7 +324,7 @@ module.exports = (db) => {
                     INNER JOIN game_team AS gt ON g.id = gt.game_id
                     INNER JOIN game_team AS gt2 ON g.id = gt2.game_id AND gt.id <> gt2.id
                     INNER JOIN team AS t ON gt.team_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN game_team_stat AS s ON s.game_team_id = gt2.id AND s.type_id IN (16,21,24)
                     LEFT JOIN fumbles AS f ON f.team_id = t.id
                 ${filter}
@@ -334,7 +335,7 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
                     INNER JOIN team AS t ON p.offense_id = t.id
-                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                 ${filter}
                 GROUP BY g.season, t.id
             )
@@ -382,7 +383,7 @@ module.exports = (db) => {
                     INNER JOIN drives AS dr ON d.id = dr.drive_id
                 WHERE dr.min_yards <= 40
             )
-            SELECT season, school, unit, AVG(points) AS points 
+            SELECT season, school, unit, COUNT(*) AS opportunities, AVG(points) AS points 
             FROM drive_points
             GROUP BY season, school, unit
         `, params);
@@ -400,7 +401,7 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.offense_id
                     INNER JOIN team AS t ON d.offense_id = t.id
-                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'home' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'away' AND d.start_yardline = ppa.yard_line))
                 ${filter} AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
                 GROUP BY g.season, t.id
@@ -416,7 +417,7 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.defense_id
                     INNER JOIN team AS t ON d.defense_id = t.id
-                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+                    INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
                     INNER JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'away' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'home' AND d.start_yardline = ppa.yard_line))
                 ${filter} AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
                 GROUP BY g.season, t.id
@@ -480,6 +481,7 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
                         openFieldYards: parseFloat(offense.open_field_yards),
                         openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
+                        totalOpportunies: parseInt(scoringOppO ? scoringOppO.opportunities : 0),
                         pointsPerOpportunity: parseFloat(scoringOppO ? scoringOppO.points : 0),
                         fieldPosition: {
                             averageStart: parseFloat(fieldPosition.avg_start_off),
@@ -532,6 +534,7 @@ module.exports = (db) => {
                         secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
                         openFieldYards: parseFloat(defense.open_field_yards),
                         openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
+                        totalOpportunies: parseInt(scoringOppD ? scoringOppD.opportunities : 0),
                         pointsPerOpportunity: parseFloat(scoringOppD ? scoringOppD.points : 0),
                         fieldPosition: {
                             averageStart: parseFloat(fieldPosition.avg_start_def),
@@ -637,7 +640,8 @@ module.exports = (db) => {
                         ELSE 'standard'
                     END AS down_type,
                     CASE
-                        WHEN p.scoring = true AND p.play_type_id NOT IN (26,36,38,39) THEN true
+                        WHEN p.play_type_id IN (20,26,34,36,37,38,39,63) THEN false
+                        WHEN p.scoring = true THEN true
                         WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                         WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                         WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
@@ -849,7 +853,8 @@ module.exports = (db) => {
                             ELSE 'standard'
                         END AS down_type,
                         CASE
-                            WHEN p.scoring = true AND p.play_type_id NOT IN (26,36,38,39) THEN true
+                            WHEN p.play_type_id IN (20,26,34,36,37,38,39,63) THEN false
+                            WHEN p.scoring = true THEN true
                             WHEN p.down = 1 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.5 THEN true
                             WHEN p.down = 2 AND (CAST(p.yards_gained AS NUMERIC) / p.distance) >= 0.7 THEN true
                             WHEN p.down IN (3,4) AND (p.yards_gained >= p.distance) THEN true
@@ -1122,7 +1127,7 @@ WITH offensive_drives AS (
 		LEFT JOIN drive AS d ON g.id = d.game_id AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
 		LEFT JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.offense_id
 		LEFT JOIN team AS t ON d.offense_id = t.id
-		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
 		LEFT JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'home' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'away' AND d.start_yardline = ppa.yard_line))
 	WHERE g.id = $1
 	GROUP BY t.id
@@ -1137,7 +1142,7 @@ WITH offensive_drives AS (
 		LEFT JOIN drive AS d ON g.id = d.game_id AND d.start_period < 5 AND d.result_id NOT IN (28, 41, 43, 44, 57)
 		LEFT JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = d.defense_id
 		LEFT JOIN team AS t ON d.defense_id = t.id
-		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL
+		LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.end_year IS NULL AND ct.start_year IS NOT NULL
 		LEFT JOIN ppa ON ppa.down = 1 AND ppa.distance = 10 AND ((gt.home_away = 'away' AND (100 - d.start_yardline) = ppa.yard_line) OR (gt.home_away = 'home' AND d.start_yardline = ppa.yard_line))
 	WHERE g.id = $1
 	GROUP BY t.id

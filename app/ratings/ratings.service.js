@@ -19,7 +19,7 @@ module.exports = (db) => {
             FROM ratings AS r
                 INNER JOIN team AS t ON r.team_id = t.id
                 INNER JOIN conference_team AS ct ON ct.team_id = t.id AND ct.end_year IS NULL
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             ${filter}
             ORDER BY r.year, r.rating DESC
         `, params);
@@ -147,7 +147,7 @@ module.exports = (db) => {
                     AVG(r.d_db_havoc) AS d_db_havoc
             FROM ratings AS r
                 INNER JOIN conference_team AS ct ON ct.team_id = r.team_id AND ct.start_year <= r.year AND (ct.end_year >= r.year OR ct.end_year IS NULL)
-                INNER JOIN conference AS c ON ct.conference_id = c.id
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             ${filter}
             GROUP BY year, c.name
             ORDER BY c.name, year
@@ -225,11 +225,64 @@ module.exports = (db) => {
         `, params);
 
         return results;
-    }
+    };
+
+    const getElo = async (year, week, team, conference) => {
+        let filter = '';
+        let filters = [];
+        let params = [];
+        let index = 1;
+
+        if (year) {
+            filters.push(`g.season = $${index}`);
+            params.push(year);
+            index++;
+        }
+
+        if (week) {
+            filters.push(`g.week <= $${index}`);
+            params.push(week);
+            index++;
+        }
+
+        if (team) {
+            filters.push(`LOWER(t.school) = LOWER($${index})`);
+            params.push(team);
+            index++
+        }
+
+        if (conference) {
+            filters.push(`LOWER(c.abbreviation) = LOWER($${index})`);
+            params.push(conference);
+            index++;
+        }
+
+        if (params.length) {
+            filter = 'AND ' + filters.join(' AND ');
+        }
+
+        let results = await db.any(`
+        WITH elos AS (
+            SELECT ROW_NUMBER() OVER(PARTITION BY g.season, t.school ORDER BY g.start_date DESC) AS rownum, g.season, t.school AS team, c.name AS conference, gt.end_elo AS elo
+            FROM game AS g
+                INNER JOIN game_team AS gt ON g.id = gt.game_id
+                INNER JOIN team AS t ON gt.team_id = t.id
+                INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year > g.season)
+                INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
+            WHERE gt.end_elo IS NOT NULL AND g.status = 'completed' ${filter}
+        )
+        SELECT season AS year, team, conference, elo
+        FROM elos
+        WHERE rownum = 1
+        `, params);
+
+        return results;
+    };
 
     return {
         getSP,
         getConferenceSP,
-        getSRS
+        getSRS,
+        getElo
     };
 };
