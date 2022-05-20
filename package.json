@@ -36,7 +36,7 @@
     "express-ws": "^4.0.0",
     "gaussian": "^1.1.0",
     "helmet": "^4.2.0",
-    "passport": "^0.4.1",
+    "passport": "^0.6.0",
     "passport-http-bearer": "^1.0.1",
     "pg": "^7.18.2",
     "pg-promise": "^10.9.5",
