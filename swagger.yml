@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.3.2
+  version: 4.4.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -94,6 +94,11 @@ paths:
           type: string
         - name: conference
           description: Conference abbreviation filter
+          in: query
+          required: false
+          type: string
+        - name: division
+          description: Division filter (fbs/fcs/ii/iii)
           in: query
           required: false
           type: string
@@ -2049,6 +2054,8 @@ definitions:
         type: string
       home_conference:
         type: string
+      home_division:
+        type: string
       home_points:
         type: integer
       home_line_scores:
@@ -2066,6 +2073,8 @@ definitions:
       away_team:
         type: string
       away_conference:
+        type: string
+      away_division:
         type: string
       away_points:
         type: integer
@@ -2450,6 +2459,8 @@ definitions:
       alt_name_2:
         type: string
       alt_name_3:
+        type: string
+      classification:
         type: string
       conference:
         type: string

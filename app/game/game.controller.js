@@ -15,6 +15,12 @@ module.exports = (db, Sentry) => {
                         });
 
                         return;
+                    } else if (req.query.division && !['fbs', 'fcs', 'ii', 'iii'].includes(req.query.division.toLowerCase())) {
+                        res.status(400).send({
+                            error: 'Invalid division. Division must be one of: fbs, fcs, ii, iii.'
+                        });
+
+                        return;
                     }
 
                     filter = 'WHERE g.season = $1';
@@ -73,21 +79,27 @@ module.exports = (db, Sentry) => {
                         params.push(req.query.conference);
                         index++;
                     }
+
+                    if (req.query.division) {
+                        filter += ` AND (hc.division = $${index} OR ac.division = $${index})`;
+                        params.push(req.query.division.toLowerCase());
+                        index++;
+                    }
                 } else {
                     filter = 'WHERE g.id = $1';
                     params = [req.query.id];
                 }
 
                 let games = await db.any(`
-                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.start_time_tbd, g.neutral_site, g.conference_game, g.attendance, v.id as venue_id, v.name as venue, home.id as home_id, home.school as home_team, hc.name as home_conference, gt.points as home_points, gt.line_scores as home_line_scores, gt.win_prob AS home_post_win_prob, gt.start_elo AS home_pregame_elo, gt.end_elo AS home_postgame_elo, away.id AS away_id, away.school as away_team, ac.name as away_conference, gt2.points as away_points, gt2.line_scores as away_line_scores, gt2.win_prob AS away_post_win_prob, gt2.start_elo AS away_pregame_elo, gt2.end_elo AS away_postgame_elo, g.excitement as excitement_index, 'https://www.youtube.com/watch?v=' || g.highlights AS highlights, g.notes
+                    SELECT g.id, g.season, g.week, g.season_type, g.start_date, g.start_time_tbd, g.neutral_site, g.conference_game, g.attendance, v.id as venue_id, v.name as venue, home.id as home_id, home.school as home_team, hc.name as home_conference, hc.division as home_division, gt.points as home_points, gt.line_scores as home_line_scores, gt.win_prob AS home_post_win_prob, gt.start_elo AS home_pregame_elo, gt.end_elo AS home_postgame_elo, away.id AS away_id, away.school as away_team, ac.name as away_conference, ac.division as away_division, gt2.points as away_points, gt2.line_scores as away_line_scores, gt2.win_prob AS away_post_win_prob, gt2.start_elo AS away_pregame_elo, gt2.end_elo AS away_postgame_elo, g.excitement as excitement_index, 'https://www.youtube.com/watch?v=' || g.highlights AS highlights, g.notes
                     FROM game g
                         INNER JOIN game_team gt ON g.id = gt.game_id AND gt.home_away = 'home'
                         INNER JOIN team home ON gt.team_id = home.id
-                        LEFT JOIN conference_team hct ON home.id = hct.team_id AND hct.start_year <= g.season AND (hct.end_year >= g.season OR hct.end_year IS NULL)
+                        LEFT JOIN conference_team hct ON home.id = hct.team_id AND (hct.start_year IS NULL OR hct.start_year <= g.season) AND (hct.end_year >= g.season OR hct.end_year IS NULL)
                         LEFT JOIN conference hc ON hct.conference_id = hc.id
                         INNER JOIN game_team gt2 ON g.id = gt2.game_id AND gt2.home_away = 'away'
                         INNER JOIN team away ON gt2.team_id = away.id
-                        LEFT JOIN conference_team act ON away.id = act.team_id AND act.start_year <= g.season AND (act.end_year >= g.season OR act.end_year IS NULL)
+                        LEFT JOIN conference_team act ON away.id = act.team_id AND (act.start_year IS NULL OR act.start_year <= g.season) AND (act.end_year >= g.season OR act.end_year IS NULL)
                         LEFT JOIN conference ac ON act.conference_id = ac.id
                         LEFT JOIN venue v ON g.venue_id = v.id
                     ${filter}
