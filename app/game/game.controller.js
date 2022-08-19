@@ -629,7 +629,7 @@ module.exports = (db, Sentry) => {
         },
         getScoreboard: async (req, res) => {
             try {
-                const scoreboard = await service.getScoreboard();
+                const scoreboard = await service.getScoreboard(req.query.classification, req.query.conference);
                 res.send(scoreboard);
             } catch (err) {
                 Sentry.captureException(err);

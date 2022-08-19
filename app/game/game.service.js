@@ -309,7 +309,25 @@ module.exports = (db) => {
         }));
     };
 
-    const getScoreboard = async () => {
+    const getScoreboard = async (classification = 'fbs', conference) => {
+        let filters = [];
+        let filterParams = [];
+        let filterIndex = 1;
+
+        if (classification) {
+            filterParams.push(classification.toLowerCase());
+            filters.push(`(c.division = $${filterIndex} OR c2.division = $${filterIndex})`);
+            filterIndex++;
+        }
+
+        if (conference) {
+            filterParams.push(conference.toLowerCase());
+            filters.push(`(LOWER(c.abbreviation) = $${filterIndex} OR LOWER(c2.abbreviation) = $${filterIndex})`);
+            filterIndex++;
+        }
+
+        let filterClause = filters.length ? `WHERE ${filters.join(" AND ")}` : '';
+
         let scoreboard = await db.any(`
         WITH this_week AS (
             SELECT DISTINCT season, season_type, week
@@ -320,6 +338,7 @@ module.exports = (db) => {
         )
         SELECT g.id,
             g.start_date AT TIME ZONE 'UTC' AS start_date,
+            g.start_time_tbd,
             g.status,
             g.neutral_site,
             g.conference_game,
@@ -328,11 +347,13 @@ module.exports = (db) => {
             v.state,
             t.id AS home_id,
             t.display_name AS home_team,
+            c.division AS home_classification,
             c.name AS home_conference,
             CASE WHEN g.status = 'completed' THEN gt.points ELSE g.current_home_score END AS home_points,
             t2.id AS away_id,
             t2.display_name AS away_team,
             c2.name AS away_conference,
+            c2.division AS away_classification,
             CASE WHEN g.status = 'completed' THEN gt2.points ELSE g.current_away_score END AS away_points,
             g.current_period,
             CAST(g.current_clock AS CHARACTER VARYING) AS current_clock,
@@ -360,12 +381,14 @@ module.exports = (db) => {
             LEFT JOIN game_weather AS gw ON g.id = gw.game_id
             LEFT JOIN weather_condition AS wc ON gw.weather_condition_code = wc.id
             LEFT JOIN game_lines AS gl ON g.id = gl.game_id AND gl.lines_provider_id = 999999
+        ${filterClause}
         ORDER BY g.start_date
-        `);
+        `, filterParams);
 
         return scoreboard.map(s => ({
             id: parseInt(s.id),
             startDate: s.start_date,
+            startTimeTBD: s.start_time_tbd,
             tv: s.tv,
             neutralSite: s.neutral_site,
             conferenceGame: s.conference_game,
@@ -381,12 +404,14 @@ module.exports = (db) => {
                 id: s.home_id,
                 name: s.home_team,
                 conference: s.home_conference,
+                classfication: s.home_classification,
                 points: s.home_points
             },
             awayTeam: {
                 id: s.away_id,
                 name: s.away_team,
                 conference: s.away_conference,
+                classification: s.away_classification,
                 points: s.away_points
             },
             weather: {
