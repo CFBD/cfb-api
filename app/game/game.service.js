@@ -404,7 +404,7 @@ module.exports = (db) => {
                 id: s.home_id,
                 name: s.home_team,
                 conference: s.home_conference,
-                classfication: s.home_classification,
+                classification: s.home_classification,
                 points: s.home_points
             },
             awayTeam: {
