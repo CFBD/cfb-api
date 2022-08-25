@@ -1,5 +1,5 @@
 const gaussian = require('gaussian');
-const gaussianDistro = gaussian(0, Math.pow(17, 2));
+const gaussianDistro = gaussian(0, Math.pow(14.5, 2));
 const axios = require('axios');
 
 module.exports = (db) => {
