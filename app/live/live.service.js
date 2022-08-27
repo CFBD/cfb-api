@@ -65,7 +65,7 @@ module.exports = async (db) => {
         let drives = [];
         let plays = [];
 
-        if (result.data.gamepackageJSON.drives.current) {
+        if (result.data.gamepackageJSON.drives.current && !driveData.find(d => d.id == result.data.gamepackageJSON.drives.current.id)) {
             driveData.push(result.data.gamepackageJSON.drives.current);
         }
 
