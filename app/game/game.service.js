@@ -378,7 +378,7 @@ module.exports = (db) => {
             LEFT JOIN conference_team AS ct2 ON t2.id = ct2.team_id AND ct2.end_year IS NULL
             LEFT JOIN conference AS c2 ON ct2.conference_id = c2.id
             LEFT JOIN game_media AS gm ON g.id = gm.game_id AND gm.media_type = 'tv'
-            LEFT JOIN game_media AS gm2 ON g.id = gm2.game_id AND gm2.media_type = 'web'
+            LEFT JOIN game_media AS gm2 ON g.id = gm2.game_id AND gm.id <> gm2.id AND gm2.media_type = 'web'
             LEFT JOIN game_weather AS gw ON g.id = gw.game_id
             LEFT JOIN weather_condition AS wc ON gw.weather_condition_code = wc.id
             LEFT JOIN game_lines AS gl ON g.id = gl.game_id AND gl.lines_provider_id = 999999
