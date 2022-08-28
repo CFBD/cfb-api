@@ -60,7 +60,7 @@ module.exports = async (db) => {
 
         let comp = result.data.gamepackageJSON.header.competitions[0];
         let teams = comp.competitors;
-        let driveData = result.data.gamepackageJSON.drives.previous;
+        let driveData = result.data.gamepackageJSON.drives.previous.filter(p => p.team);
 
         let drives = [];
         let plays = [];
