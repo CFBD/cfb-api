@@ -1,5 +1,5 @@
 module.exports = (db) => {
-    const getPlays = async (year, week, team, offense, defense, offenseConference, defenseConference, conference, playType, seasonType) => {
+    const getPlays = async (year, week, team, offense, defense, offenseConference, defenseConference, conference, playType, seasonType, classification) => {
         let filter = 'WHERE g.season = $1';
         let params = [year];
 
@@ -57,6 +57,12 @@ module.exports = (db) => {
         if (seasonType != 'both') {
             filter += ` AND g.season_type = $${index}`;
             params.push(seasonType || 'regular');
+            index++;
+        }
+
+        if (classification && ['fbs', 'fcs', 'ii', 'iii'].includes(classification.toLowerCase())) {
+            filter += ` AND (oc.division = $${index} OR dc.division = $${index})`;
+            params.push(classification.toLowerCase());
             index++;
         }
 

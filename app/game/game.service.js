@@ -1,5 +1,5 @@
 module.exports = (db) => {
-    const getDrives = async (year, seasonType, week, team, offense, defense, offenseConference, defenseConference, conference) => {
+    const getDrives = async (year, seasonType, week, team, offense, defense, offenseConference, defenseConference, conference, classification) => {
         let filter = 'WHERE g.season = $1';
         let params = [year];
 
@@ -50,6 +50,12 @@ module.exports = (db) => {
         if (conference) {
             filter += ` AND (LOWER(oc.abbreviation) = LOWER($${index}) OR LOWER(dc.abbreviation) = LOWER($${index}))`;
             params.push(conference);
+            index++;
+        }
+
+        if (classification && ['fbs', 'fcs', 'ii', 'iii'].includes(classification.toLowerCase())) {
+            filter += ` AND (oc.division = $${index} OR dc.division = $${index})`;
+            params.push(classification.toLowerCase());
             index++;
         }
 
@@ -132,7 +138,7 @@ module.exports = (db) => {
         return drives;
     }
 
-    const getMedia = async (year, seasonType, week, team, conference, mediaType) => {
+    const getMedia = async (year, seasonType, week, team, conference, mediaType, classification) => {
         const filters = [];
         const params = [];
         let index = 1;
@@ -170,6 +176,12 @@ module.exports = (db) => {
         if (mediaType) {
             filters.push(`gm.media_type = $${index}`);
             params.push(mediaType.toLowerCase());
+            index++;
+        }
+
+        if (classification && ['fbs', 'fcs', 'ii', 'iii'].includes(classification.toLowerCase())) {
+            filters.push(`(hc.division = $${index} OR ac.division = $${index})`);
+            params.push(classification.toLowerCase());
             index++;
         }
 
@@ -224,7 +236,7 @@ module.exports = (db) => {
         }));
     };
 
-    const getWeather = async (gameId, year, seasonType, week, team, conference) => {
+    const getWeather = async (gameId, year, seasonType, week, team, conference, classification) => {
         const filters = [];
         const params = [];
         let index = 1;
@@ -260,6 +272,12 @@ module.exports = (db) => {
             if (conference) {
                 filters.push(`(LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`);
                 params.push(conference);
+                index++;
+            }
+
+            if (classification && ['fbs', 'fcs', 'ii', 'iii'].includes(classification.toLowerCase())) {
+                filters.push(`(hc.division = $${index} OR ac.division = $${index})`);
+                params.push(classification.toLowerCase());
                 index++;
             }
         }

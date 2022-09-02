@@ -129,7 +129,7 @@ module.exports = (db, Sentry) => {
                         error: 'Week parameter must be numeric.'
                     });
                 } else {
-                    const drives = await service.getDrives(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.offense, req.query.defense, req.query.offenseConference, req.query.defenseConference, req.query.conference);
+                    const drives = await service.getDrives(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.offense, req.query.defense, req.query.offenseConference, req.query.defenseConference, req.query.conference, req.query.classification);
                     res.send(drives);
                 }
             } catch (err) {
@@ -575,7 +575,7 @@ module.exports = (db, Sentry) => {
                         error: 'Week must be an integer'
                     });
                 } else {
-                    const results = await service.getMedia(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference, req.query.mediaType);
+                    const results = await service.getMedia(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference, req.query.mediaType, req.query.classification);
                     res.send(results);
                 }
             } catch (err) {
@@ -617,7 +617,7 @@ module.exports = (db, Sentry) => {
                         error: 'Year must be an integer'
                     });
                 } else {
-                    const results = await service.getWeather(req.query.gameId, req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference);
+                    const results = await service.getWeather(req.query.gameId, req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference, req.query.classification);
                     res.send(results);
                 }
             } catch (err) {

@@ -52,7 +52,8 @@ module.exports = (db, Sentry) => {
                     req.query.defenseConference,
                     req.query.conference,
                     req.query.playType,
-                    req.query.seasonType
+                    req.query.seasonType,
+                    req.query.classification
                 );
 
                 res.send(plays);

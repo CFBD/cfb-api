@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.4.2
+  version: 4.4.3
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -98,7 +98,7 @@ paths:
           required: false
           type: string
         - name: division
-          description: Division filter (fbs/fcs/ii/iii)
+          description: Division classification filter (fbs/fcs/ii/iii)
           in: query
           required: false
           type: string
@@ -247,6 +247,11 @@ paths:
           in: query
           required: false
           type: string
+        - name: classification
+          description: Division classification filter (fbs/fcs/ii/iii)
+          in: query
+          required: false
+          type: string
       responses:
         '200':
           description: successful operation
@@ -296,6 +301,11 @@ paths:
           type: string
         - name: conference
           description: Conference filter
+          in: query
+          required: false
+          type: string
+        - name: classification
+          description: Division classification filter (fbs/fcs/ii/iii)
           in: query
           required: false
           type: string
@@ -498,6 +508,11 @@ paths:
           in: query
           required: false
           type: string
+        - name: classification
+          description: Division classification filter (fbs/fcs/ii/iii)
+          in: query
+          required: false
+          type: string
       responses:
         '200':
           description: successful operation
@@ -569,6 +584,11 @@ paths:
           in: query
           required: false
           type: integer
+        - name: classification
+          description: Division classification filter (fbs/fcs/ii/iii)
+          in: query
+          required: false
+          type: string
       responses:
         '200':
           description: successful operation
