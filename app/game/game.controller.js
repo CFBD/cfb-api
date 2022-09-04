@@ -216,6 +216,12 @@ module.exports = (db, Sentry) => {
                         params.push(req.query.conference);
                         index++;
                     }
+
+                    if (req.query.classification) {
+                        filter += ` AND (c.division = $${index} OR c2.division = $${index})`;
+                        params.push(req.query.classification.toLowerCase());
+                        index++;
+                    }
                 }
 
                 let data = await db.any(`
