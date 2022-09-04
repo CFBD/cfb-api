@@ -484,8 +484,8 @@ module.exports = (db) => {
                         totalOpportunies: parseInt(scoringOppO ? scoringOppO.opportunities : 0),
                         pointsPerOpportunity: parseFloat(scoringOppO ? scoringOppO.points : 0),
                         fieldPosition: {
-                            averageStart: parseFloat(fieldPosition.avg_start_off),
-                            averagePredictedPoints: parseFloat(fieldPosition.avg_predicted_points_off)
+                            averageStart: fieldPosition ? parseFloat(fieldPosition.avg_start_off) : null,
+                            averagePredictedPoints: fieldPosition ? parseFloat(fieldPosition.avg_predicted_points_off) : null
                         },
                         havoc: {
                             total: havocO ? parseFloat(havocO.total_havoc) : null,
@@ -537,8 +537,8 @@ module.exports = (db) => {
                         totalOpportunies: parseInt(scoringOppD ? scoringOppD.opportunities : 0),
                         pointsPerOpportunity: parseFloat(scoringOppD ? scoringOppD.points : 0),
                         fieldPosition: {
-                            averageStart: parseFloat(fieldPosition.avg_start_def),
-                            averagePredictedPoints: parseFloat(fieldPosition.avg_predicted_points_def)
+                            averageStart: fieldPosition ? parseFloat(fieldPosition.avg_start_def) : null,
+                            averagePredictedPoints: fieldPosition ? parseFloat(fieldPosition.avg_predicted_points_def) : null
                         },
                         havoc: {
                             total: havocD ? parseFloat(havocD.total_havoc) : null,
