@@ -1,7 +1,7 @@
 const serviceConstructor = require('./auth.service');
 
-module.exports = (Sentry) => {
-    const service = serviceConstructor();
+module.exports = (Sentry, db) => {
+    const service = serviceConstructor(db);
     const emailPattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
     const generateKey = async (req, res) => {
@@ -24,7 +24,21 @@ module.exports = (Sentry) => {
         }
     };
 
+    const graphQLAuth = async (req, res) => {
+        try {
+            res.status(200).send({
+                "X-Hasura-User-Id": req.user.id,
+                "X-Hasura-Role": "user",
+                "X-Hasura-Is-Owner": "false",
+                "Cache-Control": "max-age=86400"
+            });
+        } catch (err) {
+            res.sendStatus(401);
+        }
+    };
+
     return {
-        generateKey
+        generateKey,
+        graphQLAuth
     };
 };

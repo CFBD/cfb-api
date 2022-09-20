@@ -112,7 +112,7 @@ module.exports = async (Sentry) => {
     const middlewares = [corsConfig, originAuth, apm, limiter];
     const patreonMiddlewares = [corsConfig, patreonAuth, apm, limiter];
 
-    require('../app/auth/auth.route')(app, corsConfig, Sentry);
+    require('../app/auth/auth.route')(app, corsConfig, Sentry, superPatreonAuth);
     require('../app/coach/coach.route')(app, dbInfo.db, middlewares, Sentry);
     require('../app/game/game.route')(app, dbInfo.db, middlewares, Sentry, patreonMiddlewares);
     require('../app/play/play.route')(app, dbInfo.db, middlewares, Sentry);
