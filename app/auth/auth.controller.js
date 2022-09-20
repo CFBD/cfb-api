@@ -27,7 +27,7 @@ module.exports = (Sentry, db) => {
     const graphQLAuth = async (req, res) => {
         try {
             res.status(200).send({
-                "X-Hasura-User-Id": req.user.id,
+                "X-Hasura-User-Id": `${req.user.id}`,
                 "X-Hasura-Role": "user",
                 "X-Hasura-Is-Owner": "false",
                 "Cache-Control": "max-age=86400"
