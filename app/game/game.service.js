@@ -375,6 +375,8 @@ module.exports = (db) => {
             CASE WHEN g.status = 'completed' THEN gt2.points ELSE g.current_away_score END AS away_points,
             g.current_period,
             CAST(g.current_clock AS CHARACTER VARYING) AS current_clock,
+            g.current_situation,
+            g.current_possession,
             COALESCE(gm.name, gm2.name) AS tv,
             gw.temperature,
             gw.wind_speed,
@@ -414,6 +416,8 @@ module.exports = (db) => {
             status: s.status,
             period: parseInt(s.current_period),
             clock: s.current_clock,
+            situation: s.current_situation,
+            possession: s.current_possession,
             venue: {
                 name: s.venue,
                 city: s.city,
