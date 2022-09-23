@@ -6,7 +6,7 @@ module.exports = (db, Sentry) => {
                 let params = [req.query.conference];
 
                 let teams = await db.any(`
-                    SELECT t.id, t.school, t.mascot, t.abbreviation, t.alt_name as alt_name1, t.abbreviation as alt_name2, t.nickname as alt_name3, c.division AS classification, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos, v.id AS venue_id, v.name AS venue_name, v.capacity, v.grass, v.city, v.state, v.zip, v.country_code, v.location, v.elevation, v.year_constructed, v.dome, v.timezone
+                    SELECT t.id, t.school, t.mascot, t.abbreviation, t.alt_name as alt_name1, t.abbreviation as alt_name2, t.nickname as alt_name3, t.twitter, c.division AS classification, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos, v.id AS venue_id, v.name AS venue_name, v.capacity, v.grass, v.city, v.state, v.zip, v.country_code, v.location, v.elevation, v.year_constructed, v.dome, v.timezone
                     FROM team t
                         LEFT JOIN venue AS v ON t.venue_id = v.id
                         LEFT JOIN conference_team ct ON t.id = ct.team_id AND ct.end_year IS NULL
@@ -29,6 +29,7 @@ module.exports = (db, Sentry) => {
                     color: t.color,
                     alt_color: t.alt_color,
                     logos: t.logos,
+                    twitter: t.twitter,
                     location: {
                         venue_id: t.venue_id,
                         name: t.venue_name,
@@ -64,7 +65,7 @@ module.exports = (db, Sentry) => {
                 let params = req.query.year ? [req.query.year] : [];
 
                 let teams = await db.any(`
-                    SELECT t.id, t.school, t.mascot, t.abbreviation, t.alt_name as alt_name1, t.abbreviation as alt_name2, t.nickname as alt_name3, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos, v.id AS venue_id, v.name AS venue_name, v.capacity, v.grass, v.city, v.state, v.zip, v.country_code, v.location, v.elevation, v.year_constructed, v.dome, v.timezone
+                    SELECT t.id, t.school, t.mascot, t.abbreviation, t.alt_name as alt_name1, t.abbreviation as alt_name2, t.nickname as alt_name3, t.twitter, c.name as conference, ct.division as division, ('#' || t.color) as color, ('#' || t.alt_color) as alt_color, t.images as logos, v.id AS venue_id, v.name AS venue_name, v.capacity, v.grass, v.city, v.state, v.zip, v.country_code, v.location, v.elevation, v.year_constructed, v.dome, v.timezone
                     FROM team t
                         INNER JOIN conference_team ct ON t.id = ct.team_id
                         INNER JOIN  conference c ON c.id = ct.conference_id AND c.division = 'fbs'
@@ -86,6 +87,7 @@ module.exports = (db, Sentry) => {
                     color: t.color,
                     alt_color: t.alt_color,
                     logos: t.logos,
+                    twitter: t.twitter,
                     location: {
                         venue_id: t.venue_id,
                         name: t.venue_name,
