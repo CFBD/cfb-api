@@ -135,14 +135,14 @@ module.exports = (db) => {
                             a.id,
                             a.name,
                             po.abbreviation AS position,
-                            COUNT(*) AS plays,
-                            COUNT(*) FILTER(WHERE p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS pass_plays,
-                            COUNT(*) FILTER(WHERE p.play_type_id IN (5,9,29,39,68)) AS rush_plays,
-                            COUNT(*) FILTER(WHERE p.down = 1) AS first_downs,
-                            COUNT(*) FILTER(WHERE p.down = 2) AS second_downs,
-                            COUNT(*) FILTER(WHERE p.down = 3) AS third_downs,
-                            COUNT(*) FILTER(WHERE (p.down = 2 AND p.distance >= 8) OR (p.down IN (3,4) AND p.distance >= 5)) AS passing_downs,
-                            COUNT(*) FILTER(WHERE p.distance < 5 OR (p.down = 2 AND p.distance < 8)) AS standard_downs
+                            COUNT(DISTINCT p.id) AS plays,
+                            COUNT(DISTINCT p.id) FILTER(WHERE p.play_type_id IN (3,4,6,7,24,26,36,51,67)) AS pass_plays,
+                            COUNT(DISTINCT p.id) FILTER(WHERE p.play_type_id IN (5,9,29,39,68)) AS rush_plays,
+                            COUNT(DISTINCT p.id) FILTER(WHERE p.down = 1) AS first_downs,
+                            COUNT(DISTINCT p.id) FILTER(WHERE p.down = 2) AS second_downs,
+                            COUNT(DISTINCT p.id) FILTER(WHERE p.down = 3) AS third_downs,
+                            COUNT(DISTINCT p.id) FILTER(WHERE (p.down = 2 AND p.distance >= 8) OR (p.down IN (3,4) AND p.distance >= 5)) AS passing_downs,
+                            COUNT(DISTINCT p.id) FILTER(WHERE p.distance < 5 OR (p.down = 2 AND p.distance < 8)) AS standard_downs
             FROM game AS g
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
                 INNER JOIN team AS t ON gt.team_id = t.id
