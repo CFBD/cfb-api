@@ -9,7 +9,8 @@ module.exports = (passport, authDb) => {
                 return cb(null, {
                     id: user.id,
                     username: user.username,
-                    patronLevel: user.patron_level
+                    patronLevel: user.patron_level,
+                    blacklisted: user.blacklisted
                 });
             } else {
                 return cb(null, false);

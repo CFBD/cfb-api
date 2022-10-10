@@ -67,6 +67,8 @@ module.exports = async (Sentry) => {
             if (user || req.get('origin') == corsOrigin || req.get('host') == corsOrigin || env == 'development') {
                 req.user = user;
                 next();
+            } else if (user && user.blacklisted == true) {
+                res.status(401).send('Account has been blacklisted.');
             } else {
                 res.status(401).send('Unauthorized. Did you forget to add "Bearer " before your key? Go to CollegeFootballData.com to register for your free API key. See the CFBD Blog for examples on usage: https://blog.collegefootballdata.com/using-api-keys-with-the-cfbd-api.');
             }
