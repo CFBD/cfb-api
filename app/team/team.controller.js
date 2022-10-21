@@ -133,7 +133,7 @@ module.exports = (db, Sentry) => {
                     }
                 }
 
-                let year = req.query.year || 2020;
+                let year = req.query.year || 2022;
                 filters.push(`att.start_year <= $${index} AND att.end_year >= $${index}`);
                 params.push(year);
 

@@ -60,7 +60,7 @@ module.exports = (db) => {
     };
 
     const getMeanPassingChartData = async (id, rollingPlays, year) => {
-        let season = year ? year : 2020;
+        let season = year ? year : 2022;
         const condition = rollingPlays ? `p2.row_num <= p1.row_num AND (p2.row_num + ${rollingPlays}) > p1.row_num` : 'p2.row_num <= p1.row_num';
 
         const results = await db.any(`
