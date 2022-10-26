@@ -24,14 +24,14 @@ describe('Players', () => {
 
     describe('Passing Charts', () => {
         it('it should get a passing chart for the specified player (no rolling specified)', async () => {
-            const data = await players.getMeanPassingChartData(4035409);
+            const data = await players.getMeanPassingChartData(4035409, null, 2020);
             
             data.should.be.an('array');
             data.length.should.be.gt(0);
         });
 
         it('it should get a passing chart for the specified player (10 rolling plays)', async () => {
-            const data = await players.getMeanPassingChartData(4035409, 10);
+            const data = await players.getMeanPassingChartData(4035409, 10, 2020);
             
             data.should.be.an('array');
             data.length.should.be.gt(0);
