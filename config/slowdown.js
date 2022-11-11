@@ -4,7 +4,7 @@ module.exports = () => {
     const speedLimiter = slowDown({
         windowMs: 10 * 1000,
         delayAfter: 10,
-        delayMs: 300,
+        delayMs: 500,
         keyGenerator: (req) => {
             return req.user.username;
         }
@@ -13,7 +13,7 @@ module.exports = () => {
     const speedLimiterTier1 = slowDown({
         windowMs: 10 * 1000,
         delayAfter: 15,
-        delayMs: 200,
+        delayMs: 300,
         keyGenerator: (req) => {
             return req.user.username;
         }
@@ -22,7 +22,7 @@ module.exports = () => {
     const speedLimiterTier2 = slowDown({
         windowMs: 10 * 1000,
         delayAfter: 20,
-        delayMs: 100,
+        delayMs: 200,
         keyGenerator: (req) => {
             return req.user.username;
         }
