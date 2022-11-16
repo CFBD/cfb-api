@@ -10,7 +10,8 @@ module.exports = (passport, authDb) => {
                     id: user.id,
                     username: user.username,
                     patronLevel: user.patron_level,
-                    blacklisted: user.blacklisted
+                    blacklisted: user.blacklisted,
+                    throttled: user.throttled
                 });
             } else {
                 return cb(null, false);
