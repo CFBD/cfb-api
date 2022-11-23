@@ -340,7 +340,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -428,7 +428,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -494,7 +494,7 @@
             "in": "query",
             "required": true,
             "type": "integer",
-            "minumum": 2001
+            "minimum": 2001
           },
           {
             "name": "week",
@@ -502,7 +502,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -704,7 +704,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -804,7 +804,7 @@
             "in": "query",
             "required": true,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -957,7 +957,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -1171,7 +1171,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 2009
+            "minimum": 2009
           }
         ],
         "responses": {
@@ -1259,7 +1259,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1869
+            "minimum": 1869
           },
           {
             "name": "maxYear",
@@ -1349,7 +1349,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1869
+            "minimum": 1869
           },
           {
             "name": "minYear",
@@ -1407,7 +1407,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -1468,7 +1468,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -2020,7 +2020,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -2095,7 +2095,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -2299,7 +2299,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -2373,7 +2373,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -2382,7 +2382,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           }
         ],
@@ -2442,7 +2442,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -2451,7 +2451,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           }
         ],
@@ -2497,7 +2497,7 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "minumum": 1,
+            "minimum": 1,
             "maximum": 16
           },
           {
@@ -6607,7 +6607,9 @@
                     "teamId": {
                       "type": "integer"
                     },
-                    "team": "string",
+                    "team": {
+                      "type": "string"
+                    },
                     "down": {
                       "type": "integer"
                     },
