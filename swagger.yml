@@ -4435,7 +4435,7 @@ definitions:
                   teamId:
                     type: integer
                   team:
-                    string
+                    type: string
                   down:
                     type: integer
                   distance:

@@ -6607,7 +6607,9 @@
                     "teamId": {
                       "type": "integer"
                     },
-                    "team": "string",
+                    "team": {
+                      "type": "string"
+                    },
                     "down": {
                       "type": "integer"
                     },
