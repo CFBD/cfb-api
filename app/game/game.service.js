@@ -351,7 +351,7 @@ module.exports = (db) => {
             SELECT DISTINCT season, season_type, week
             FROM game
             WHERE start_date > (now() - interval '1d')
-            ORDER BY season, season_type DESC, week
+            ORDER BY season, season_type, week
             LIMIT 1
         )
         SELECT g.id,
