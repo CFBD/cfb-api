@@ -5,6 +5,7 @@ module.exports = () => {
     const port = process.env.DATABASE_PORT;
     const dbName = process.env.DATABASE;
 
+    const authDbHost = process.env.AUTH_DATABASE_HOST;
     const authDbUser = process.env.AUTH_DATABASE_USER;
     const authDbPassword = process.env.AUTH_DATABASE_PASSWORD;
     const authDbName = process.env.AUTH_DATABASE;
@@ -13,7 +14,7 @@ module.exports = () => {
     const promise = require('bluebird');
 
     const connectionString = `postgres://${user}:${password}@${host}:${port}/${dbName}`;
-    const authConnectionString = `postgres://${authDbUser}:${authDbPassword}@${host}:${port}/${authDbName}`;
+    const authConnectionString = `postgres://${authDbUser}:${authDbPassword}@${authDbHost}:${port}/${authDbName}`;
 
     const dbCreator = pgp({
         promiseLib: promise

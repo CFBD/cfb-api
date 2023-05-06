@@ -1,6 +1,6 @@
 module.exports = async (Sentry) => {
     const express = require('express');
-    const expressWs = require('express-ws');
+    // const expressWs = require('express-ws');
 
     const helmet = require('helmet');
     const bodyParser = require('body-parser');
@@ -37,7 +37,7 @@ module.exports = async (Sentry) => {
     let corsConfig = cors(corsOptions);
 
     const app = express();
-    const expressWsObj = expressWs(app);
+    // const expressWsObj = expressWs(app);
 
     app.enable('trust proxy');
 
@@ -130,8 +130,8 @@ module.exports = async (Sentry) => {
     require('../app/draft/draft.route')(app, dbInfo.db, middlewares, Sentry);
     await require('../app/live/live.route')(app, dbInfo.db, patreonMiddlewares, Sentry);
 
-    const consumers = await require('./consumers')();
-    await require('../app/events/events.route')(app, consumers, expressWsObj);
+    // const consumers = await require('./consumers')();
+    // await require('../app/events/events.route')(app, consumers, expressWsObj);
 
     app.get('*', (req, res) => {
         res.redirect('/api/docs/?url=/api-docs.json');

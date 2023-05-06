@@ -1,6 +1,6 @@
 module.exports = (db) => {
     return async (req, res, next) => {
-        if (req.user && req.user.id) {
+        if (process.env.ENABLE_METRICS == 'true' && req.user && req.user.id) {
             try {
                 await db.none(`
                 INSERT INTO metrics (user_id, endpoint, query, user_agent)
