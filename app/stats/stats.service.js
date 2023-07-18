@@ -1,42 +1,43 @@
 module.exports = (db) => {
-    const getTeamStats = async (year, team, conference, startWeek, endWeek) => {
-        let filter = '';
-        let params = [];
-        let index = 1;
+  const getTeamStats = async (year, team, conference, startWeek, endWeek) => {
+    let filter = "";
+    let params = [];
+    let index = 1;
 
-        if (year) {
-            filter += ` AND g.season = $${index}`;
-            params.push(year);
-            index++;
-        }
+    if (year) {
+      filter += ` AND g.season = $${index}`;
+      params.push(year);
+      index++;
+    }
 
-        if (team) {
-            filter += ` AND LOWER(t.school) = LOWER($${index})`;
-            params.push(team);
-            index++;
-        }
+    if (team) {
+      filter += ` AND LOWER(t.school) = LOWER($${index})`;
+      params.push(team);
+      index++;
+    }
 
-        if (conference) {
-            filter += ` AND LOWER(c.abbreviation) = LOWER($${index})`;
-            params.push(conference);
-            index++;
-        }
+    if (conference) {
+      filter += ` AND LOWER(c.abbreviation) = LOWER($${index})`;
+      params.push(conference);
+      index++;
+    }
 
-        if (startWeek) {
-            filter += ` AND (g.week >= $${index} OR g.season_type = 'postseason')`;
-            params.push(startWeek);
-            index++;
-        }
+    if (startWeek) {
+      filter += ` AND (g.week >= $${index} OR g.season_type = 'postseason')`;
+      params.push(startWeek);
+      index++;
+    }
 
-        if (endWeek) {
-            filter += ` AND g.week <= $${index} AND g.season_type <> 'postseason'`;
-            params.push(endWeek);
-            index++;
-        }
+    if (endWeek) {
+      filter += ` AND g.week <= $${index} AND g.season_type <> 'postseason'`;
+      params.push(endWeek);
+      index++;
+    }
 
-        filter = filter.substring(4);
+    filter = filter.substring(4);
 
-        let results = await db.any(`
+    let results = await db.any(
+      `
         SELECT 	g.season,
                 t.school,
                 c.name AS conference,
@@ -117,57 +118,66 @@ module.exports = (db) => {
             INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
         WHERE ${filter}
         GROUP BY g.season, t.school, c.name
-        `, params);
+        `,
+      params
+    );
 
-        return results.map(r => ({
-            season: r.season,
-            team: r.school,
-            conference: r.conference,
-            statName: r.stat_type,
-            statValue: r.stat
-        }));
-    };
+    return results.map((r) => ({
+      season: r.season,
+      team: r.school,
+      conference: r.conference,
+      statName: r.stat_type,
+      statValue: r.stat,
+    }));
+  };
 
-    const getCategories = async () => {
-        let results = await db.any(`
+  const getCategories = async () => {
+    let results = await db.any(`
             SELECT name
             FROM team_stat_type
             ORDER BY name
         `);
 
-        return results.map(r => r.name);
+    return results.map((r) => r.name);
+  };
+
+  const getAdvancedStats = async (
+    year,
+    team,
+    excludeGarbageTime,
+    startWeek,
+    endWeek
+  ) => {
+    let filter = "WHERE ";
+    let params = [];
+    let index = 1;
+
+    if (year) {
+      filter += `g.season = $${index}`;
+      params.push(year);
+      index++;
     }
 
-    const getAdvancedStats = async (year, team, excludeGarbageTime, startWeek, endWeek) => {
-        let filter = 'WHERE ';
-        let params = [];
-        let index = 1;
+    if (team) {
+      filter += ` ${year ? "AND " : ""}LOWER(t.school) = LOWER($${index})`;
+      params.push(team);
+      index++;
+    }
 
-        if (year) {
-            filter += `g.season = $${index}`;
-            params.push(year);
-            index++;
-        }
+    if (startWeek) {
+      filter += ` AND (g.week >= $${index} OR g.season_type = 'postseason')`;
+      params.push(startWeek);
+      index++;
+    }
 
-        if (team) {
-            filter += ` ${year ? 'AND ' : ''}LOWER(t.school) = LOWER($${index})`;
-            params.push(team);
-            index++;
-        }
+    if (endWeek) {
+      filter += ` AND g.week <= $${index} AND g.season_type <> 'postseason'`;
+      params.push(endWeek);
+      index++;
+    }
 
-        if (startWeek) {
-            filter += ` AND (g.week >= $${index} OR g.season_type = 'postseason')`;
-            params.push(startWeek);
-            index++;
-        }
-
-        if (endWeek) {
-            filter += ` AND g.week <= $${index} AND g.season_type <> 'postseason'`;
-            params.push(endWeek);
-            index++;
-        }
-
-        const mainTask = db.any(`
+    const mainTask = db.any(
+      `
         WITH plays AS (
             SELECT  g.id,
                     g.season,
@@ -255,11 +265,14 @@ module.exports = (db) => {
                 CAST(AVG(CASE WHEN yards_gained > 10 THEN yards_gained - 10 ELSE 0 END) FILTER(WHERE play_type = 'Rush') AS NUMERIC) AS open_field_yards,
                 CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards_sum
         FROM plays
-        ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
+        ${excludeGarbageTime == "true" ? "WHERE garbage_time = false" : ""}
         GROUP BY season, school, conference, o_d
-        `, params);
+        `,
+      params
+    );
 
-        const havocTask1 = db.any(`
+    const havocTask1 = db.any(
+      `
             WITH havoc_events AS (
                 WITH fumbles AS (
                     SELECT g.season, t.id AS team_id, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0) AS fumbles
@@ -300,9 +313,12 @@ module.exports = (db) => {
             FROM plays AS p
                 INNER JOIN havoc_events AS h ON p.team_id = h.team_id AND h.season = p.season
                 INNER JOIN team AS t ON t.id = p.team_id
-        `, params);
+        `,
+      params
+    );
 
-        const havocTask2 = await db.any(`
+    const havocTask2 = await db.any(
+      `
             WITH havoc_events AS (
                 WITH fumbles AS (
                     SELECT g.season, t.id AS team_id, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0) AS fumbles
@@ -343,9 +359,12 @@ module.exports = (db) => {
             FROM plays AS p
                 INNER JOIN havoc_events AS h ON p.team_id = h.team_id AND h.season = p.season
                 INNER JOIN team AS t ON t.id = p.team_id
-        `, params);
+        `,
+      params
+    );
 
-        let scoringOppTasks = db.any(`
+    let scoringOppTasks = db.any(
+      `
             WITH drive_data AS (
                 SELECT 	p.drive_id,
                         g.season,
@@ -386,9 +405,12 @@ module.exports = (db) => {
             SELECT season, school, unit, COUNT(*) AS opportunities, AVG(points) AS points 
             FROM drive_points
             GROUP BY season, school, unit
-        `, params);
+        `,
+      params
+    );
 
-        const fieldPositionTask = db.any(`
+    const fieldPositionTask = db.any(
+      `
             WITH offensive_drives AS (
                 SELECT 	g.season,
                         t.id AS team_id,
@@ -431,195 +453,233 @@ module.exports = (db) => {
             FROM team AS t
                 INNER JOIN offensive_drives AS o ON o.team_id = t.id
                 INNER JOIN defensive_drives AS d ON t.id = d.team_id AND o.season = d.season
-        `, params);
+        `,
+      params
+    );
 
-        const fullResults = await Promise.all([
-            mainTask,
-            havocTask1,
-            havocTask2,
-            scoringOppTasks,
-            fieldPositionTask
-        ]);
+    const fullResults = await Promise.all([
+      mainTask,
+      havocTask1,
+      havocTask2,
+      scoringOppTasks,
+      fieldPositionTask,
+    ]);
 
-        const results = fullResults[0];
-        const havocResultsD = fullResults[1];
-        const havocResultsO = fullResults[2];
-        const scoringOppResults = fullResults[3];
-        const fieldPositionResults = fullResults[4];
+    const results = fullResults[0];
+    const havocResultsD = fullResults[1];
+    const havocResultsO = fullResults[2];
+    const scoringOppResults = fullResults[3];
+    const fieldPositionResults = fullResults[4];
 
-        let stats = [];
-        let years = Array.from(new Set(results.map(r => r.season)));
+    let stats = [];
+    let years = Array.from(new Set(results.map((r) => r.season)));
 
-        for (let year of years) {
-            let teams = Array.from(new Set(results.filter(r => r.season == year).map(r => r.team)));
+    for (let year of years) {
+      let teams = Array.from(
+        new Set(results.filter((r) => r.season == year).map((r) => r.team))
+      );
 
-            let yearStats = teams.map(t => {
-                let offense = results.find(r => r.season == year && r.team == t && r.unit == 'offense');
-                let defense = results.find(r => r.season == year && r.team == t && r.unit == 'defense');
-                let havocD = havocResultsD.find(r => r.season == year && r.team == t);
-                let havocO = havocResultsO.find(r => r.season == year && r.team == t);
-                let scoringOppO = scoringOppResults.find(r => r.season == year && r.school == t && r.unit == 'offense');
-                let scoringOppD = scoringOppResults.find(r => r.season == year && r.school == t && r.unit == 'defense');
-                let fieldPosition = fieldPositionResults.find(r => r.season == year && r.school == t);
+      let yearStats = teams.map((t) => {
+        let offense = results.find(
+          (r) => r.season == year && r.team == t && r.unit == "offense"
+        );
+        let defense = results.find(
+          (r) => r.season == year && r.team == t && r.unit == "defense"
+        );
+        let havocD = havocResultsD.find((r) => r.season == year && r.team == t);
+        let havocO = havocResultsO.find((r) => r.season == year && r.team == t);
+        let scoringOppO = scoringOppResults.find(
+          (r) => r.season == year && r.school == t && r.unit == "offense"
+        );
+        let scoringOppD = scoringOppResults.find(
+          (r) => r.season == year && r.school == t && r.unit == "defense"
+        );
+        let fieldPosition = fieldPositionResults.find(
+          (r) => r.season == year && r.school == t
+        );
 
-                return {
-                    season: year,
-                    team: t,
-                    conference: offense.conference,
-                    offense: {
-                        plays: parseInt(offense.plays),
-                        drives: parseInt(offense.drives),
-                        ppa: parseFloat(offense.ppa),
-                        totalPPA: parseFloat(offense.total_ppa),
-                        successRate: parseFloat(offense.success_rate),
-                        explosiveness: parseFloat(offense.explosiveness),
-                        powerSuccess: parseFloat(offense.power_success),
-                        stuffRate: parseFloat(offense.stuff_rate),
-                        lineYards: parseFloat(offense.line_yards),
-                        lineYardsTotal: parseInt(offense.line_yards_sum),
-                        secondLevelYards: parseFloat(offense.second_level_yards),
-                        secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
-                        openFieldYards: parseFloat(offense.open_field_yards),
-                        openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
-                        totalOpportunies: parseInt(scoringOppO ? scoringOppO.opportunities : 0),
-                        pointsPerOpportunity: parseFloat(scoringOppO ? scoringOppO.points : 0),
-                        fieldPosition: {
-                            averageStart: fieldPosition ? parseFloat(fieldPosition.avg_start_off) : null,
-                            averagePredictedPoints: fieldPosition ? parseFloat(fieldPosition.avg_predicted_points_off) : null
-                        },
-                        havoc: {
-                            total: havocO ? parseFloat(havocO.total_havoc) : null,
-                            frontSeven: havocO ? parseFloat(havocO.front_seven_havoc) : null,
-                            db: havocO ? parseFloat(havocO.db_havoc) : null
-                        },
-                        standardDowns: {
-                            rate: parseFloat(offense.standard_down_rate),
-                            ppa: parseFloat(offense.standard_down_ppa),
-                            successRate: parseFloat(offense.standard_down_success_rate),
-                            explosiveness: parseFloat(offense.standard_down_explosiveness)
-                        },
-                        passingDowns: {
-                            rate: parseFloat(offense.passing_down_rate),
-                            ppa: parseFloat(offense.passing_down_ppa),
-                            successRate: parseFloat(offense.passing_down_success_rate),
-                            explosiveness: parseFloat(offense.passing_down_explosiveness)
-                        },
-                        rushingPlays: {
-                            rate: parseFloat(offense.rush_rate),
-                            ppa: parseFloat(offense.rushing_ppa),
-                            totalPPA: parseFloat(offense.total_rushing_ppa),
-                            successRate: parseFloat(offense.rush_success_rate),
-                            explosiveness: parseFloat(offense.rush_explosiveness)
-                        },
-                        passingPlays: {
-                            rate: parseFloat(offense.passing_rate),
-                            ppa: parseFloat(offense.passing_ppa),
-                            totalPPA: parseFloat(offense.total_passing_ppa),
-                            successRate: parseFloat(offense.pass_success_rate),
-                            explosiveness: parseFloat(offense.pass_explosiveness)
-                        }
-                    },
-                    defense: {
-                        plays: parseInt(defense.plays),
-                        drives: parseInt(defense.drives),
-                        ppa: parseFloat(defense.ppa),
-                        totalPPA: parseFloat(defense.total_ppa),
-                        successRate: parseFloat(defense.success_rate),
-                        explosiveness: parseFloat(defense.explosiveness),
-                        powerSuccess: parseFloat(defense.power_success),
-                        stuffRate: parseFloat(defense.stuff_rate),
-                        lineYards: parseFloat(defense.line_yards),
-                        lineYardsTotal: parseInt(defense.line_yards_sum),
-                        secondLevelYards: parseFloat(defense.second_level_yards),
-                        secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
-                        openFieldYards: parseFloat(defense.open_field_yards),
-                        openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
-                        totalOpportunies: parseInt(scoringOppD ? scoringOppD.opportunities : 0),
-                        pointsPerOpportunity: parseFloat(scoringOppD ? scoringOppD.points : 0),
-                        fieldPosition: {
-                            averageStart: fieldPosition ? parseFloat(fieldPosition.avg_start_def) : null,
-                            averagePredictedPoints: fieldPosition ? parseFloat(fieldPosition.avg_predicted_points_def) : null
-                        },
-                        havoc: {
-                            total: havocD ? parseFloat(havocD.total_havoc) : null,
-                            frontSeven: havocD ? parseFloat(havocD.front_seven_havoc) : null,
-                            db: havocD ? parseFloat(havocD.db_havoc) : null
-                        },
-                        standardDowns: {
-                            rate: parseFloat(defense.standard_down_rate),
-                            ppa: parseFloat(defense.standard_down_ppa),
-                            successRate: parseFloat(defense.standard_down_success_rate),
-                            explosiveness: parseFloat(defense.standard_down_explosiveness)
-                        },
-                        passingDowns: {
-                            rate: parseFloat(defense.passing_down_rate),
-                            ppa: parseFloat(defense.passing_down_ppa),
-                            totalPPA: parseFloat(defense.total_passing_ppa),
-                            successRate: parseFloat(defense.passing_down_success_rate),
-                            explosiveness: parseFloat(defense.passing_down_explosiveness)
-                        },
-                        rushingPlays: {
-                            rate: parseFloat(defense.rush_rate),
-                            ppa: parseFloat(defense.rushing_ppa),
-                            totalPPA: parseFloat(defense.total_rushing_ppa),
-                            successRate: parseFloat(defense.rush_success_rate),
-                            explosiveness: parseFloat(defense.rush_explosiveness)
-                        },
-                        passingPlays: {
-                            rate: parseFloat(defense.passing_rate),
-                            ppa: parseFloat(defense.passing_ppa),
-                            successRate: parseFloat(defense.pass_success_rate),
-                            explosiveness: parseFloat(defense.pass_explosiveness)
-                        }
-                    }
-                }
-            });
+        return {
+          season: year,
+          team: t,
+          conference: offense.conference,
+          offense: {
+            plays: parseInt(offense.plays),
+            drives: parseInt(offense.drives),
+            ppa: parseFloat(offense.ppa),
+            totalPPA: parseFloat(offense.total_ppa),
+            successRate: parseFloat(offense.success_rate),
+            explosiveness: parseFloat(offense.explosiveness),
+            powerSuccess: parseFloat(offense.power_success),
+            stuffRate: parseFloat(offense.stuff_rate),
+            lineYards: parseFloat(offense.line_yards),
+            lineYardsTotal: parseInt(offense.line_yards_sum),
+            secondLevelYards: parseFloat(offense.second_level_yards),
+            secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
+            openFieldYards: parseFloat(offense.open_field_yards),
+            openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
+            totalOpportunies: parseInt(
+              scoringOppO ? scoringOppO.opportunities : 0
+            ),
+            pointsPerOpportunity: parseFloat(
+              scoringOppO ? scoringOppO.points : 0
+            ),
+            fieldPosition: {
+              averageStart: fieldPosition
+                ? parseFloat(fieldPosition.avg_start_off)
+                : null,
+              averagePredictedPoints: fieldPosition
+                ? parseFloat(fieldPosition.avg_predicted_points_off)
+                : null,
+            },
+            havoc: {
+              total: havocO ? parseFloat(havocO.total_havoc) : null,
+              frontSeven: havocO ? parseFloat(havocO.front_seven_havoc) : null,
+              db: havocO ? parseFloat(havocO.db_havoc) : null,
+            },
+            standardDowns: {
+              rate: parseFloat(offense.standard_down_rate),
+              ppa: parseFloat(offense.standard_down_ppa),
+              successRate: parseFloat(offense.standard_down_success_rate),
+              explosiveness: parseFloat(offense.standard_down_explosiveness),
+            },
+            passingDowns: {
+              rate: parseFloat(offense.passing_down_rate),
+              ppa: parseFloat(offense.passing_down_ppa),
+              successRate: parseFloat(offense.passing_down_success_rate),
+              explosiveness: parseFloat(offense.passing_down_explosiveness),
+            },
+            rushingPlays: {
+              rate: parseFloat(offense.rush_rate),
+              ppa: parseFloat(offense.rushing_ppa),
+              totalPPA: parseFloat(offense.total_rushing_ppa),
+              successRate: parseFloat(offense.rush_success_rate),
+              explosiveness: parseFloat(offense.rush_explosiveness),
+            },
+            passingPlays: {
+              rate: parseFloat(offense.passing_rate),
+              ppa: parseFloat(offense.passing_ppa),
+              totalPPA: parseFloat(offense.total_passing_ppa),
+              successRate: parseFloat(offense.pass_success_rate),
+              explosiveness: parseFloat(offense.pass_explosiveness),
+            },
+          },
+          defense: {
+            plays: parseInt(defense.plays),
+            drives: parseInt(defense.drives),
+            ppa: parseFloat(defense.ppa),
+            totalPPA: parseFloat(defense.total_ppa),
+            successRate: parseFloat(defense.success_rate),
+            explosiveness: parseFloat(defense.explosiveness),
+            powerSuccess: parseFloat(defense.power_success),
+            stuffRate: parseFloat(defense.stuff_rate),
+            lineYards: parseFloat(defense.line_yards),
+            lineYardsTotal: parseInt(defense.line_yards_sum),
+            secondLevelYards: parseFloat(defense.second_level_yards),
+            secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
+            openFieldYards: parseFloat(defense.open_field_yards),
+            openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
+            totalOpportunies: parseInt(
+              scoringOppD ? scoringOppD.opportunities : 0
+            ),
+            pointsPerOpportunity: parseFloat(
+              scoringOppD ? scoringOppD.points : 0
+            ),
+            fieldPosition: {
+              averageStart: fieldPosition
+                ? parseFloat(fieldPosition.avg_start_def)
+                : null,
+              averagePredictedPoints: fieldPosition
+                ? parseFloat(fieldPosition.avg_predicted_points_def)
+                : null,
+            },
+            havoc: {
+              total: havocD ? parseFloat(havocD.total_havoc) : null,
+              frontSeven: havocD ? parseFloat(havocD.front_seven_havoc) : null,
+              db: havocD ? parseFloat(havocD.db_havoc) : null,
+            },
+            standardDowns: {
+              rate: parseFloat(defense.standard_down_rate),
+              ppa: parseFloat(defense.standard_down_ppa),
+              successRate: parseFloat(defense.standard_down_success_rate),
+              explosiveness: parseFloat(defense.standard_down_explosiveness),
+            },
+            passingDowns: {
+              rate: parseFloat(defense.passing_down_rate),
+              ppa: parseFloat(defense.passing_down_ppa),
+              totalPPA: parseFloat(defense.total_passing_ppa),
+              successRate: parseFloat(defense.passing_down_success_rate),
+              explosiveness: parseFloat(defense.passing_down_explosiveness),
+            },
+            rushingPlays: {
+              rate: parseFloat(defense.rush_rate),
+              ppa: parseFloat(defense.rushing_ppa),
+              totalPPA: parseFloat(defense.total_rushing_ppa),
+              successRate: parseFloat(defense.rush_success_rate),
+              explosiveness: parseFloat(defense.rush_explosiveness),
+            },
+            passingPlays: {
+              rate: parseFloat(defense.passing_rate),
+              ppa: parseFloat(defense.passing_ppa),
+              totalPPA: parseFloat(defense.total_passing_ppa),
+              successRate: parseFloat(defense.pass_success_rate),
+              explosiveness: parseFloat(defense.pass_explosiveness),
+            },
+          },
+        };
+      });
 
-            stats = [
-                ...stats,
-                ...yearStats
-            ];
-        }
+      stats = [...stats, ...yearStats];
+    }
 
-        return stats;
-    };
+    return stats;
+  };
 
-    const getAdvancedGameStats = async (year, team, week, opponent, excludeGarbageTime, seasonType) => {
-        let filter = 'WHERE ';
-        let params = [];
-        let index = 1;
+  const getAdvancedGameStats = async (
+    year,
+    team,
+    week,
+    opponent,
+    excludeGarbageTime,
+    seasonType
+  ) => {
+    let filter = "WHERE ";
+    let params = [];
+    let index = 1;
 
-        if (year) {
-            filter += `g.season = $${index}`;
-            params.push(year);
-            index++;
-        }
+    if (year) {
+      filter += `g.season = $${index}`;
+      params.push(year);
+      index++;
+    }
 
-        if (team) {
-            filter += ` ${year ? 'AND ' : ''}LOWER(t.school) = LOWER($${index})`;
-            params.push(team);
-            index++;
-        }
+    if (team) {
+      filter += ` ${year ? "AND " : ""}LOWER(t.school) = LOWER($${index})`;
+      params.push(team);
+      index++;
+    }
 
-        if (opponent) {
-            filter += ` ${params.length ? 'AND ' : ''}LOWER(t2.school) = LOWER($${index})`;
-            params.push(opponent);
-            index++;
-        }
+    if (opponent) {
+      filter += ` ${
+        params.length ? "AND " : ""
+      }LOWER(t2.school) = LOWER($${index})`;
+      params.push(opponent);
+      index++;
+    }
 
-        if (week) {
-            filter += ` ${params.length ? 'AND ' : ''}g.week = $${index}`;
-            params.push(week);
-            index++;
-        }
+    if (week) {
+      filter += ` ${params.length ? "AND " : ""}g.week = $${index}`;
+      params.push(week);
+      index++;
+    }
 
-        if (seasonType && seasonType.toLowerCase() !== 'both') {
-            filter += ` ${params.length ? 'AND ' : ''}g.season_type = $${index}`;
-            params.push(seasonType);
-            index++;
-        }
+    if (seasonType && seasonType.toLowerCase() !== "both") {
+      filter += ` ${params.length ? "AND " : ""}g.season_type = $${index}`;
+      params.push(seasonType);
+      index++;
+    }
 
-        const results = await db.any(`
+    const results = await db.any(
+      `
         WITH plays AS (
             SELECT  g.id,
                     g.season,
@@ -706,120 +766,128 @@ module.exports = (db) => {
                 CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) / COALESCE(NULLIF(COUNT(*) FILTER(WHERE play_type = 'Rush'), 0), 1) AS open_field_yards,
                 CAST(SUM(yards_gained - 10) FILTER(WHERE play_type = 'Rush' AND yards_gained >= 10) AS NUMERIC) AS open_field_yards_sum
         FROM plays
-        ${excludeGarbageTime == 'true' ? 'WHERE garbage_time = false' : ''}
+        ${excludeGarbageTime == "true" ? "WHERE garbage_time = false" : ""}
         GROUP BY id, season, week, school, opponent, o_d
-        `, params);
+        `,
+      params
+    );
 
-        let stats = [];
-        let ids = Array.from(new Set(results.map(r => r.id)));
+    let stats = [];
+    let ids = Array.from(new Set(results.map((r) => r.id)));
 
-        for (let id of ids) {
-            let teams = Array.from(new Set(results.filter(r => r.id == id).map(r => r.team)));
+    for (let id of ids) {
+      let teams = Array.from(
+        new Set(results.filter((r) => r.id == id).map((r) => r.team))
+      );
 
-            let gameStats = teams.map(t => {
-                let offense = results.find(r => r.id == id && r.team == t && r.unit == 'offense');
-                let defense = results.find(r => r.id == id && r.team == t && r.unit == 'defense');
+      let gameStats = teams
+        .map((t) => {
+          let offense = results.find(
+            (r) => r.id == id && r.team == t && r.unit == "offense"
+          );
+          let defense = results.find(
+            (r) => r.id == id && r.team == t && r.unit == "defense"
+          );
 
-                if (!offense || ! defense) {
-                    return null;
-                }
+          if (!offense || !defense) {
+            return null;
+          }
 
-                return {
-                    gameId: id,
-                    season: offense.year,
-                    week: offense.week,
-                    team: t,
-                    opponent: offense.opponent,
-                    offense: {
-                        plays: parseInt(offense.plays),
-                        drives: parseInt(offense.drives),
-                        ppa: parseFloat(offense.ppa),
-                        totalPPA: parseFloat(offense.total_ppa),
-                        successRate: parseFloat(offense.success_rate),
-                        explosiveness: parseFloat(offense.explosiveness),
-                        powerSuccess: parseFloat(offense.power_success),
-                        stuffRate: parseFloat(offense.stuff_rate),
-                        lineYards: parseFloat(offense.line_yards),
-                        lineYardsTotal: parseInt(offense.line_yards_sum),
-                        secondLevelYards: parseFloat(offense.second_level_yards),
-                        secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
-                        openFieldYards: parseFloat(offense.open_field_yards),
-                        openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
-                        standardDowns: {
-                            ppa: parseFloat(offense.standard_down_ppa),
-                            successRate: parseFloat(offense.standard_down_success_rate),
-                            explosiveness: parseFloat(offense.standard_down_explosiveness)
-                        },
-                        passingDowns: {
-                            ppa: parseFloat(offense.passing_down_ppa),
-                            successRate: parseFloat(offense.passing_down_success_rate),
-                            explosiveness: parseFloat(offense.passing_down_explosiveness)
-                        },
-                        rushingPlays: {
-                            ppa: parseFloat(offense.rushing_ppa),
-                            totalPPA: parseFloat(offense.total_rushing_ppa),
-                            successRate: parseFloat(offense.rush_success_rate),
-                            explosiveness: parseFloat(offense.rush_explosiveness)
-                        },
-                        passingPlays: {
-                            ppa: parseFloat(offense.passing_ppa),
-                            totalPPA: parseFloat(offense.total_passing_ppa),
-                            successRate: parseFloat(offense.pass_success_rate),
-                            explosiveness: parseFloat(offense.pass_explosiveness)
-                        }
-                    },
-                    defense: {
-                        plays: parseInt(defense.plays),
-                        drives: parseInt(defense.drives),
-                        ppa: parseFloat(defense.ppa),
-                        totalPPA: parseFloat(defense.total_ppa),
-                        successRate: parseFloat(defense.success_rate),
-                        explosiveness: parseFloat(defense.explosiveness),
-                        powerSuccess: parseFloat(defense.power_success),
-                        stuffRate: parseFloat(defense.stuff_rate),
-                        lineYards: parseFloat(defense.line_yards),
-                        lineYardsTotal: parseInt(defense.line_yards_sum),
-                        secondLevelYards: parseFloat(defense.second_level_yards),
-                        secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
-                        openFieldYards: parseFloat(defense.open_field_yards),
-                        openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
-                        standardDowns: {
-                            ppa: parseFloat(defense.standard_down_ppa),
-                            successRate: parseFloat(defense.standard_down_success_rate),
-                            explosiveness: parseFloat(defense.standard_down_explosiveness)
-                        },
-                        passingDowns: {
-                            ppa: parseFloat(defense.passing_down_ppa),
-                            successRate: parseFloat(defense.passing_down_success_rate),
-                            explosiveness: parseFloat(defense.passing_down_explosiveness)
-                        },
-                        rushingPlays: {
-                            ppa: parseFloat(defense.rushing_ppa),
-                            totalPPA: parseFloat(defense.total_rushing_ppa),
-                            successRate: parseFloat(defense.rush_success_rate),
-                            explosiveness: parseFloat(defense.rush_explosiveness)
-                        },
-                        passingPlays: {
-                            ppa: parseFloat(defense.passing_ppa),
-                            totalPPA: parseFloat(defense.total_passing_ppa),
-                            successRate: parseFloat(defense.pass_success_rate),
-                            explosiveness: parseFloat(defense.pass_explosiveness)
-                        }
-                    }
-                }
-            }).filter(r => r != null);
+          return {
+            gameId: id,
+            season: offense.year,
+            week: offense.week,
+            team: t,
+            opponent: offense.opponent,
+            offense: {
+              plays: parseInt(offense.plays),
+              drives: parseInt(offense.drives),
+              ppa: parseFloat(offense.ppa),
+              totalPPA: parseFloat(offense.total_ppa),
+              successRate: parseFloat(offense.success_rate),
+              explosiveness: parseFloat(offense.explosiveness),
+              powerSuccess: parseFloat(offense.power_success),
+              stuffRate: parseFloat(offense.stuff_rate),
+              lineYards: parseFloat(offense.line_yards),
+              lineYardsTotal: parseInt(offense.line_yards_sum),
+              secondLevelYards: parseFloat(offense.second_level_yards),
+              secondLevelYardsTotal: parseInt(offense.second_level_yards_sum),
+              openFieldYards: parseFloat(offense.open_field_yards),
+              openFieldYardsTotal: parseInt(offense.open_field_yards_sum),
+              standardDowns: {
+                ppa: parseFloat(offense.standard_down_ppa),
+                successRate: parseFloat(offense.standard_down_success_rate),
+                explosiveness: parseFloat(offense.standard_down_explosiveness),
+              },
+              passingDowns: {
+                ppa: parseFloat(offense.passing_down_ppa),
+                successRate: parseFloat(offense.passing_down_success_rate),
+                explosiveness: parseFloat(offense.passing_down_explosiveness),
+              },
+              rushingPlays: {
+                ppa: parseFloat(offense.rushing_ppa),
+                totalPPA: parseFloat(offense.total_rushing_ppa),
+                successRate: parseFloat(offense.rush_success_rate),
+                explosiveness: parseFloat(offense.rush_explosiveness),
+              },
+              passingPlays: {
+                ppa: parseFloat(offense.passing_ppa),
+                totalPPA: parseFloat(offense.total_passing_ppa),
+                successRate: parseFloat(offense.pass_success_rate),
+                explosiveness: parseFloat(offense.pass_explosiveness),
+              },
+            },
+            defense: {
+              plays: parseInt(defense.plays),
+              drives: parseInt(defense.drives),
+              ppa: parseFloat(defense.ppa),
+              totalPPA: parseFloat(defense.total_ppa),
+              successRate: parseFloat(defense.success_rate),
+              explosiveness: parseFloat(defense.explosiveness),
+              powerSuccess: parseFloat(defense.power_success),
+              stuffRate: parseFloat(defense.stuff_rate),
+              lineYards: parseFloat(defense.line_yards),
+              lineYardsTotal: parseInt(defense.line_yards_sum),
+              secondLevelYards: parseFloat(defense.second_level_yards),
+              secondLevelYardsTotal: parseInt(defense.second_level_yards_sum),
+              openFieldYards: parseFloat(defense.open_field_yards),
+              openFieldYardsTotal: parseInt(defense.open_field_yards_sum),
+              standardDowns: {
+                ppa: parseFloat(defense.standard_down_ppa),
+                successRate: parseFloat(defense.standard_down_success_rate),
+                explosiveness: parseFloat(defense.standard_down_explosiveness),
+              },
+              passingDowns: {
+                ppa: parseFloat(defense.passing_down_ppa),
+                successRate: parseFloat(defense.passing_down_success_rate),
+                explosiveness: parseFloat(defense.passing_down_explosiveness),
+              },
+              rushingPlays: {
+                ppa: parseFloat(defense.rushing_ppa),
+                totalPPA: parseFloat(defense.total_rushing_ppa),
+                successRate: parseFloat(defense.rush_success_rate),
+                explosiveness: parseFloat(defense.rush_explosiveness),
+              },
+              passingPlays: {
+                ppa: parseFloat(defense.passing_ppa),
+                totalPPA: parseFloat(defense.total_passing_ppa),
+                successRate: parseFloat(defense.pass_success_rate),
+                explosiveness: parseFloat(defense.pass_explosiveness),
+              },
+            },
+          };
+        })
+        .filter((r) => r != null);
 
-            stats = [
-                ...stats,
-                ...gameStats
-            ];
-        }
+      stats = [...stats, ...gameStats];
+    }
 
-        return stats;
-    };
+    return stats;
+  };
 
-    const getAdvancedBoxScore = async (id) => {
-        const teamTask = db.any(` 
+  const getAdvancedBoxScore = async (id) => {
+    const teamTask = db.any(
+      ` 
             WITH havoc AS (
                 WITH fumbles AS (
                     SELECT t.school, COALESCE(SUM(CAST(s.stat AS NUMERIC)), 0.0) AS fumbles
@@ -960,9 +1028,12 @@ module.exports = (db) => {
             FROM plays
             WHERE garbage_time = false
             GROUP BY school, total_havoc, db_havoc, front_seven_havoc
-        `, [id]);
+        `,
+      [id]
+    );
 
-        const playerTask = db.any(`
+    const playerTask = db.any(
+      `
             WITH plays AS (
                 SELECT DISTINCT t.id AS team_id,
                                 t.school,
@@ -1070,9 +1141,12 @@ module.exports = (db) => {
             WHERE position IN ('QB', 'RB', 'FB', 'TE', 'WR') AND p.garbage_time = false
             GROUP BY p.id, p."name", p.position, p.school, t.plays, t.pass, t.rush, t.plays_1, t.plays_2, t.plays_3, t.plays_4
             ORDER BY overall_usage DESC
-        `, [id]);
+        `,
+      [id]
+    );
 
-        let scoringOppTask = db.any(`
+    let scoringOppTask = db.any(
+      `
             WITH drive_data AS (
                 SELECT 	p.drive_id,
                         g.season,
@@ -1113,9 +1187,12 @@ module.exports = (db) => {
             SELECT team, unit, COUNT(*) AS opportunities, ROUND(AVG(points), 2) AS avg_points, SUM(points) AS points
             FROM drive_points
             GROUP BY season, team, unit
-        `, [id]);
+        `,
+      [id]
+    );
 
-        const fieldPositionTask = db.any(`
+    const fieldPositionTask = db.any(
+      `
 WITH offensive_drives AS (
 	SELECT 	t.id AS team_id,
 			AVG(CASE
@@ -1155,190 +1232,197 @@ SELECT 	t.school,
 FROM team AS t
 	INNER JOIN offensive_drives AS o ON o.team_id = t.id
 	INNER JOIN defensive_drives AS d ON t.id = d.team_id
-        `, [id]);
+        `,
+      [id]
+    );
 
-        const results = await Promise.all([
-            teamTask,
-            playerTask,
-            scoringOppTask,
-            fieldPositionTask
-        ]);
+    const results = await Promise.all([
+      teamTask,
+      playerTask,
+      scoringOppTask,
+      fieldPositionTask,
+    ]);
 
-        const teamResults = results[0];
-        const playerResults = results[1];
-        const scoringOppResults = results[2];
-        const fieldPositionResults = results[3];
+    const teamResults = results[0];
+    const playerResults = results[1];
+    const scoringOppResults = results[2];
+    const fieldPositionResults = results[3];
 
-        let teams = Array.from(new Set(teamResults.map(t => t.team)));
-
-        return {
-            teams: {
-                ppa: teamResults.map(t => ({
-                    team: t.team,
-                    plays: parseInt(t.plays),
-                    overall: {
-                        total: parseFloat(t.ppa),
-                        quarter1: parseFloat(t.ppa_1),
-                        quarter2: parseFloat(t.ppa_2),
-                        quarter3: parseFloat(t.ppa_3),
-                        quarter4: parseFloat(t.ppa_4)
-                    },
-                    passing: {
-                        total: parseFloat(t.passing_ppa),
-                        quarter1: parseFloat(t.passing_ppa_1),
-                        quarter2: parseFloat(t.passing_ppa_2),
-                        quarter3: parseFloat(t.passing_ppa_3),
-                        quarter4: parseFloat(t.passing_ppa_4)
-                    },
-                    rushing: {
-                        total: parseFloat(t.rushing_ppa),
-                        quarter1: parseFloat(t.rushing_ppa_1),
-                        quarter2: parseFloat(t.rushing_ppa_2),
-                        quarter3: parseFloat(t.rushing_ppa_3),
-                        quarter4: parseFloat(t.rushing_ppa_4)
-                    }
-                })),
-                cumulativePpa: teamResults.map(t => ({
-                    team: t.team,
-                    plays: parseInt(t.plays),
-                    overall: {
-                        total: parseFloat(t.cum_ppa),
-                        quarter1: parseFloat(t.cum_ppa_1),
-                        quarter2: parseFloat(t.cum_ppa_2),
-                        quarter3: parseFloat(t.cum_ppa_3),
-                        quarter4: parseFloat(t.cum_ppa_4)
-                    },
-                    passing: {
-                        total: parseFloat(t.cum_passing_ppa),
-                        quarter1: parseFloat(t.cum_passing_ppa_1),
-                        quarter2: parseFloat(t.cum_passing_ppa_2),
-                        quarter3: parseFloat(t.cum_passing_ppa_3),
-                        quarter4: parseFloat(t.cum_passing_ppa_4)
-                    },
-                    rushing: {
-                        total: parseFloat(t.cum_rushing_ppa),
-                        quarter1: parseFloat(t.cum_rushing_ppa_1),
-                        quarter2: parseFloat(t.cum_rushing_ppa_2),
-                        quarter3: parseFloat(t.cum_rushing_ppa_3),
-                        quarter4: parseFloat(t.cum_rushing_ppa_4)
-                    }
-                })),
-                successRates: teamResults.map(t => ({
-                    team: t.team,
-                    overall: {
-                        total: parseFloat(t.success_rate),
-                        quarter1: parseFloat(t.success_rate_1),
-                        quarter2: parseFloat(t.success_rate_2),
-                        quarter3: parseFloat(t.success_rate_3),
-                        quarter4: parseFloat(t.success_rate_4)
-                    },
-                    standardDowns: {
-                        total: parseFloat(t.standard_success_rate),
-                        quarter1: parseFloat(t.standard_success_rate_1),
-                        quarter2: parseFloat(t.standard_success_rate_2),
-                        quarter3: parseFloat(t.standard_success_rate_3),
-                        quarter4: parseFloat(t.standard_success_rate_4)
-                    },
-                    passingDowns: {
-                        total: parseFloat(t.passing_success_rate),
-                        quarter1: parseFloat(t.passing_success_rate_1),
-                        quarter2: parseFloat(t.passing_success_rate_2),
-                        quarter3: parseFloat(t.passing_success_rate_3),
-                        quarter4: parseFloat(t.passing_success_rate_4)
-                    }
-                })),
-                explosiveness: teamResults.map(t => ({
-                    team: t.team,
-                    overall: {
-                        total: parseFloat(t.explosiveness),
-                        quarter1: parseFloat(t.explosiveness_1),
-                        quarter2: parseFloat(t.explosiveness_2),
-                        quarter3: parseFloat(t.explosiveness_3),
-                        quarter4: parseFloat(t.explosiveness_4)
-                    }
-                })),
-                rushing: teamResults.map(t => ({
-                    team: t.team,
-                    powerSuccess: t.power_success,
-                    stuffRate: t.stuff_rate,
-                    lineYards: t.line_yards,
-                    lineYardsAverage: t.line_yards_avg,
-                    secondLevelYards: t.second_level_yards,
-                    secondLevelYardsAverage: t.second_level_yards_avg,
-                    openFieldYards: t.open_field_yards,
-                    openFieldYardsAverage: t.open_field_yards_avg
-                })),
-                havoc: teamResults.map(t => ({
-                    team: teams.find(te => te != t.team),
-                    total: t.total_havoc,
-                    frontSeven: t.front_seven_havoc,
-                    db: t.db_havoc
-                })),
-                scoringOpportunities: teamResults.map(t => {
-                    let scoring = scoringOppResults.find(o => t.team == o.team && o.unit == 'offense');
-
-                    return {
-                        team: t.team,
-                        opportunities: scoring ? parseInt(scoring.opportunities) : 0,
-                        points: scoring ? parseInt(scoring.points) : 0,
-                        pointsPerOpportunity: scoring ? parseFloat(scoring.avg_points) : 0
-                    };
-                }),
-                fieldPosition: teamResults.map(t => {
-                    let fieldPosition = fieldPositionResults.find(o => t.team == o.school);
-
-                    return {
-                        team: t.team,
-                        averageStart: fieldPosition.avg_start_off,
-                        averageStartingPredictedPoints: fieldPosition.avg_predicted_points_off
-                    }
-                })
-            },
-            players: {
-                usage: playerResults.map(p => ({
-                    player: p.name,
-                    team: p.school,
-                    position: p.position,
-                    total: parseFloat(p.overall_usage),
-                    quarter1: parseFloat(p.overall_usage_1),
-                    quarter2: parseFloat(p.overall_usage_2),
-                    quarter3: parseFloat(p.overall_usage_3),
-                    quarter4: parseFloat(p.overall_usage_4),
-                    rushing: parseFloat(p.rush_usage),
-                    passing: parseFloat(p.pass_usage)
-                })),
-                ppa: playerResults.map(p => ({
-                    player: p.name,
-                    team: p.school,
-                    position: p.position,
-                    average: {
-                        total: parseFloat(p.ppa),
-                        quarter1: parseFloat(p.ppa_1),
-                        quarter2: parseFloat(p.ppa_2),
-                        quarter3: parseFloat(p.ppa_3),
-                        quarter4: parseFloat(p.ppa_4),
-                        rushing: parseFloat(p.ppa_rush),
-                        passing: parseFloat(p.ppa_pass)
-                    },
-                    cumulative: {
-                        total: parseFloat(p.cum_ppa),
-                        quarter1: parseFloat(p.cum_ppa_1),
-                        quarter2: parseFloat(p.cum_ppa_2),
-                        quarter3: parseFloat(p.cum_ppa_3),
-                        quarter4: parseFloat(p.cum_ppa_4),
-                        rushing: parseFloat(p.cum_ppa_rush),
-                        passing: parseFloat(p.cum_ppa_pass)
-                    }
-                }))
-            }
-        }
-    };
+    let teams = Array.from(new Set(teamResults.map((t) => t.team)));
 
     return {
-        getTeamStats,
-        getCategories,
-        getAdvancedStats,
-        getAdvancedGameStats,
-        getAdvancedBoxScore
+      teams: {
+        ppa: teamResults.map((t) => ({
+          team: t.team,
+          plays: parseInt(t.plays),
+          overall: {
+            total: parseFloat(t.ppa),
+            quarter1: parseFloat(t.ppa_1),
+            quarter2: parseFloat(t.ppa_2),
+            quarter3: parseFloat(t.ppa_3),
+            quarter4: parseFloat(t.ppa_4),
+          },
+          passing: {
+            total: parseFloat(t.passing_ppa),
+            quarter1: parseFloat(t.passing_ppa_1),
+            quarter2: parseFloat(t.passing_ppa_2),
+            quarter3: parseFloat(t.passing_ppa_3),
+            quarter4: parseFloat(t.passing_ppa_4),
+          },
+          rushing: {
+            total: parseFloat(t.rushing_ppa),
+            quarter1: parseFloat(t.rushing_ppa_1),
+            quarter2: parseFloat(t.rushing_ppa_2),
+            quarter3: parseFloat(t.rushing_ppa_3),
+            quarter4: parseFloat(t.rushing_ppa_4),
+          },
+        })),
+        cumulativePpa: teamResults.map((t) => ({
+          team: t.team,
+          plays: parseInt(t.plays),
+          overall: {
+            total: parseFloat(t.cum_ppa),
+            quarter1: parseFloat(t.cum_ppa_1),
+            quarter2: parseFloat(t.cum_ppa_2),
+            quarter3: parseFloat(t.cum_ppa_3),
+            quarter4: parseFloat(t.cum_ppa_4),
+          },
+          passing: {
+            total: parseFloat(t.cum_passing_ppa),
+            quarter1: parseFloat(t.cum_passing_ppa_1),
+            quarter2: parseFloat(t.cum_passing_ppa_2),
+            quarter3: parseFloat(t.cum_passing_ppa_3),
+            quarter4: parseFloat(t.cum_passing_ppa_4),
+          },
+          rushing: {
+            total: parseFloat(t.cum_rushing_ppa),
+            quarter1: parseFloat(t.cum_rushing_ppa_1),
+            quarter2: parseFloat(t.cum_rushing_ppa_2),
+            quarter3: parseFloat(t.cum_rushing_ppa_3),
+            quarter4: parseFloat(t.cum_rushing_ppa_4),
+          },
+        })),
+        successRates: teamResults.map((t) => ({
+          team: t.team,
+          overall: {
+            total: parseFloat(t.success_rate),
+            quarter1: parseFloat(t.success_rate_1),
+            quarter2: parseFloat(t.success_rate_2),
+            quarter3: parseFloat(t.success_rate_3),
+            quarter4: parseFloat(t.success_rate_4),
+          },
+          standardDowns: {
+            total: parseFloat(t.standard_success_rate),
+            quarter1: parseFloat(t.standard_success_rate_1),
+            quarter2: parseFloat(t.standard_success_rate_2),
+            quarter3: parseFloat(t.standard_success_rate_3),
+            quarter4: parseFloat(t.standard_success_rate_4),
+          },
+          passingDowns: {
+            total: parseFloat(t.passing_success_rate),
+            quarter1: parseFloat(t.passing_success_rate_1),
+            quarter2: parseFloat(t.passing_success_rate_2),
+            quarter3: parseFloat(t.passing_success_rate_3),
+            quarter4: parseFloat(t.passing_success_rate_4),
+          },
+        })),
+        explosiveness: teamResults.map((t) => ({
+          team: t.team,
+          overall: {
+            total: parseFloat(t.explosiveness),
+            quarter1: parseFloat(t.explosiveness_1),
+            quarter2: parseFloat(t.explosiveness_2),
+            quarter3: parseFloat(t.explosiveness_3),
+            quarter4: parseFloat(t.explosiveness_4),
+          },
+        })),
+        rushing: teamResults.map((t) => ({
+          team: t.team,
+          powerSuccess: t.power_success,
+          stuffRate: t.stuff_rate,
+          lineYards: t.line_yards,
+          lineYardsAverage: t.line_yards_avg,
+          secondLevelYards: t.second_level_yards,
+          secondLevelYardsAverage: t.second_level_yards_avg,
+          openFieldYards: t.open_field_yards,
+          openFieldYardsAverage: t.open_field_yards_avg,
+        })),
+        havoc: teamResults.map((t) => ({
+          team: teams.find((te) => te != t.team),
+          total: t.total_havoc,
+          frontSeven: t.front_seven_havoc,
+          db: t.db_havoc,
+        })),
+        scoringOpportunities: teamResults.map((t) => {
+          let scoring = scoringOppResults.find(
+            (o) => t.team == o.team && o.unit == "offense"
+          );
+
+          return {
+            team: t.team,
+            opportunities: scoring ? parseInt(scoring.opportunities) : 0,
+            points: scoring ? parseInt(scoring.points) : 0,
+            pointsPerOpportunity: scoring ? parseFloat(scoring.avg_points) : 0,
+          };
+        }),
+        fieldPosition: teamResults.map((t) => {
+          let fieldPosition = fieldPositionResults.find(
+            (o) => t.team == o.school
+          );
+
+          return {
+            team: t.team,
+            averageStart: fieldPosition.avg_start_off,
+            averageStartingPredictedPoints:
+              fieldPosition.avg_predicted_points_off,
+          };
+        }),
+      },
+      players: {
+        usage: playerResults.map((p) => ({
+          player: p.name,
+          team: p.school,
+          position: p.position,
+          total: parseFloat(p.overall_usage),
+          quarter1: parseFloat(p.overall_usage_1),
+          quarter2: parseFloat(p.overall_usage_2),
+          quarter3: parseFloat(p.overall_usage_3),
+          quarter4: parseFloat(p.overall_usage_4),
+          rushing: parseFloat(p.rush_usage),
+          passing: parseFloat(p.pass_usage),
+        })),
+        ppa: playerResults.map((p) => ({
+          player: p.name,
+          team: p.school,
+          position: p.position,
+          average: {
+            total: parseFloat(p.ppa),
+            quarter1: parseFloat(p.ppa_1),
+            quarter2: parseFloat(p.ppa_2),
+            quarter3: parseFloat(p.ppa_3),
+            quarter4: parseFloat(p.ppa_4),
+            rushing: parseFloat(p.ppa_rush),
+            passing: parseFloat(p.ppa_pass),
+          },
+          cumulative: {
+            total: parseFloat(p.cum_ppa),
+            quarter1: parseFloat(p.cum_ppa_1),
+            quarter2: parseFloat(p.cum_ppa_2),
+            quarter3: parseFloat(p.cum_ppa_3),
+            quarter4: parseFloat(p.cum_ppa_4),
+            rushing: parseFloat(p.cum_ppa_rush),
+            passing: parseFloat(p.cum_ppa_pass),
+          },
+        })),
+      },
     };
+  };
+
+  return {
+    getTeamStats,
+    getCategories,
+    getAdvancedStats,
+    getAdvancedGameStats,
+    getAdvancedBoxScore,
+  };
 };

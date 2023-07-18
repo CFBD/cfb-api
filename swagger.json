@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\"). API keys can be acquired from the CollegeFootballData.com website.",
-    "version": "4.4.12",
+    "version": "4.4.13",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -3307,18 +3307,13 @@
             "type": "object",
             "properties": {
               "school": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "conference": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
+              },
+              "conference": {
+                "type": "string"
               },
               "homeAway": {
-                "type": "boolean"
+                "type": "string"
               },
               "points": {
                 "type": "integer"
