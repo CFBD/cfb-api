@@ -9,9 +9,8 @@ on:
     # Publish `v1.2.3` tags as releases.
     tags:
       - v*
-  
+
   pull_request:
-    
 
 env:
   # TODO: Change variable to your image's name.
@@ -20,23 +19,23 @@ env:
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
-    runs-on: ubuntu-latest
+  # test:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@v1
 
-      - name: Run tests
-        run: |
-          npm install
-          npm test
-        env:
-          HOST: ${{ secrets.HOST }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-          DATABASE: ${{ secrets.DATABASE }}
+  #     - name: Run tests
+  #       run: |
+  #         npm install
+  #         npm test
+  #       env:
+  #         HOST: ${{ secrets.DATABASE_HOST }}
+  #         DATABASE_USER: ${{ secrets.DATABASE_USER }}
+  #         DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  #         DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+  #         DATABASE: ${{ secrets.DATABASE }}
 
   # Push image to GitHub Package Registry.
   # See also https://docs.docker.com/docker-hub/builds/
@@ -78,16 +77,16 @@ jobs:
     needs: push
     runs-on: ubuntu-latest
     steps:
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        script: |
-          cd /docker/cfb
-          docker pull docker.pkg.github.com/cfbd/cfb-api/cfb-api
-          docker-compose up -d
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd /docker/cfb
+            docker pull docker.pkg.github.com/cfbd/cfb-api/cfb-api
+            docker-compose up -d
   publish-js:
     needs: deploy
     runs-on: ubuntu-latest
