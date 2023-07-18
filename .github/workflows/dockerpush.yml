@@ -82,7 +82,8 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             cd /docker/cfb
             docker pull docker.pkg.github.com/cfbd/cfb-api/cfb-api
