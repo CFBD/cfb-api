@@ -452,11 +452,31 @@ module.exports = (db) => {
         }));
     };
 
+    const getPlayerStatsByWeek = async (week, playerId) => {
+        const stats = await db.any(`
+            SELECT gps.*
+            FROM game_player_stat gps
+            JOIN game_team gt ON gps.game_team_id = gt.id
+            JOIN game g ON gt.game_id = g.id
+            WHERE g.week = ${week} AND gps.athlete_id = ${playerId};
+        `);
+
+        return stats.map(s => ({
+            id: s.id,
+            gameTeamId: s.game_team_id,
+            athleteId: s.athlete_id,
+            categoryId: s.category_id,
+            typeId: s.type_id,
+            stat: s.stat
+        }));
+    };
+
     return {
         getDrives,
         getMedia,
         getCalendar,
         getWeather,
-        getScoreboard
+        getScoreboard,
+        getPlayerStatsByWeek
     };
 };
