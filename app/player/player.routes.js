@@ -9,4 +9,7 @@ module.exports = (app, db, middlewares, Sentry) => {
     app.route('/player/returning').get(middlewares, controller.getReturningProduction);
     app.route('/stats/player/season').get(middlewares, controller.getSeasonStats);
     app.route('/player/portal').get(middlewares, controller.getTransferPortal);
-};
+    app.route('/player/active').get(middlewares, controller.getActivePlayers);
+    app.route('/player/active/powerfive').get(middlewares, controller.getActivePowerFivePlayers);
+    app.route('/player/position').get(middlewares, controller.getActivePlayersByPosition);
+}; 
