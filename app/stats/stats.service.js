@@ -915,6 +915,11 @@ module.exports = (db) => {
                         g.season,
                         g.week,
                         t.school,
+                        g.excitement,
+                        gt.win_prob,
+                        gt.home_away AS home_away,
+                        gt.points AS points,
+                        gt.winner AS winner,
                         CASE
                             WHEN p.down = 2 AND p.distance >= 8 THEN 'passing'
                             WHEN p.down IN (3,4) AND p.distance >= 5 THEN 'passing'
@@ -954,10 +959,16 @@ module.exports = (db) => {
                     INNER JOIN drive AS d ON g.id = d.game_id
                     INNER JOIN play AS p ON d.id = p.drive_id AND p.ppa IS NOT NULL
                     INNER JOIN team AS t ON p.offense_id = t.id
+                    INNER JOIN game_team AS gt ON g.id = gt.game_id AND gt.team_id = t.id
                     LEFT JOIN havoc AS h ON t.school <> h.school
                 WHERE g.id = $1
             )
             SELECT 	school AS team,
+                    home_away,
+                    points,
+                    winner,
+                    excitement,
+                    win_prob,
                     COUNT(*) AS plays,
                     ROUND(CAST(AVG(ppa) AS NUMERIC), 4) AS ppa,
                     ROUND(CAST(AVG(ppa) FILTER(WHERE period = 1) AS NUMERIC), 3) AS ppa_1,
@@ -989,21 +1000,21 @@ module.exports = (db) => {
                     ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush' AND period = 2) AS NUMERIC), 1) AS cum_rushing_ppa_2,
                     ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush' AND period = 3) AS NUMERIC), 1) AS cum_rushing_ppa_3,
                     COALESCE(ROUND(CAST(SUM(ppa) FILTER(WHERE play_type = 'Rush' AND period = 4) AS NUMERIC), 1), 0) AS cum_rushing_ppa_4,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END), 3) AS success_rate,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 1), 3) AS success_rate_1,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 2), 3) AS success_rate_2,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 3), 3) AS success_rate_3,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 4), 3) AS success_rate_4,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE down_type = 'standard'), 3) AS standard_success_rate,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 1 AND down_type = 'standard'), 3) AS standard_success_rate_1,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 2 AND down_type = 'standard'), 3) AS standard_success_rate_2,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 3 AND down_type = 'standard'), 3) AS standard_success_rate_3,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 4 AND down_type = 'standard'), 3) AS standard_success_rate_4,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE down_type = 'passing'), 3) AS passing_success_rate,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 1 AND down_type = 'passing'), 3) AS passing_success_rate_1,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 2 AND down_type = 'passing'), 3) AS passing_success_rate_2,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 3 AND down_type = 'passing'), 3) AS passing_success_rate_3,
-					ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 4 AND down_type = 'passing'), 3) AS passing_success_rate_4,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END), 3) AS success_rate,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 1), 3) AS success_rate_1,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 2), 3) AS success_rate_2,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 3), 3) AS success_rate_3,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 4), 3) AS success_rate_4,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE down_type = 'standard'), 3) AS standard_success_rate,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 1 AND down_type = 'standard'), 3) AS standard_success_rate_1,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 2 AND down_type = 'standard'), 3) AS standard_success_rate_2,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 3 AND down_type = 'standard'), 3) AS standard_success_rate_3,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 4 AND down_type = 'standard'), 3) AS standard_success_rate_4,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE down_type = 'passing'), 3) AS passing_success_rate,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 1 AND down_type = 'passing'), 3) AS passing_success_rate_1,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 2 AND down_type = 'passing'), 3) AS passing_success_rate_2,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 3 AND down_type = 'passing'), 3) AS passing_success_rate_3,
+                    ROUND(AVG(CASE WHEN success = true THEN 1 ELSE 0 END) FILTER(WHERE period = 4 AND down_type = 'passing'), 3) AS passing_success_rate_4,
                     ROUND(CAST(AVG(ppa) FILTER(WHERE success = true) AS NUMERIC), 2) AS explosiveness,
                     ROUND(CAST(AVG(ppa) FILTER(WHERE success = true AND period = 1) AS NUMERIC), 2) AS explosiveness_1,
                     ROUND(CAST(AVG(ppa) FILTER(WHERE success = true AND period = 2) AS NUMERIC), 2) AS explosiveness_2,
@@ -1027,7 +1038,7 @@ module.exports = (db) => {
                     COUNT(*) FILTER(WHERE period = 4) AS plays_4
             FROM plays
             WHERE garbage_time = false
-            GROUP BY school, total_havoc, db_havoc, front_seven_havoc
+            GROUP BY school, home_away, points, winner, excitement, win_prob, total_havoc, db_havoc, front_seven_havoc
         `,
       [id]
     );
@@ -1250,7 +1261,20 @@ FROM team AS t
 
     let teams = Array.from(new Set(teamResults.map((t) => t.team)));
 
+    const homeTeam = teamResults.find(t => t.home_away == "home");
+    const awayTeam = teamResults.find(t => t.team != homeTeam.team);
+
     return {
+      gameInfo: {
+        homeTeam: homeTeam.team,
+        homePoints: homeTeam.points,
+        homeWinProb: homeTeam.win_prob,
+        awayTeam: awayTeam.team,
+        awayPoints: awayTeam.points,
+        awayWinProb: awayTeam.win_prob,
+        homeWinner: homeTeam.winner,
+        excitement: homeTeam.excitement
+      },
       teams: {
         ppa: teamResults.map((t) => ({
           team: t.team,
