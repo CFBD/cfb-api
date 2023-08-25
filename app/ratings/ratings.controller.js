@@ -62,7 +62,7 @@ module.exports = (db, Sentry) => {
             } else if (req.query.week && !parseInt(req.query.week)) {
                 res.status(400).send('Week must be an integer.');
             } else {
-                let elos = await service.getElo(req.query.year, req.query.week, req.query.team, req.query.conference);
+                let elos = await service.getElo(req.query.year, req.query.week, req.query.seasonType, req.query.team, req.query.conference);
                 res.send(elos);
             }
         } catch (err) {

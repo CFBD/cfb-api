@@ -1,7 +1,7 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.4.13
+  version: 4.4.14
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -108,13 +108,13 @@ paths:
           required: false
           type: integer
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Game'
-        '400':
+              $ref: "#/definitions/Game"
+        "400":
           description: error
   /scoreboard:
     get:
@@ -137,13 +137,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/ScoreboardGame'
-        '400':
+              $ref: "#/definitions/ScoreboardGame"
+        "400":
           description: error
   /records:
     get:
@@ -172,13 +172,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamRecord'
-        '400':
+              $ref: "#/definitions/TeamRecord"
+        "400":
           description: error
   /calendar:
     get:
@@ -196,13 +196,13 @@ paths:
           required: true
           type: integer
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Week'
-        '400':
+              $ref: "#/definitions/Week"
+        "400":
           description: error
   /games/media:
     get:
@@ -253,13 +253,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/GameMedia'
-        '400':
+              $ref: "#/definitions/GameMedia"
+        "400":
           description: error
   /games/weather:
     get:
@@ -310,13 +310,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/GameWeather'
-        '400':
+              $ref: "#/definitions/GameWeather"
+        "400":
           description: error
   /games/players:
     get:
@@ -368,13 +368,13 @@ paths:
           required: false
           type: integer
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayerGame'
-        '400':
+              $ref: "#/definitions/PlayerGame"
+        "400":
           description: error
   /games/teams:
     get:
@@ -426,13 +426,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamGame'
-        '400':
+              $ref: "#/definitions/TeamGame"
+        "400":
           description: error
   /game/box/advanced:
     get:
@@ -450,10 +450,10 @@ paths:
           required: true
           type: integer
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
-            $ref: '#/definitions/BoxScore'
+            $ref: "#/definitions/BoxScore"
   /drives:
     get:
       tags:
@@ -519,12 +519,12 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Drive'
+              $ref: "#/definitions/Drive"
   /plays:
     get:
       tags:
@@ -548,7 +548,7 @@ paths:
           type: integer
           minimum: 2001
         - name: week
-          description: 'Week filter (required if team, offense, or defense, not specified)'
+          description: "Week filter (required if team, offense, or defense, not specified)"
           in: query
           required: true
           type: integer
@@ -595,12 +595,12 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Play'
+              $ref: "#/definitions/Play"
   /live/plays:
     get:
       tags:
@@ -617,10 +617,10 @@ paths:
           required: true
           type: integer
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
-              $ref: '#/definitions/LivePlayByPlay'
+            $ref: "#/definitions/LivePlayByPlay"
   /play/types:
     get:
       tags:
@@ -631,12 +631,12 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayType'
+              $ref: "#/definitions/PlayType"
   /play/stats:
     get:
       tags:
@@ -691,13 +691,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayStat'
-        '400':
+              $ref: "#/definitions/PlayStat"
+        "400":
           description: error
   /play/stat/types:
     get:
@@ -709,13 +709,13 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayStatType'
-        '400':
+              $ref: "#/definitions/PlayStatType"
+        "400":
           description: error
   /conferences:
     get:
@@ -727,13 +727,13 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Conference'
-        '400':
+              $ref: "#/definitions/Conference"
+        "400":
           description: error
   /teams:
     get:
@@ -751,13 +751,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Team'
-        '400':
+              $ref: "#/definitions/Team"
+        "400":
           description: error
   /teams/fbs:
     get:
@@ -776,13 +776,13 @@ paths:
           type: integer
           minimum: 1869
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Team'
-        '400':
+              $ref: "#/definitions/Team"
+        "400":
           description: error
   /roster:
     get:
@@ -806,13 +806,13 @@ paths:
           type: integer
           minimum: 2009
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Player'
-        '400':
+              $ref: "#/definitions/Player"
+        "400":
           description: error
   /talent:
     get:
@@ -831,13 +831,13 @@ paths:
           type: integer
           minimum: 2015
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamTalent'
-        '400':
+              $ref: "#/definitions/TeamTalent"
+        "400":
           description: error
   /teams/matchup:
     get:
@@ -872,11 +872,11 @@ paths:
           type: integer
           minimum: 1869
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
-              $ref: '#/definitions/TeamMatchup'
-        '400':
+            $ref: "#/definitions/TeamMatchup"
+        "400":
           description: error
   /venues:
     get:
@@ -888,13 +888,13 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Venue'
-        '400':
+              $ref: "#/definitions/Venue"
+        "400":
           description: error
   /coaches:
     get:
@@ -940,12 +940,12 @@ paths:
           type: integer
           minimum: 1869
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Coach'
+              $ref: "#/definitions/Coach"
   /rankings:
     get:
       tags:
@@ -976,13 +976,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/RankingWeek'
-        '400':
+              $ref: "#/definitions/RankingWeek"
+        "400":
           description: error
   /lines:
     get:
@@ -1039,13 +1039,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/GameLines'
-        '400':
+              $ref: "#/definitions/GameLines"
+        "400":
           description: error
   /recruiting/players:
     get:
@@ -1064,7 +1064,7 @@ paths:
           type: integer
           minimum: 2000
         - name: classification
-          description: 'Type of recruit (HighSchool, JUCO, PrepSchool)'
+          description: "Type of recruit (HighSchool, JUCO, PrepSchool)"
           default: HighSchool
           in: query
           required: false
@@ -1085,13 +1085,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/Recruit'
-        '400':
+              $ref: "#/definitions/Recruit"
+        "400":
           description: error
   /recruiting/teams:
     get:
@@ -1115,13 +1115,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamRecruitingRank'
-        '400':
+              $ref: "#/definitions/TeamRecruitingRank"
+        "400":
           description: error
   /recruiting/groups:
     get:
@@ -1156,13 +1156,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PositionGroupRecruitingRating'
-        '400':
+              $ref: "#/definitions/PositionGroupRecruitingRating"
+        "400":
           description: error
   /ratings/sp:
     get:
@@ -1186,13 +1186,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamSPRating'
-        '400':
+              $ref: "#/definitions/TeamSPRating"
+        "400":
           description: error
   /ratings/srs:
     get:
@@ -1221,13 +1221,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamSRSRating'
-        '400':
+              $ref: "#/definitions/TeamSRSRating"
+        "400":
           description: error
   /ratings/sp/conferences:
     get:
@@ -1251,13 +1251,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/ConferenceSPRating'
-        '400':
+              $ref: "#/definitions/ConferenceSPRating"
+        "400":
           description: error
   /ratings/elo:
     get:
@@ -1279,6 +1279,10 @@ paths:
           in: query
           required: false
           type: integer
+        - name: seasonType
+          description: Maximum season type to consider (defaults to regular if week is specified else defaults to postseason)
+          in: query
+          required: false
         - name: team
           description: Team filter
           in: query
@@ -1290,13 +1294,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamEloRating'
-        '400':
+              $ref: "#/definitions/TeamEloRating"
+        "400":
           description: error
   /ppa/predicted:
     get:
@@ -1323,13 +1327,13 @@ paths:
           minimum: 1
           maximum: 99
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PredictedPoints'
-        '400':
+              $ref: "#/definitions/PredictedPoints"
+        "400":
           description: error
   /ppa/teams:
     get:
@@ -1363,13 +1367,13 @@ paths:
           required: false
           type: boolean
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamPPA'
-        '400':
+              $ref: "#/definitions/TeamPPA"
+        "400":
           description: error
   /ppa/games:
     get:
@@ -1416,13 +1420,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/GamePPA'
-        '400':
+              $ref: "#/definitions/GamePPA"
+        "400":
           description: error
   /ppa/players/games:
     get:
@@ -1479,13 +1483,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayerGamePPA'
-        '400':
+              $ref: "#/definitions/PlayerGamePPA"
+        "400":
           description: error
   /ppa/players/season:
     get:
@@ -1534,13 +1538,13 @@ paths:
           required: false
           type: boolean
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayerSeasonPPA'
-        '400':
+              $ref: "#/definitions/PlayerSeasonPPA"
+        "400":
           description: error
   /metrics/wp:
     get:
@@ -1558,13 +1562,13 @@ paths:
           required: true
           type: integer
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayWP'
-        '400':
+              $ref: "#/definitions/PlayWP"
+        "400":
           description: error
   /metrics/wp/pregame:
     get:
@@ -1600,13 +1604,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PregameWP'
-        '400':
+              $ref: "#/definitions/PregameWP"
+        "400":
           description: error
   /stats/season:
     get:
@@ -1649,13 +1653,13 @@ paths:
           minimum: 1
           maximum: 16
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/TeamSeasonStat'
-        '400':
+              $ref: "#/definitions/TeamSeasonStat"
+        "400":
           description: error
   /stats/season/advanced:
     get:
@@ -1698,13 +1702,13 @@ paths:
           minimum: 1
           maximum: 16
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/AdvancedSeasonStat'
-        '400':
+              $ref: "#/definitions/AdvancedSeasonStat"
+        "400":
           description: error
   /stats/game/advanced:
     get:
@@ -1750,13 +1754,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/AdvancedGameStat'
-        '400':
+              $ref: "#/definitions/AdvancedGameStat"
+        "400":
           description: error
   /stats/categories:
     get:
@@ -1768,7 +1772,7 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
@@ -1806,13 +1810,13 @@ paths:
           type: integer
           minimum: 2001
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayerSearchResult'
-        '400':
+              $ref: "#/definitions/PlayerSearchResult"
+        "400":
           description: error
   /player/usage:
     get:
@@ -1857,13 +1861,13 @@ paths:
           required: false
           type: boolean
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayerUsage'
-        '400':
+              $ref: "#/definitions/PlayerUsage"
+        "400":
           description: error
   /player/returning:
     get:
@@ -1892,13 +1896,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/ReturningProduction'
-        '400':
+              $ref: "#/definitions/ReturningProduction"
+        "400":
           description: error
   /stats/player/season:
     get:
@@ -1946,13 +1950,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PlayerSeasonStat'
-        '400':
+              $ref: "#/definitions/PlayerSeasonStat"
+        "400":
           description: error
   /player/portal:
     get:
@@ -1970,13 +1974,13 @@ paths:
           required: true
           type: integer
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/PortalPlayer'
-        '400':
+              $ref: "#/definitions/PortalPlayer"
+        "400":
           description: error
   /draft/teams:
     get:
@@ -1988,13 +1992,13 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/DraftTeam'
-        '400':
+              $ref: "#/definitions/DraftTeam"
+        "400":
           description: error
   /draft/positions:
     get:
@@ -2006,13 +2010,13 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/DraftPosition'
-        '400':
+              $ref: "#/definitions/DraftPosition"
+        "400":
           description: error
   /draft/picks:
     get:
@@ -2050,13 +2054,13 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
             type: array
             items:
-              $ref: '#/definitions/DraftPick'
-        '400':
+              $ref: "#/definitions/DraftPick"
+        "400":
           description: error
 definitions:
   Game:
@@ -2645,7 +2649,7 @@ definitions:
         properties:
           x:
             type: number
-          'y':
+          "y":
             type: number
       elevation:
         type: number
@@ -3173,7 +3177,7 @@ definitions:
         type: integer
   PregameWP:
     type: object
-    properties: 
+    properties:
       season:
         type: integer
       seasonType:
@@ -3289,7 +3293,7 @@ definitions:
             type: number
           fieldPosition:
             type: object
-            properties: 
+            properties:
               averageStart:
                 type: number
               averagePredictedPoints:
@@ -3388,7 +3392,7 @@ definitions:
             type: number
           fieldPosition:
             type: object
-            properties: 
+            properties:
               averageStart:
                 type: number
               averagePredictedPoints:
@@ -3634,7 +3638,7 @@ definitions:
         type: string
   PlayerGamePPA:
     type: object
-    properties: 
+    properties:
       season:
         type: integer
       week:
@@ -3649,7 +3653,7 @@ definitions:
         type: string
       averagePPA:
         type: object
-        properties: 
+        properties:
           all:
             type: number
           pass:
@@ -3658,7 +3662,7 @@ definitions:
             type: number
   PlayerSeasonPPA:
     type: object
-    properties: 
+    properties:
       season:
         type: integer
       id:
@@ -3673,7 +3677,7 @@ definitions:
         type: string
       averagePPA:
         type: object
-        properties: 
+        properties:
           all:
             type: number
           pass:
@@ -3692,7 +3696,7 @@ definitions:
             type: number
       totalPPA:
         type: object
-        properties: 
+        properties:
           all:
             type: number
           pass:
@@ -3711,7 +3715,7 @@ definitions:
             type: number
   PlayerUsage:
     type: object
-    properties: 
+    properties:
       season:
         type: integer
       id:
@@ -3726,7 +3730,7 @@ definitions:
         type: string
       usage:
         type: object
-        properties: 
+        properties:
           overall:
             type: number
           pass:
@@ -3786,14 +3790,14 @@ definitions:
             type: array
             items:
               type: object
-              properties: 
+              properties:
                 team:
                   type: string
                 plays:
                   type: number
                 overall:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3806,7 +3810,7 @@ definitions:
                       type: number
                 passing:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3819,7 +3823,7 @@ definitions:
                       type: number
                 rushing:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3834,14 +3838,14 @@ definitions:
             type: array
             items:
               type: object
-              properties: 
+              properties:
                 team:
                   type: string
                 plays:
                   type: number
                 overall:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3854,7 +3858,7 @@ definitions:
                       type: number
                 passing:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3867,7 +3871,7 @@ definitions:
                       type: number
                 rushing:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3882,12 +3886,12 @@ definitions:
             type: array
             items:
               type: object
-              properties: 
+              properties:
                 team:
                   type: string
                 overall:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3900,7 +3904,7 @@ definitions:
                       type: number
                 standardDowns:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3913,7 +3917,7 @@ definitions:
                       type: number
                 passingDowns:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3928,12 +3932,12 @@ definitions:
             type: array
             items:
               type: object
-              properties: 
+              properties:
                 team:
                   type: string
                 overall:
                   type: object
-                  properties: 
+                  properties:
                     total:
                       type: number
                     quarter1:
@@ -3997,7 +4001,7 @@ definitions:
             type: array
             items:
               type: object
-              properties: 
+              properties:
                 team:
                   type: string
                 averageStart:

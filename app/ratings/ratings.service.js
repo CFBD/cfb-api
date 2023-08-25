@@ -227,7 +227,7 @@ module.exports = (db) => {
         return results;
     };
 
-    const getElo = async (year, week, team, conference) => {
+    const getElo = async (year, week, seasonType, team, conference) => {
         let filter = '';
         let filters = [];
         let params = [];
@@ -242,6 +242,12 @@ module.exports = (db) => {
         if (week) {
             filters.push(`g.week <= $${index}`);
             params.push(week);
+            index++;
+        }
+
+        if ((seasonType && seasonType === 'regular') || week) {
+            filters.push(`g.season_type = $${index}`);
+            params.push('regular');
             index++;
         }
 
