@@ -516,12 +516,86 @@ module.exports = (db) => {
         }));
     };
 
+    const getActivePlayers = async () => {
+        let players = await db.any(`
+            SELECT * from athlete
+            WHERE active = true
+        `);
+
+        return players.map(p => ({
+            id: p.id,
+            teamId: p.team_id,
+            name: p.name,
+            firstName: p.first_name,
+            lastName: p.last_name,
+            weight: p.weight,
+            height: p.height,
+            jersey: p.jersey,
+            hometownId: p.hometown_id,
+            positionId: p.position_id,
+            active: p.active,
+            year: p.year
+        }));
+    };
+
+    const getActivePowerFivePlayers = async () => {
+        // need to replace dashed line with IDs of power five conferences
+        let players = await db.any(`
+            SELECT a.*
+            FROM athlete a
+            JOIN athlete_team at ON a.id = at.athlete_id
+            JOIN team t ON at.team_id = t.id
+            JOIN conference_team ct ON t.id = ct.team_id
+            WHERE ct.conference_id IN ---------;
+        `);
+
+        return players.map(p => ({
+            id: p.id,
+            teamId: p.team_id,
+            name: p.name,
+            firstName: p.first_name,
+            lastName: p.last_name,
+            weight: p.weight,
+            height: p.height,
+            jersey: p.jersey,
+            hometownId: p.hometown_id,
+            positionId: p.position_id,
+            active: p.active,
+            year: p.year
+        }));
+    };
+
+    const getActivePlayersByPosition = async (positionId) => {
+        let players = await db.any(`
+            SELECT * from athlete
+            WHERE position_id = ${positionId}
+        `);
+
+        return players.map(p => ({
+            id: p.id,
+            teamId: p.team_id,
+            name: p.name,
+            firstName: p.first_name,
+            lastName: p.last_name,
+            weight: p.weight,
+            height: p.height,
+            jersey: p.jersey,
+            hometownId: p.hometown_id,
+            positionId: p.position_id,
+            active: p.active,
+            year: p.year
+        }));
+    };
+
     return {
         playerSearch,
         getMeanPassingChartData,
         getPlayerUsage,
         getReturningProduction,
         getSeasonStats,
-        getTransferPortal
+        getTransferPortal,
+        getActivePlayers,
+        getActivePowerFivePlayers,
+        getActivePlayersByPosition
     };
 };

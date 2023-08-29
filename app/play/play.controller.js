@@ -7,7 +7,7 @@ module.exports = (db, Sentry) => {
         try {
             let types = await service.getPlayTypes();
             res.send(types);
-        } catch (err) {
+        } catch (err) { 
             Sentry.captureException(err);
             res.status(500).send({
                 error: 'Something went wrong.'

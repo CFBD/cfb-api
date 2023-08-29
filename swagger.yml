@@ -145,6 +145,37 @@ paths:
               $ref: "#/definitions/ScoreboardGame"
         "400":
           description: error
+  /player/stats:
+    get:
+      tags:
+        - games
+      summary: Individual player stats
+      description: Get a player's stats for a given week
+      operationId: getPlayerStats
+      produces:
+        - application/json
+      parameters:
+        - name: week
+          description: Week of season the game took place
+          in: query
+          required: true
+          type: integer
+          minimum: 0
+        - name: athleteId
+          description: The database id of the athlete
+          in: query
+          required: true
+          type: integer
+          minimum: 0
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: array
+        "400":
+          description: error, failed to include required parameter
+        "500":
+          description: erro, unknown cause
   /records:
     get:
       tags:
@@ -1982,6 +2013,62 @@ paths:
               $ref: "#/definitions/PortalPlayer"
         "400":
           description: error
+  /player/active:
+    get:
+      tags:
+        - players
+      summary: Get all active players
+      description: All active players
+      operationId: getActivePlayers
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+        "500":
+          description: error, unknown origin
+    /player/active/powerfive:
+      get:
+        tags:
+          - players
+        summary: Get all active power five players
+        description: All active power five players
+        operationId: getActivePowerFivePlayers
+        produces:
+          - application/json
+        responses:
+          "200":
+            description: successful operation
+            schema:
+              type: array
+          "500":
+            description: error, unknown origin
+  /player/position:
+    get:
+      tags:
+        - players
+      summary: Get all active players at a given position
+      description: All active players at a given position
+      operationId: getActivePlayersByPosition
+      produces:
+        - application/json
+      parameters:
+        - name: positionId
+          description: Id of position looking for (include QB = 1, RB = 2 but idk what id goes with what position)
+          in: query
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+        "400":
+          description: error, failed to include positionId
+        "500":
+          description: error, unknown origin
   /draft/teams:
     get:
       tags:

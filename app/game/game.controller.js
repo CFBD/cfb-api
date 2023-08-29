@@ -287,7 +287,7 @@ module.exports = (db, Sentry) => {
                     res.status(400).send({
                         error: 'Must specify a gameId or a year with either a week, team, or conference.'
                     });
-
+ 
                     return;
                 }
 
@@ -637,6 +637,23 @@ module.exports = (db, Sentry) => {
             try {
                 const scoreboard = await service.getScoreboard(req.query.classification, req.query.conference);
                 res.send(scoreboard);
+            } catch (err) {
+                Sentry.captureException(err);
+                res.status(500).send({
+                    error: 'Something went wrong.'
+                });
+            }
+        },
+        getPlayerStatsByWeek: async (req, res) => {
+            try {
+                if (!req.query.week || !req.query.athleteId) {
+                    res.status(400).send({
+                        error: 'athletId and week must be specified'
+                    });
+                } else {
+                    const data = await service.getPlayerStatsByWeek(req.query.week, req.query.athleteId);
+                    res.send(data);
+                }
             } catch (err) {
                 Sentry.captureException(err);
                 res.status(500).send({

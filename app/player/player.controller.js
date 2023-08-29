@@ -19,7 +19,7 @@ module.exports = (db, Sentry) => {
             }
         } catch (err) {
             Sentry.captureException(err);
-            res.status(500).send({
+            res.status(500).send({ 
                 error: 'Something went wrong.'
             });
         }
@@ -152,12 +152,57 @@ module.exports = (db, Sentry) => {
         }
     };
 
+    const getActivePlayers = async (req, res) => {
+        try {
+            const data = await service.getActivePlayers();
+            res.send(data);
+        } catch (err) {
+            Sentry.captureException(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    };
+
+    const getActivePowerFivePlayers = async (req, res) => {
+        try {
+            const data = await service.getActivePowerFivePlayers();
+            res.send(data);
+        } catch (err) {
+            Sentry.captureException(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    }; 
+
+    const getActivePlayersByPosition = async (req, res) => {
+        try {
+            if (!req.query.positionId) {
+                res.status(400).send({
+                    error: 'position id must be specified'
+                });
+            } else {
+                const data = await service.getActivePlayersByPosition(req.query.positionId);
+                res.send(data);
+            }
+        } catch (err) {
+            Sentry.captureException(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    };
+
     return {
         playerSearch,
         getMeanPassingPPA,
         getPlayerUsage,
         getReturningProduction,
         getSeasonStats,
-        getTransferPortal
+        getTransferPortal,
+        getActivePlayers,
+        getActivePowerFivePlayers,
+        getActivePlayersByPosition
     };
 };
