@@ -527,7 +527,7 @@ module.exports = (db, Sentry) => {
                     INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year >= g.season OR ct.end_year IS NULL)
                     INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
                 ${filter}
-                GROUP BY g.season, t.school, c.name, ct.division
+                GROUP BY g.season, t.id, t.school, c.name, ct.division
                 `, params);
 
                 res.send(results.map(r => ({
