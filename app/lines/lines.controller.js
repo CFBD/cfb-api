@@ -11,7 +11,7 @@ module.exports = (db, Sentry) => {
                 });
 
                 return;
-            } else if (!req.query.year || isNaN(req.query.year)) {
+            } else if (!req.query.gameId && (!req.query.year || isNaN(req.query.year))) {
                 res.status(400).send({
                     error: 'A numeric year parameter must be specified.'
                 });

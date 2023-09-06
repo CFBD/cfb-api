@@ -225,7 +225,7 @@ module.exports = (db, Sentry) => {
                 }
 
                 let data = await db.any(`
-                                SELECT g.id, gt.home_away, t.school, c.name as conference, gt.points, tst.name, gts.stat
+                                SELECT g.id, gt.home_away, t.id AS team_id, t.school, c.name as conference, gt.points, tst.name, gts.stat
                                 FROM team t
                                     INNER JOIN game_team gt ON t.id = gt.team_id
                                     INNER JOIN game g ON gt.game_id = g.id
@@ -256,6 +256,7 @@ module.exports = (db, Sentry) => {
                         let teamStats = gameStats.filter(gs => gs.school == team);
 
                         game.teams.push({
+                            schoolId: teamStats[0].team_id,
                             school: team,
                             conference: teamStats[0].conference,
                             homeAway: teamStats[0].home_away,
@@ -498,6 +499,7 @@ module.exports = (db, Sentry) => {
 
                 const results = await db.any(`
                 SELECT 	g.season,
+                        t.id AS team_id,
                         t.school AS team,
                         c.name AS conference,
                         ct.division,
@@ -530,6 +532,7 @@ module.exports = (db, Sentry) => {
 
                 res.send(results.map(r => ({
                     year: r.season,
+                    teamId: r.team_id,
                     team: r.team,
                     conference: r.conference,
                     division: r.division || '',
