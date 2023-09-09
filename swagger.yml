@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.4.15
+  version: 4.5.0
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -1300,6 +1300,40 @@ paths:
             type: array
             items:
               $ref: "#/definitions/TeamEloRating"
+        "400":
+          description: error
+  /ratings/fpi:
+    get:
+      tags:
+        - ratings
+      summary: Historical FPI ratings
+      description: FPI rating data
+      operationId: getFPIRatings
+      produces:
+        - application/json
+      parameters:
+        - name: year
+          description: Season filter
+          in: query
+          required: false
+          type: integer
+        - name: team
+          description: Team filter
+          in: query
+          required: false
+          type: string
+        - name: conference
+          description: Conference filter
+          in: query
+          required: false
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/TeamFPIRating"
         "400":
           description: error
   /ppa/predicted:
@@ -2882,6 +2916,43 @@ definitions:
         type: string
       elo:
         type: number
+  TeamFPIRating:
+    type: object
+    properties:
+      year:
+        type: integer
+      team:
+        type: string
+      conference:
+        type: string
+      fpi:
+        type: number
+      resumeRanks:
+        type: object
+        properties:
+          strengthOfRecord:
+            type: integer
+          fpi:
+            type: integer
+          averageWinProbability:
+            type: integer
+          strengthOfSchedule:
+            type: integer
+          remainingStrengthOfSchedule:
+            type: integer
+          gameControl:
+            type: integer
+      efficiencies:
+        type: object
+        properties:
+          overall:
+            type: number
+          offense:
+            type: number
+          defense:
+            type: number
+          specialTeams:
+            type: number
   TeamSPRating:
     type: object
     properties:

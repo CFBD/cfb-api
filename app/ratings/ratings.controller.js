@@ -73,10 +73,29 @@ module.exports = (db, Sentry) => {
         }
     };
 
+    const getFpi = async (req, res) => {
+        try {
+            if (!req.query.year && !req.query.team) {
+                res.status(400).send("Year or team must be specified");
+            } else if (req.query.year && !parseInt(req.query.year)) {
+                res.status(400).send('Year must be an integer.');
+            } else {
+                let elos = await service.getFpi(req.query.year, req.query.team, req.query.conference);
+                res.send(elos);
+            }
+        } catch (err) {
+            Sentry.captureException(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    }
+
     return {
         getSP,
         getConferenceSP,
         getSRS,
-        getElo
+        getElo,
+        getFpi
     };
 };

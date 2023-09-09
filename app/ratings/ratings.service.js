@@ -285,10 +285,72 @@ module.exports = (db) => {
         return results;
     };
 
+    const getFpi = async (year, team, conference) => {
+        let filter = '';
+        let filters = [];
+        let params = [];
+        let index = 1;
+
+        if (year) {
+            filters.push(`fpi.year = $${index}`);
+            params.push(year);
+            index++;
+        }
+
+        if (team) {
+            filters.push(`LOWER(t.school) = LOWER($${index})`);
+            params.push(team);
+            index++
+        }
+
+        if (conference) {
+            filters.push(`LOWER(c.abbreviation) = LOWER($${index})`);
+            params.push(conference);
+            index++;
+        }
+
+        if (params.length) {
+            filter = 'WHERE ' + filters.join(' AND ');
+        }
+
+        let results = await db.any(`
+        SELECT 	t.school,
+                c.name AS conference,
+                fpi.*
+        FROM fpi
+            INNER JOIN team AS t ON fpi.team_id = t.id
+            LEFT JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= fpi.year AND (ct.end_year >= fpi.year OR ct.end_year IS NULL)
+            LEFT JOIN conference AS c ON ct.conference_id = c.id
+            ${filter}
+        `, params);
+
+        return results.map(r => ({
+            year: parseInt(r.year),
+            team: r.school,
+            conference: r.conference,
+            fpi: parseFloat(r.fpi),
+            resumeRanks: {
+                strenghOfRecord: parseInt(r.strength_of_record_rank),
+                fpi: parseInt(r.fpi_resume_rank),
+                averageWinProbability: parseInt(r.avg_win_prob_rank),
+                strengthOfSchedule: parseInt(r.sos_rank),
+                remaningStrengthOfSchedule: r.remaining_sos_rank ? parseInt(r.remaining_sos_rank) : null,
+                gameControl: parseInt(r.game_control_rank)
+            },
+            efficiencies: {
+                overall: parseFloat(r.overall_efficiency),
+                offense: parseFloat(r.offensive_efficiency),
+                defense: parseFloat(r.defensive_efficiency),
+                specialTeams: parseFloat(r.special_teams_efficiency)
+            }
+        }));
+    }
+
     return {
         getSP,
         getConferenceSP,
         getSRS,
-        getElo
+        getElo,
+        getFpi
     };
 };
