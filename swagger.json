@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\"). API keys can be acquired from the CollegeFootballData.com website.",
-    "version": "4.5.0",
+    "version": "4.5.1",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -1862,7 +1862,8 @@
             "name": "seasonType",
             "description": "Maximum season type to consider (defaults to regular if week is specified else defaults to postseason)",
             "in": "query",
-            "required": false
+            "required": false,
+            "type": "string"
           },
           {
             "name": "team",
