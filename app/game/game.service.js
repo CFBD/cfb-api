@@ -332,11 +332,9 @@ module.exports = (db) => {
         let filterParams = [];
         let filterIndex = 1;
 
-        if (classification) {
-            filterParams.push(classification.toLowerCase());
-            filters.push(`(c.division = $${filterIndex} OR c2.division = $${filterIndex})`);
-            filterIndex++;
-        }
+        filterParams.push(classification.toLowerCase());
+        filters.push(`(c.division = $${filterIndex} OR c2.division = $${filterIndex})`);
+        filterIndex++;
 
         if (conference) {
             filterParams.push(conference.toLowerCase());
@@ -348,11 +346,14 @@ module.exports = (db) => {
 
         let scoreboard = await db.any(`
         WITH this_week AS (
-            SELECT DISTINCT season, season_type, week
-            FROM game
-            WHERE start_date > (now() - interval '1d')
-            ORDER BY season, season_type, week
+            SELECT DISTINCT g.id, g.season, g.season_type, g.week
+            FROM game AS g
+                INNER JOIN game_team AS gt ON g.id = gt.game_id
+                INNER JOIN current_conferences AS cc ON gt.team_id = cc.team_id AND cc.classification = $1
+            WHERE g.start_date > (now() - interval '2d')
+            ORDER BY g.season, g.season_type, g.week
             LIMIT 1
+
         )
         SELECT g.id,
             g.start_date AT TIME ZONE 'UTC' AS start_date,
