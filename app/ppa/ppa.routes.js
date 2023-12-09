@@ -10,4 +10,5 @@ module.exports = (app, db, middlewares, Sentry) => {
     app.route('/ppa/players/season').get(middlewares, controller.getPPAByPlayerSeason);
     app.route('/metrics/wp').get(middlewares, controller.getWP);
     app.route('/metrics/wp/pregame').get(middlewares, controller.getPregameWP);
+    app.route('/metrics/fg/ep').get(middlewares, controller.getFGEP);
 }

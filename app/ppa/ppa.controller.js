@@ -187,7 +187,19 @@ module.exports = (db, Sentry) => {
                 error: 'Something went wrong.'
             });
         }
-    }
+    };
+
+    const getFGEP = async (req, res) => {
+        try {
+            let results = await service.getFGEP();
+            res.send(results);
+        } catch (err) {
+            Sentry.captureException(err);
+            res.status(500).send({
+                error: 'Something went wrong.'
+            });
+        }
+    };
 
     return {
         getPP,
@@ -196,6 +208,7 @@ module.exports = (db, Sentry) => {
         getPPAByGame,
         getPPAByPlayerGame,
         getPPAByPlayerSeason,
-        getPregameWP
+        getPregameWP,
+        getFGEP
     }
 }

@@ -1,6 +1,5 @@
 const gaussian = require('gaussian');
 const gaussianDistro = gaussian(0, Math.pow(14.5, 2));
-const axios = require('axios');
 
 module.exports = (db) => {
 
@@ -684,6 +683,20 @@ module.exports = (db) => {
         }));
     };
 
+    const getFGEP = async () => {
+        let results = await db.any(`
+                SELECT yards_to_goal, (yards_to_goal + 17) AS distance, expected_points
+                FROM fg_ep
+                ORDER BY yards_to_goal
+        `);
+
+        return results.map(r => ({
+            yardsToGoal: r.yards_to_goal,
+            distance: r.distance,
+            expectedPoints: r.expected_points
+        }));
+    };
+
     return {
         getPP,
         getWP,
@@ -691,6 +704,7 @@ module.exports = (db) => {
         getPPAByGame,
         getPPAByPlayerGame,
         getPPAByPlayerSeason,
-        getPregameWP
+        getPregameWP,
+        getFGEP
     }
 }

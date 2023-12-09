@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with \"Bearer \" prepended (e.g. \"Bearer your_key\"). API keys can be acquired from the CollegeFootballData.com website.",
-    "version": "4.5.1",
+    "version": "4.5.2",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
@@ -2294,6 +2294,33 @@
         }
       }
     },
+    "/metrics/fg/ep": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Field Goal Expected Points",
+        "description": "Field Goal Expected Poitns",
+        "operationId": "getFGEP",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FieldGoalExpectedPoints"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
     "/metrics/wp": {
       "get": {
         "tags": [
@@ -4565,6 +4592,20 @@
           "type": "integer"
         },
         "predictedPoints": {
+          "type": "number"
+        }
+      }
+    },
+    "FieldGoalExpectedPoints": {
+      "type": "object",
+      "properties": {
+        "yardsToGoal": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "expectedPoints": {
           "type": "number"
         }
       }
