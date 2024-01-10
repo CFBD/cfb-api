@@ -654,7 +654,8 @@ module.exports = (db, Sentry) => {
                 user: req.user,
                 cors: (req.get("origin") == process.env.CORS_ORIGIN || req.get("host") == process.env.CORS_ORIGIN),
                 corsOrigin: process.env.CORS_ORIGIN,
-                env: process.env.NODE_ENV
+                env: process.env.NODE_ENV,
+                userAgent: req.get("user-agent")
             })
         }
     }
