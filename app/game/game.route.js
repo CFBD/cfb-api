@@ -10,5 +10,4 @@ module.exports = (app, db, middlewares, Sentry, patreonMiddlewares) => {
     app.route('/calendar').get(middlewares, controller.getCalendar);
     app.route('/games/weather').get(patreonMiddlewares, controller.getWeather);
     app.route('/scoreboard').get(patreonMiddlewares, controller.getScoreboard);
-    app.route('/debug').get(middlewares, controller.debug);
 }

@@ -8,6 +8,7 @@ module.exports = (db) => {
             `, [req.user.id, req.sws.api_path, req.query, req.get('user-agent')]);
             } catch (err) {
                 console.error(err);
+                next();
             }
         }
 
