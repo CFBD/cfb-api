@@ -646,6 +646,13 @@ module.exports = (db, Sentry) => {
                     error: 'Something went wrong.'
                 });
             }
+        },
+        debug: async (req, res) => {
+            res.send({
+                origin: req.get("origin"),
+                host: req.get("host"),
+                user: req.user
+            })
         }
     }
 }

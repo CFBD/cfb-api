@@ -74,8 +74,7 @@ module.exports = async (Sentry) => {
         res.status(401).send("Account has been blacklisted.");
       } else if (
         user ||
-        (req.get("user-agent").indexOf("Google-Apps-Script") === -1 &&
-          (req.get("origin") == corsOrigin || req.get("host") == corsOrigin)) ||
+        (req.get("origin") == corsOrigin || req.get("host") == corsOrigin) ||
         env == "development"
       ) {
         req.user = user;
