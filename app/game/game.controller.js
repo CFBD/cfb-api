@@ -651,7 +651,10 @@ module.exports = (db, Sentry) => {
             res.send({
                 origin: req.get("origin"),
                 host: req.get("host"),
-                user: req.user
+                user: req.user,
+                cors: (req.get("origin") == process.env.CORS_ORIGIN || req.get("host") == process.env.CORS_ORIGIN),
+                corsOrigin: process.env.CORS_ORIGIN,
+                env: process.env.NODE_ENV
             })
         }
     }
