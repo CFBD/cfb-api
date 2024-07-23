@@ -273,7 +273,7 @@ module.exports = (db) => {
             FROM game AS g
                 INNER JOIN game_team AS gt ON g.id = gt.game_id
                 INNER JOIN team AS t ON gt.team_id = t.id
-                INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year > g.season)
+                INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
                 INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
             WHERE gt.end_elo IS NOT NULL AND g.status = 'completed' ${filter}
         )
@@ -330,11 +330,11 @@ module.exports = (db) => {
             conference: r.conference,
             fpi: parseFloat(r.fpi),
             resumeRanks: {
-                strenghOfRecord: parseInt(r.strength_of_record_rank),
+                strengthOfRecord: parseInt(r.strength_of_record_rank),
                 fpi: parseInt(r.fpi_resume_rank),
                 averageWinProbability: parseInt(r.avg_win_prob_rank),
                 strengthOfSchedule: parseInt(r.sos_rank),
-                remaningStrengthOfSchedule: r.remaining_sos_rank ? parseInt(r.remaining_sos_rank) : null,
+                remainingStrengthOfSchedule: r.remaining_sos_rank ? parseInt(r.remaining_sos_rank) : null,
                 gameControl: parseInt(r.game_control_rank)
             },
             efficiencies: {

@@ -223,51 +223,29 @@ module.exports = (db) => {
         let index = 1;
 
         if (year) {
-            filters.push(`g.season = $${index}`);
+            filters.push(`season = $${index}`);
             params.push(year - 1);
             index ++;
         }
 
         if (team) {
-            filters.push(`LOWER(t.school) = LOWER($${index})`);
+            filters.push(`LOWER(school) = LOWER($${index})`);
             params.push(team);
             index ++;
         }
 
         if (conference) {
-            filters.push(`LOWER(c.abbreviation) = LOWER($${index})`);
+            filters.push(`LOWER(conference)) = LOWER($${index})`);
             params.push(conference);
             index ++;
         }
 
-        let filter = `WHERE ps.stat_type_id IN (1,2,4,5,7,11,20) AND ${filters.join(' AND ')}`;
+        let filter = `WHERE ${filters.join(' AND ')}`;
 
         let results = await db.any(`
-        SELECT  g.season + 1 AS season,
-                t.school,
-                c.name AS conference,
-                ROUND(SUM(p.ppa)) AS ppa,
-                ROUND(SUM(p.ppa) FILTER(WHERE att.end_year > g.season), 1) AS returning_ppa,
-                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (1,4,11,20)), 1) AS pass_ppa,
-                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (1,4,11,20) AND att.end_year > g.season), 1) AS returning_pass_ppa,
-                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (2,5)), 1) AS receiving_ppa,
-                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (2,5) AND att.end_year > g.season), 1) AS returning_receiving_ppa,
-                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (7)), 1) AS rush_ppa,
-                ROUND(SUM(p.ppa) FILTER(WHERE ps.stat_type_id IN (7) AND att.end_year > g.season), 1) AS returning_rush_ppa,
-                ROUND(AVG(CASE WHEN att.end_year > g.season THEN 1 ELSE 0 END), 3) AS returning_usage,
-                ROUND(AVG(CASE WHEN att.end_year > g.season THEN 1 ELSE 0 END) FILTER(WHERE ps.stat_type_id IN (1,4,11,20)), 3) AS returning_pass_usage,
-                ROUND(AVG(CASE WHEN att.end_year > g.season THEN 1 ELSE 0 END) FILTER(WHERE ps.stat_type_id IN (2,5)), 3) AS returning_receiving_usage,
-                ROUND(AVG(CASE WHEN att.end_year > g.season THEN 1 ELSE 0 END) FILTER(WHERE ps.stat_type_id IN (7)), 3) AS returning_rush_usage
-        FROM game AS g 
-            INNER JOIN drive AS d ON g.id = d.game_id
-            INNER JOIN play AS p ON d.id = p.drive_id
-            INNER JOIN play_stat AS ps ON p.id = ps.play_id
-            INNER JOIN athlete_team AS att ON ps.athlete_id = att.athlete_id AND att.start_year <= g.season AND att.end_year >= g.season
-            INNER JOIN team AS t ON att.team_id = t.id
-            INNER JOIN conference_team AS ct ON t.id = ct.team_id AND ct.start_year <= g.season AND (ct.end_year IS NULL OR ct.end_year >= g.season)
-            INNER JOIN conference AS c ON ct.conference_id = c.id AND c.division = 'fbs'
+        SELECT  *
+        FROM returning_production
         ${filter}
-        GROUP BY g.season, t.school, c.name
         `, params);
 
         return results.map((r) => ({
