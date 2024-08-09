@@ -224,7 +224,7 @@ module.exports = (db) => {
 
         if (year) {
             filters.push(`season = $${index}`);
-            params.push(year - 1);
+            params.push(year);
             index ++;
         }
 
