@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: This is an API for accessing all sorts of college football data.  Please note that API keys should be supplied with "Bearer " prepended (e.g. "Bearer your_key"). API keys can be acquired from the CollegeFootballData.com website.
-  version: 4.6.0
+  version: 4.6.1
   title: College Football Data API
   contact:
     email: admin@collegefootballdata.com
@@ -271,15 +271,10 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: gameId
-          description: Game id filter (required if no year)
-          in: query
-          required: false
-          type: integer
         - name: year
           description: Year filter (required if no game id)
           in: query
-          required: false
+          required: true
           type: integer
           minimum: 2001
         - name: week
@@ -994,15 +989,10 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: gameId
-          description: Game id filter
-          in: query
-          required: false
-          type: integer
         - name: year
           description: Year/season filter for games
           in: query
-          required: false
+          required: true
           type: integer
           minimum: 2013
         - name: week
