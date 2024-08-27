@@ -236,50 +236,45 @@ module.exports = (db) => {
         }));
     };
 
-    const getWeather = async (gameId, year, seasonType, week, team, conference, classification) => {
+    const getWeather = async (year, seasonType, week, team, conference, classification) => {
         const filters = [];
         const params = [];
         let index = 1;
 
-        if (gameId) {
-            filters.push(`g.id = $${index}`);
-            params.push(gameId)
-        } else {
-            if (year) {
-                filters.push(`g.season = $${index}`);
-                params.push(year);
-                index++;
-            }
+        if (year) {
+            filters.push(`g.season = $${index}`);
+            params.push(year);
+            index++;
+        }
 
-            if (seasonType && seasonType.toLowerCase() !== 'both') {
-                filters.push(`g.season_type = '${seasonType}'`);
-                params.push(seasonType);
-                index++;
-            }
+        if (seasonType && seasonType.toLowerCase() !== 'both') {
+            filters.push(`g.season_type = '${seasonType}'`);
+            params.push(seasonType);
+            index++;
+        }
 
-            if (week) {
-                filters.push(`g.week = $${index}`);
-                params.push(week);
-                index++
-            }
+        if (week) {
+            filters.push(`g.week = $${index}`);
+            params.push(week);
+            index++
+        }
 
-            if (team) {
-                filters.push(`(LOWER(home.school) = LOWER($${index}) OR LOWER(away.school) = LOWER($${index}))`);
-                params.push(team);
-                index++;
-            }
+        if (team) {
+            filters.push(`(LOWER(home.school) = LOWER($${index}) OR LOWER(away.school) = LOWER($${index}))`);
+            params.push(team);
+            index++;
+        }
 
-            if (conference) {
-                filters.push(`(LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`);
-                params.push(conference);
-                index++;
-            }
+        if (conference) {
+            filters.push(`(LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`);
+            params.push(conference);
+            index++;
+        }
 
-            if (classification && ['fbs', 'fcs', 'ii', 'iii'].includes(classification.toLowerCase())) {
-                filters.push(`(hc.division = $${index} OR ac.division = $${index})`);
-                params.push(classification.toLowerCase());
-                index++;
-            }
+        if (classification && ['fbs', 'fcs', 'ii', 'iii'].includes(classification.toLowerCase())) {
+            filters.push(`(hc.division = $${index} OR ac.division = $${index})`);
+            params.push(classification.toLowerCase());
+            index++;
         }
 
         const filter = 'WHERE ' + filters.join(' AND ');

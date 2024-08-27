@@ -5,13 +5,13 @@ module.exports = (db, Sentry) => {
 
     const getLines = async (req, res) => {
         try {
-            if (req.query.gameId && isNaN(req.query.gameId)) {
+            if (!req.query.year) {
                 res.status(400).send({
-                    error: 'gameId parameter must be numeric.'
+                    error: 'year parameter is required.'
                 });
 
                 return;
-            } else if (!req.query.gameId && (!req.query.year || isNaN(req.query.year))) {
+            } else if (isNaN(req.query.year)) {
                 res.status(400).send({
                     error: 'A numeric year parameter must be specified.'
                 });
@@ -24,7 +24,7 @@ module.exports = (db, Sentry) => {
 
                 return;
             } else {
-                const lines = await service.getLines(req.query.gameId, req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.home, req.query.away, req.query.conference);
+                const lines = await service.getLines(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.home, req.query.away, req.query.conference);
                 res.send(lines);
             }
         } catch (err) {

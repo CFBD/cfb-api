@@ -617,7 +617,7 @@ module.exports = (db, Sentry) => {
         },
         getWeather: async (req, res) => {
             try {
-                if (!req.query.gameId && !req.query.year) {
+                if (!req.query.year) {
                     res.status(400).send({
                         error: 'Year is required'
                     });
@@ -626,7 +626,7 @@ module.exports = (db, Sentry) => {
                         error: 'Year must be an integer'
                     });
                 } else {
-                    const results = await service.getWeather(req.query.gameId, req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference, req.query.classification);
+                    const results = await service.getWeather(req.query.year, req.query.seasonType, req.query.week, req.query.team, req.query.conference, req.query.classification);
                     res.send(results);
                 }
             } catch (err) {

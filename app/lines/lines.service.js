@@ -1,51 +1,44 @@
 module.exports = (db) => {
-    const getLines = async (gameId, year, seasonType, week, team, home, away, conference) => {
-        let filter;
-        let params;
+    const getLines = async (year, seasonType, week, team, home, away, conference) => {
+        let filter = 'WHERE g.season = $1';
+        let params = [year];
 
-        if (gameId) {
-            filter = 'WHERE g.id = $1';
-            params = [gameId];
-        } else {
-            filter = 'WHERE g.season = $1';
-            params = [year];
-            let index = 2;
+        let index = 2;
 
-            if (seasonType != 'both') {
-                filter += ` AND g.season_type = $${index}`;
-                params.push(seasonType || 'regular');
-                index++;
-            }
+        if (seasonType != 'both') {
+            filter += ` AND g.season_type = $${index}`;
+            params.push(seasonType || 'regular');
+            index++;
+        }
 
-            if (week) {
-                filter += ` AND g.week = $${index}`;
-                params.push(week);
-                index++;
-            }
+        if (week) {
+            filter += ` AND g.week = $${index}`;
+            params.push(week);
+            index++;
+        }
 
-            if (team) {
-                filter += ` AND (LOWER(awt.school) = LOWER($${index}) OR LOWER(ht.school) = LOWER($${index}))`;
-                params.push(team);
-                index++;
-            }
-            
-            if (home) {
-                filter += ` AND LOWER(ht.school) = LOWER($${index})`;
-                params.push(home);
-                index++;
-            }
+        if (team) {
+            filter += ` AND (LOWER(awt.school) = LOWER($${index}) OR LOWER(ht.school) = LOWER($${index}))`;
+            params.push(team);
+            index++;
+        }
+        
+        if (home) {
+            filter += ` AND LOWER(ht.school) = LOWER($${index})`;
+            params.push(home);
+            index++;
+        }
 
-            if (away) {
-                filter += ` AND LOWER(awt.school) = LOWER($${index})`;
-                params.push(away);
-                index++;
-            }
+        if (away) {
+            filter += ` AND LOWER(awt.school) = LOWER($${index})`;
+            params.push(away);
+            index++;
+        }
 
-            if (conference) {
-                filter += ` AND (LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`;
-                params.push(conference);
-                index++;
-            }
+        if (conference) {
+            filter += ` AND (LOWER(hc.abbreviation) = LOWER($${index}) OR LOWER(ac.abbreviation) = LOWER($${index}))`;
+            params.push(conference);
+            index++;
         }
 
         let games = await db.any(`
