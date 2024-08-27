@@ -195,7 +195,7 @@ module.exports = async (Sentry) => {
     res.redirect("/api/docs/?url=/api-docs.json");
   });
 
-  app.use(Sentry.Handlers.errorHandler());
+  // app.use(Sentry.Handlers.errorHandler());
 
   return app;
 };

@@ -1264,182 +1264,186 @@ FROM team AS t
     const homeTeam = teamResults.find(t => t.home_away == "home");
     const awayTeam = teamResults.find(t => t.team != homeTeam.team);
 
-    return {
-      gameInfo: {
-        homeTeam: homeTeam.team,
-        homePoints: homeTeam.points,
-        homeWinProb: homeTeam.win_prob,
-        awayTeam: awayTeam.team,
-        awayPoints: awayTeam.points,
-        awayWinProb: awayTeam.win_prob,
-        homeWinner: homeTeam.winner,
-        excitement: homeTeam.excitement
-      },
-      teams: {
-        ppa: teamResults.map((t) => ({
-          team: t.team,
-          plays: parseInt(t.plays),
-          overall: {
-            total: parseFloat(t.ppa),
-            quarter1: parseFloat(t.ppa_1),
-            quarter2: parseFloat(t.ppa_2),
-            quarter3: parseFloat(t.ppa_3),
-            quarter4: parseFloat(t.ppa_4),
-          },
-          passing: {
-            total: parseFloat(t.passing_ppa),
-            quarter1: parseFloat(t.passing_ppa_1),
-            quarter2: parseFloat(t.passing_ppa_2),
-            quarter3: parseFloat(t.passing_ppa_3),
-            quarter4: parseFloat(t.passing_ppa_4),
-          },
-          rushing: {
-            total: parseFloat(t.rushing_ppa),
-            quarter1: parseFloat(t.rushing_ppa_1),
-            quarter2: parseFloat(t.rushing_ppa_2),
-            quarter3: parseFloat(t.rushing_ppa_3),
-            quarter4: parseFloat(t.rushing_ppa_4),
-          },
-        })),
-        cumulativePpa: teamResults.map((t) => ({
-          team: t.team,
-          plays: parseInt(t.plays),
-          overall: {
-            total: parseFloat(t.cum_ppa),
-            quarter1: parseFloat(t.cum_ppa_1),
-            quarter2: parseFloat(t.cum_ppa_2),
-            quarter3: parseFloat(t.cum_ppa_3),
-            quarter4: parseFloat(t.cum_ppa_4),
-          },
-          passing: {
-            total: parseFloat(t.cum_passing_ppa),
-            quarter1: parseFloat(t.cum_passing_ppa_1),
-            quarter2: parseFloat(t.cum_passing_ppa_2),
-            quarter3: parseFloat(t.cum_passing_ppa_3),
-            quarter4: parseFloat(t.cum_passing_ppa_4),
-          },
-          rushing: {
-            total: parseFloat(t.cum_rushing_ppa),
-            quarter1: parseFloat(t.cum_rushing_ppa_1),
-            quarter2: parseFloat(t.cum_rushing_ppa_2),
-            quarter3: parseFloat(t.cum_rushing_ppa_3),
-            quarter4: parseFloat(t.cum_rushing_ppa_4),
-          },
-        })),
-        successRates: teamResults.map((t) => ({
-          team: t.team,
-          overall: {
-            total: parseFloat(t.success_rate),
-            quarter1: parseFloat(t.success_rate_1),
-            quarter2: parseFloat(t.success_rate_2),
-            quarter3: parseFloat(t.success_rate_3),
-            quarter4: parseFloat(t.success_rate_4),
-          },
-          standardDowns: {
-            total: parseFloat(t.standard_success_rate),
-            quarter1: parseFloat(t.standard_success_rate_1),
-            quarter2: parseFloat(t.standard_success_rate_2),
-            quarter3: parseFloat(t.standard_success_rate_3),
-            quarter4: parseFloat(t.standard_success_rate_4),
-          },
-          passingDowns: {
-            total: parseFloat(t.passing_success_rate),
-            quarter1: parseFloat(t.passing_success_rate_1),
-            quarter2: parseFloat(t.passing_success_rate_2),
-            quarter3: parseFloat(t.passing_success_rate_3),
-            quarter4: parseFloat(t.passing_success_rate_4),
-          },
-        })),
-        explosiveness: teamResults.map((t) => ({
-          team: t.team,
-          overall: {
-            total: parseFloat(t.explosiveness),
-            quarter1: parseFloat(t.explosiveness_1),
-            quarter2: parseFloat(t.explosiveness_2),
-            quarter3: parseFloat(t.explosiveness_3),
-            quarter4: parseFloat(t.explosiveness_4),
-          },
-        })),
-        rushing: teamResults.map((t) => ({
-          team: t.team,
-          powerSuccess: t.power_success,
-          stuffRate: t.stuff_rate,
-          lineYards: t.line_yards,
-          lineYardsAverage: t.line_yards_avg,
-          secondLevelYards: t.second_level_yards,
-          secondLevelYardsAverage: t.second_level_yards_avg,
-          openFieldYards: t.open_field_yards,
-          openFieldYardsAverage: t.open_field_yards_avg,
-        })),
-        havoc: teamResults.map((t) => ({
-          team: teams.find((te) => te != t.team),
-          total: t.total_havoc,
-          frontSeven: t.front_seven_havoc,
-          db: t.db_havoc,
-        })),
-        scoringOpportunities: teamResults.map((t) => {
-          let scoring = scoringOppResults.find(
-            (o) => t.team == o.team && o.unit == "offense"
-          );
-
-          return {
+    if (homeTeam && awayTeam) {
+      return {
+        gameInfo: {
+          homeTeam: homeTeam.team,
+          homePoints: homeTeam.points,
+          homeWinProb: homeTeam.win_prob,
+          awayTeam: awayTeam.team,
+          awayPoints: awayTeam.points,
+          awayWinProb: awayTeam.win_prob,
+          homeWinner: homeTeam.winner,
+          excitement: homeTeam.excitement
+        },
+        teams: {
+          ppa: teamResults.map((t) => ({
             team: t.team,
-            opportunities: scoring ? parseInt(scoring.opportunities) : 0,
-            points: scoring ? parseInt(scoring.points) : 0,
-            pointsPerOpportunity: scoring ? parseFloat(scoring.avg_points) : 0,
-          };
-        }),
-        fieldPosition: teamResults.map((t) => {
-          let fieldPosition = fieldPositionResults.find(
-            (o) => t.team == o.school
-          );
-
-          return {
+            plays: parseInt(t.plays),
+            overall: {
+              total: parseFloat(t.ppa),
+              quarter1: parseFloat(t.ppa_1),
+              quarter2: parseFloat(t.ppa_2),
+              quarter3: parseFloat(t.ppa_3),
+              quarter4: parseFloat(t.ppa_4),
+            },
+            passing: {
+              total: parseFloat(t.passing_ppa),
+              quarter1: parseFloat(t.passing_ppa_1),
+              quarter2: parseFloat(t.passing_ppa_2),
+              quarter3: parseFloat(t.passing_ppa_3),
+              quarter4: parseFloat(t.passing_ppa_4),
+            },
+            rushing: {
+              total: parseFloat(t.rushing_ppa),
+              quarter1: parseFloat(t.rushing_ppa_1),
+              quarter2: parseFloat(t.rushing_ppa_2),
+              quarter3: parseFloat(t.rushing_ppa_3),
+              quarter4: parseFloat(t.rushing_ppa_4),
+            },
+          })),
+          cumulativePpa: teamResults.map((t) => ({
             team: t.team,
-            averageStart: fieldPosition.avg_start_off,
-            averageStartingPredictedPoints:
-              fieldPosition.avg_predicted_points_off,
-          };
-        }),
-      },
-      players: {
-        usage: playerResults.map((p) => ({
-          player: p.name,
-          team: p.school,
-          position: p.position,
-          total: parseFloat(p.overall_usage),
-          quarter1: parseFloat(p.overall_usage_1),
-          quarter2: parseFloat(p.overall_usage_2),
-          quarter3: parseFloat(p.overall_usage_3),
-          quarter4: parseFloat(p.overall_usage_4),
-          rushing: parseFloat(p.rush_usage),
-          passing: parseFloat(p.pass_usage),
-        })),
-        ppa: playerResults.map((p) => ({
-          player: p.name,
-          team: p.school,
-          position: p.position,
-          average: {
-            total: parseFloat(p.ppa),
-            quarter1: parseFloat(p.ppa_1),
-            quarter2: parseFloat(p.ppa_2),
-            quarter3: parseFloat(p.ppa_3),
-            quarter4: parseFloat(p.ppa_4),
-            rushing: parseFloat(p.ppa_rush),
-            passing: parseFloat(p.ppa_pass),
-          },
-          cumulative: {
-            total: parseFloat(p.cum_ppa),
-            quarter1: parseFloat(p.cum_ppa_1),
-            quarter2: parseFloat(p.cum_ppa_2),
-            quarter3: parseFloat(p.cum_ppa_3),
-            quarter4: parseFloat(p.cum_ppa_4),
-            rushing: parseFloat(p.cum_ppa_rush),
-            passing: parseFloat(p.cum_ppa_pass),
-          },
-        })),
-      },
-    };
+            plays: parseInt(t.plays),
+            overall: {
+              total: parseFloat(t.cum_ppa),
+              quarter1: parseFloat(t.cum_ppa_1),
+              quarter2: parseFloat(t.cum_ppa_2),
+              quarter3: parseFloat(t.cum_ppa_3),
+              quarter4: parseFloat(t.cum_ppa_4),
+            },
+            passing: {
+              total: parseFloat(t.cum_passing_ppa),
+              quarter1: parseFloat(t.cum_passing_ppa_1),
+              quarter2: parseFloat(t.cum_passing_ppa_2),
+              quarter3: parseFloat(t.cum_passing_ppa_3),
+              quarter4: parseFloat(t.cum_passing_ppa_4),
+            },
+            rushing: {
+              total: parseFloat(t.cum_rushing_ppa),
+              quarter1: parseFloat(t.cum_rushing_ppa_1),
+              quarter2: parseFloat(t.cum_rushing_ppa_2),
+              quarter3: parseFloat(t.cum_rushing_ppa_3),
+              quarter4: parseFloat(t.cum_rushing_ppa_4),
+            },
+          })),
+          successRates: teamResults.map((t) => ({
+            team: t.team,
+            overall: {
+              total: parseFloat(t.success_rate),
+              quarter1: parseFloat(t.success_rate_1),
+              quarter2: parseFloat(t.success_rate_2),
+              quarter3: parseFloat(t.success_rate_3),
+              quarter4: parseFloat(t.success_rate_4),
+            },
+            standardDowns: {
+              total: parseFloat(t.standard_success_rate),
+              quarter1: parseFloat(t.standard_success_rate_1),
+              quarter2: parseFloat(t.standard_success_rate_2),
+              quarter3: parseFloat(t.standard_success_rate_3),
+              quarter4: parseFloat(t.standard_success_rate_4),
+            },
+            passingDowns: {
+              total: parseFloat(t.passing_success_rate),
+              quarter1: parseFloat(t.passing_success_rate_1),
+              quarter2: parseFloat(t.passing_success_rate_2),
+              quarter3: parseFloat(t.passing_success_rate_3),
+              quarter4: parseFloat(t.passing_success_rate_4),
+            },
+          })),
+          explosiveness: teamResults.map((t) => ({
+            team: t.team,
+            overall: {
+              total: parseFloat(t.explosiveness),
+              quarter1: parseFloat(t.explosiveness_1),
+              quarter2: parseFloat(t.explosiveness_2),
+              quarter3: parseFloat(t.explosiveness_3),
+              quarter4: parseFloat(t.explosiveness_4),
+            },
+          })),
+          rushing: teamResults.map((t) => ({
+            team: t.team,
+            powerSuccess: t.power_success,
+            stuffRate: t.stuff_rate,
+            lineYards: t.line_yards,
+            lineYardsAverage: t.line_yards_avg,
+            secondLevelYards: t.second_level_yards,
+            secondLevelYardsAverage: t.second_level_yards_avg,
+            openFieldYards: t.open_field_yards,
+            openFieldYardsAverage: t.open_field_yards_avg,
+          })),
+          havoc: teamResults.map((t) => ({
+            team: teams.find((te) => te != t.team),
+            total: t.total_havoc,
+            frontSeven: t.front_seven_havoc,
+            db: t.db_havoc,
+          })),
+          scoringOpportunities: teamResults.map((t) => {
+            let scoring = scoringOppResults.find(
+              (o) => t.team == o.team && o.unit == "offense"
+            );
+
+            return {
+              team: t.team,
+              opportunities: scoring ? parseInt(scoring.opportunities) : 0,
+              points: scoring ? parseInt(scoring.points) : 0,
+              pointsPerOpportunity: scoring ? parseFloat(scoring.avg_points) : 0,
+            };
+          }),
+          fieldPosition: teamResults.map((t) => {
+            let fieldPosition = fieldPositionResults.find(
+              (o) => t.team == o.school
+            );
+
+            return {
+              team: t.team,
+              averageStart: fieldPosition.avg_start_off,
+              averageStartingPredictedPoints:
+                fieldPosition.avg_predicted_points_off,
+            };
+          }),
+        },
+        players: {
+          usage: playerResults.map((p) => ({
+            player: p.name,
+            team: p.school,
+            position: p.position,
+            total: parseFloat(p.overall_usage),
+            quarter1: parseFloat(p.overall_usage_1),
+            quarter2: parseFloat(p.overall_usage_2),
+            quarter3: parseFloat(p.overall_usage_3),
+            quarter4: parseFloat(p.overall_usage_4),
+            rushing: parseFloat(p.rush_usage),
+            passing: parseFloat(p.pass_usage),
+          })),
+          ppa: playerResults.map((p) => ({
+            player: p.name,
+            team: p.school,
+            position: p.position,
+            average: {
+              total: parseFloat(p.ppa),
+              quarter1: parseFloat(p.ppa_1),
+              quarter2: parseFloat(p.ppa_2),
+              quarter3: parseFloat(p.ppa_3),
+              quarter4: parseFloat(p.ppa_4),
+              rushing: parseFloat(p.ppa_rush),
+              passing: parseFloat(p.ppa_pass),
+            },
+            cumulative: {
+              total: parseFloat(p.cum_ppa),
+              quarter1: parseFloat(p.cum_ppa_1),
+              quarter2: parseFloat(p.cum_ppa_2),
+              quarter3: parseFloat(p.cum_ppa_3),
+              quarter4: parseFloat(p.cum_ppa_4),
+              rushing: parseFloat(p.cum_ppa_rush),
+              passing: parseFloat(p.cum_ppa_pass),
+            },
+          })),
+        },
+      };
+    } else {
+      return null;
+    }
   };
 
   return {
