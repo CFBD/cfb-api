@@ -20,7 +20,7 @@
   "author": "BlueSCar",
   "license": "MIT",
   "dependencies": {
-    "@sentry/node": "^6.2.5",
+    "@sentry/node": "^8.29.0",
     "amqplib": "^0.8.0",
     "axios": "^0.21.4",
     "bluebird": "^3.7.2",
