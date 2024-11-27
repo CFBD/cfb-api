@@ -32,7 +32,7 @@
     "express": "^4.17.1",
     "express-brute": "^1.0.1",
     "express-brute-pg": "^2.0.0",
-    "express-slow-down": "^1.4.0",
+    "express-slow-down": "^2.0.3",
     "express-ws": "^4.0.0",
     "gaussian": "^1.1.0",
     "helmet": "^4.2.0",
