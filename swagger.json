@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "This version of the API will be deprecated and replaced in May 2025. Please switch over to the new version as soon as possible. Docs are located at APINext.CollegeFootballData.com.",
-    "version": "4.6.0",
+    "version": "4.6.3",
     "title": "College Football Data API",
     "contact": {
       "email": "admin@collegefootballdata.com"
